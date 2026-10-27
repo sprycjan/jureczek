@@ -29,6 +29,12 @@ const _pinAsset = 'assets/markers/pin.png';
 /// Zoom po przelocie do wyniku wyszukiwania lub udostępnionego miejsca.
 const _resultZoom = 15.0;
 
+/// Odstęp narzędzi od krawędzi ekranu (pod paskiem statusu).
+const _toolsPadding = 16.0;
+
+/// Rozmiar okrągłego przycisku-narzędzia (domyślny [IconButton]).
+const _toolSize = 48.0;
+
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key, required this.accessToken});
 
@@ -78,6 +84,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> _onMapCreated(MapboxMap map) async {
     _map = map;
+    await _placeOrnaments(map);
     final bytes = await rootBundle.load(_pinAsset);
     _pinImage = bytes.buffer.asUint8List();
     final manager = await map.annotations.createPointAnnotationManager();
@@ -121,6 +128,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pending = _pendingResult;
     _pendingResult = null;
     if (pending != null) await _showResult(pending);
+  }
+
+  /// Mapa leży pod paskiem statusu, więc kompas schodzi pod lupę,
+  /// a skala na dół – po prawej, bo lewy dół zajmuje logo i atrybucja Mapbox.
+  Future<void> _placeOrnaments(MapboxMap map) async {
+    final insets = MediaQuery.paddingOf(context);
+    await map.compass.updateSettings(
+      CompassSettings(
+        position: OrnamentPosition.TOP_RIGHT,
+        marginTop: insets.top + _toolsPadding + _toolSize + 12,
+        marginRight: _toolsPadding + 4,
+      ),
+    );
+    await map.scaleBar.updateSettings(
+      ScaleBarSettings(
+        position: OrnamentPosition.BOTTOM_RIGHT,
+        marginBottom: insets.bottom + 8,
+        marginRight: _toolsPadding,
+      ),
+    );
   }
 
   void _scheduleSync(List<PlacePin> pins) {
@@ -488,7 +515,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(_toolsPadding),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.end,

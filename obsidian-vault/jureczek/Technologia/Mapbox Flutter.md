@@ -31,6 +31,12 @@ final _polandViewport = CameraViewportState(
 );
 ```
 
+## Ornamenty (kompas, skala)
+- Domyślnie kompas jest w prawym górnym rogu, a skala w lewym górnym. Przy mapie pełnoekranowej oba chowają się pod paskiem statusu.
+- Ustawia się je w `onMapCreated`: `map.compass.updateSettings(CompassSettings(position: OrnamentPosition.TOP_RIGHT, marginTop: …))` oraz `map.scaleBar.updateSettings(ScaleBarSettings(…))`.
+- Marginesy podaje się w **dp**, bo plugin na Androidzie sam robi `toDevicePixels` (`mapping/CompassMappings.kt`). Wysokość paska statusu bierze się z `MediaQuery.paddingOf(context).top`.
+- Logo i atrybucja są w lewym dolnym rogu i muszą zostać widoczne (licencja), więc skala stoi w prawym dolnym. Zob. [[v5 – kompas i skala]].
+
 ## Długie przytrzymanie → pinezka
 ```dart
 map.addInteraction(
