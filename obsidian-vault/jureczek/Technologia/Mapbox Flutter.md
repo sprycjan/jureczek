@@ -82,4 +82,17 @@ Plugin `mapbox_maps_flutter` **nie ma wyszukiwarki**, więc wołamy REST **Searc
 - Środek mapy do `proximity`: `(await map.getCameraState()).center.coordinates`.
 - Tap w mapę: `TapInteraction.onMap(..., stopPropagation: false)`.
 
-Powiązane: [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]
+## Klikalne POI (v6)
+Styl Standard ma featureset `poi` (import `basemap`), więc nie trzeba żadnych zapytań do API:
+```dart
+map.addInteraction(TapInteraction(StandardPOIs(), (poi, context) {
+  poi.name;                       // String?
+  poi.geometry['coordinates'];    // [lng, lat] – NIE używać poi.coordinate!
+}));
+```
+- ⚠️ **Błąd w pluginie 3.33:** `poi.coordinate` robi `geometry["coordinates"] as Point?` na liście → `TypeError`. Wyjątek z handlera ginie w pigeonie bez logu, a natywna interakcja (domyślnie `stopPropagation: true`) i tak zjada tap. Objaw: „tap w POI nic nie robi”. Obejście: `placeFromPoi` w `domain/poi_place.dart`.
+- Ogólnie: wyjątek w handlerze `addInteraction` jest niewidoczny. Przy dziwnym „nic się nie dzieje” owinąć handler w `try/catch` + `debugPrint`.
+- Interakcja na featuresecie ma pierwszeństwo przed `TapInteraction.onMap`. Tap w pinezkę stojącą na POI otwiera tylko arkusz pinezki (sprawdzone przez adb).
+- Inne pola: `group`, `category` (`class`), `maki`; stan `StandardPOIsState(hide:)` do chowania ikony.
+
+Powiązane: [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]

@@ -10,6 +10,7 @@ import '../application/pins_providers.dart';
 import '../domain/duplicate_pin.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
+import '../domain/poi_place.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
@@ -99,6 +100,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         (_, _) {},
         stopPropagation: true,
       ),
+    );
+
+    // POI ze stylu Standard: tap pokazuje kartę jak wynik wyszukiwania,
+    // long-tap od razu stawia pinezkę z nazwą w punkcie POI, nie pod palcem.
+    map.addInteraction(
+      TapInteraction(StandardPOIs(), (poi, _) {
+        _searchFocus.unfocus();
+        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        if (place != null) _showResult(place, fly: false);
+      }),
+    );
+    map.addInteraction(
+      LongTapInteraction(StandardPOIs(), (poi, _) {
+        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        if (place == null) return;
+        _run(
+          () => ref
+              .read(pinsControllerProvider)
+              .add(lat: place.lat, lng: place.lng, name: place.name),
+        );
+      }),
     );
 
     map.addInteraction(
