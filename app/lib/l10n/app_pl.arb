@@ -1,0 +1,47 @@
+{
+  "@@locale": "pl",
+  "appTitle": "Jureczek",
+  "missingTokenTitle": "Brak tokenu Mapbox",
+  "missingTokenMessage": "Uruchom aplikację z tokenem:\nflutter run --dart-define-from-file=env/dev.json",
+  "pinSheetTitle": "Miejsce",
+  "pinAddedOn": "Dodano {date}",
+  "@pinAddedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pinUnnamed": "Bez nazwy",
+  "pinNameLabel": "Nazwa",
+  "pinNoteLabel": "Notatka",
+  "pinEdit": "Edytuj",
+  "pinSave": "Zapisz",
+  "pinCancel": "Anuluj",
+  "pinDelete": "Usuń",
+  "pinDeleted": "Usunięto pinezkę",
+  "undo": "Cofnij",
+  "pinsLoadError": "Nie udało się wczytać pinezek",
+  "pinsSaveError": "Nie udało się zapisać pinezki",
+  "pinAdded": "Dodano pinezkę",
+  "searchOpen": "Szukaj miejsca",
+  "searchClose": "Zamknij wyszukiwanie",
+  "searchHint": "Szukaj miejsca",
+  "searchError": "Nie udało się wyszukać – sprawdź połączenie",
+  "searchNoResults": "Brak wyników",
+  "searchAddPin": "Dodaj pinezkę",
+  "searchResultClose": "Zamknij",
+  "pinAddressLabel": "Adres",
+  "pinOpenInGoogleMaps": "Otwórz w Google Maps",
+  "pinNewTitle": "Nowa pinezka",
+  "pinDuplicate": "Ta pinezka już jest",
+  "shareLoading": "Odczytuję miejsce…",
+  "shareApproximate": "Położenie przybliżone – sprawdź je na mapie",
+  "shareNotAPlace": "To nie wygląda na miejsce",
+  "shareError": "Nie udało się odczytać miejsca – sprawdź połączenie",
+  "shareNeedsSearch": "Nie udało się ustalić położenia – wybierz miejsce z listy",
+  "shareSearchByName": "Szukaj w wyszukiwarce",
+  "placeAdjust": "Popraw położenie",
+  "placeAdjustHint": "Przesuń mapę, żeby pinezka wskazywała miejsce",
+  "placeAdjustDone": "Gotowe"
+}
