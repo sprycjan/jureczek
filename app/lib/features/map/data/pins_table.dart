@@ -8,13 +8,16 @@ class Pins extends Table {
   RealColumn get lng => real()();
   DateTimeColumn get createdAt => dateTime()();
 
-  /// Dodane w schemacie 2 (v3); puste dla starszych pinezek.
+  /// Nazwa i notatka (od v3).
   TextColumn get name => text().nullable()();
   TextColumn get note => text().nullable()();
 
-  /// Dodane w schemacie 3 (v5): adres i link, z którego udostępniono miejsce.
+  /// Adres i link, z którego udostępniono miejsce (od v5).
   TextColumn get address => text().nullable()();
   TextColumn get sourceUrl => text().nullable()();
+
+  /// Dodane w schemacie 4 (v9): klucz [PinCategory].
+  TextColumn get category => text().withDefault(const Constant('standard'))();
 
   @override
   Set<Column> get primaryKey => {id};

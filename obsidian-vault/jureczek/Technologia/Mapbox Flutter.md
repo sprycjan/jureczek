@@ -109,4 +109,9 @@ await map.setStyleImportConfigProperties('basemap', {
 - `map.style.*` jest deprecated; metody są na `MapboxMap`.
 - Etykiety mają automatyczną obwódkę kontrastową: ciemny tekst dostaje jasną obwódkę.
 
-Powiązane: [[v8 – styl Nocturnal Expedition]], [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]
+## Obrazki pinezek (v9)
+- `PointAnnotationOptions(image: pngBytes, iconImage: 'pin-gastronomy-default', iconAnchor: IconAnchor.BOTTOM, iconSize: dpr / 3)` – z `iconImage` obraz trafia do stylu raz i jest współdzielony.
+- Zmiana wyglądu: `annotation..image = bytes..iconImage = id; await manager.update(annotation)` (Android: `updateAnnotation` dodaje obraz do stylu, jeśli go nie ma).
+- PNG ma czubek na dolnej krawędzi – kotwica `BOTTOM` bez `iconOffset`.
+
+Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]

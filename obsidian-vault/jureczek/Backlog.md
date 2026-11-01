@@ -3,20 +3,20 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
 - [x] Nazwa i notatka miejsca (v3, [[v3 – nazwa i notatka]])
-- [ ] Pytanie o nazwę od razu po postawieniu pinezki (odrzucone w v3 – wrócić, jeśli będzie brakować)
+- [x] Formularz od razu po long-tapie (v9: wybór typu, nazwa, notatka)
 - [x] Tapnięcie w pinezkę otwiera podgląd i edycję (v2 + v3)
 - [x] Usuwanie pinezek z „Cofnij” (v2)
 - [ ] Przeciąganie pinezek (`isDraggable` + `dragEvents`)
-- [ ] Kategorie (restauracja, zabytek, nocleg…) z różnymi ikonami – w planie v9
+- [x] Kategorie z różnymi ikonami (v9, [[v9 – kategorie pinezek]])
 - [x] Animacja spadania nowej pinezki z wibracją (v7)
 - [x] Pinezka z klikniętego POI mapy, z nazwą (v6, [[v6 – klikalne POI]])
 - [ ] Chowanie ikony POI pod pinezką (`StandardPOIsState(hide: true)` + `setFeatureState`)
-- [ ] Kategoria/ikona pinezki z POI (`maki`, `class`), gdy będą kategorie
+- [ ] Podpowiedź typu pinezki z POI (`maki`, `class`) – kategorie są od v9
 - [ ] Etykiety z nazwą na mapie (`textField`; przy edycji nazwy `manager.update`)
 
 ## Mapa

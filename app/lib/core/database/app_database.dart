@@ -15,18 +15,18 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'jureczek'));
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
-      if (from < 2) {
-        await m.addColumn(pins, pins.name);
-        await m.addColumn(pins, pins.note);
-      }
-      if (from < 3) {
-        await m.addColumn(pins, pins.address);
-        await m.addColumn(pins, pins.sourceUrl);
+      // v9: świadomy reset – dane testowe sprzed schematu 4 są kasowane
+      // (decyzja użytkownika, start od pustej bazy). Od 4 w górę zwykłe migracje.
+      if (from < 4) {
+        for (final table in allTables) {
+          await m.deleteTable(table.actualTableName);
+        }
+        await m.createAll();
       }
     },
   );

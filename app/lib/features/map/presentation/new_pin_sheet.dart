@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../domain/pin_category.dart';
 import '../domain/place_suggestion.dart';
+import 'pin_category_picker.dart';
 import 'pin_form_fields.dart';
 
-/// Arkusz „Nowa pinezka”: dane z wyniku lub udostępnienia do poprawienia przed zapisem.
+/// Arkusz „Nowa pinezka”: typ pinezki i dane z long-tapu, wyniku lub udostępnienia
+/// do poprawienia przed zapisem.
 class NewPinSheet extends StatefulWidget {
   const NewPinSheet({super.key, required this.place, required this.onSave});
 
@@ -19,6 +22,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
   late final _name = TextEditingController(text: widget.place.name);
   late final _address = TextEditingController(text: widget.place.address);
   final _note = TextEditingController();
+  var _category = PinCategory.fallback;
   bool _saving = false;
   bool _saveFailed = false;
 
@@ -36,6 +40,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
       name: _name.text,
       address: _address.text,
       note: _note.text,
+      category: _category,
     ));
     if (!mounted || ok) return;
     setState(() {
@@ -63,6 +68,11 @@ class _NewPinSheetState extends State<NewPinSheet> {
             children: [
               Text(l10n.pinNewTitle, style: theme.textTheme.labelLarge),
               const SizedBox(height: 12),
+              PinCategoryPicker(
+                value: _category,
+                onChanged: (category) => setState(() => _category = category),
+              ),
+              const SizedBox(height: 16),
               PinFormFields(name: _name, address: _address, note: _note),
               if (_saveFailed) ...[
                 const SizedBox(height: 8),

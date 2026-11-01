@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/map/application/pins_providers.dart';
+import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
 void main() {
@@ -42,6 +43,19 @@ void main() {
     expect(pin.lat, 50.06);
     expect(pin.lng, 19.94);
     expect(pin.createdAt.difference(before).inSeconds, lessThan(5));
+  });
+
+  test('add zapisuje typ pinezki, domyślnie standardowy', () async {
+    final plain = await controller().add(lat: 50.06, lng: 19.94);
+    final food = await controller().add(
+      lat: 50.07,
+      lng: 19.95,
+      category: PinCategory.gastronomy,
+    );
+
+    final byId = {for (final p in await pins()) p.id: p.category};
+    expect(byId[plain], PinCategory.standard);
+    expect(byId[food], PinCategory.gastronomy);
   });
 
   test('add zwraca id zapisanej pinezki', () async {

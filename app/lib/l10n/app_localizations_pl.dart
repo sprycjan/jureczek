@@ -123,4 +123,31 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get placeAdjustDone => 'Gotowe';
+
+  @override
+  String get pinCategoryLabel => 'Typ pinezki';
+
+  @override
+  String get pinCategoryStandard => 'Pinezka';
+
+  @override
+  String get pinCategoryGastronomy => 'Gastronomia';
+
+  @override
+  String get pinCategoryPlaces => 'Miejsca i zabytki';
+
+  @override
+  String get pinCategoryNature => 'Natura i widoki';
+
+  @override
+  String get pinCategoryActivities => 'Aktywności i szlaki';
+
+  @override
+  String get pinCategoryTravel => 'Podróż i baza vana';
+
+  @override
+  String get pinCategoryEntertainment => 'Rozrywka i kultura';
+
+  @override
+  String get pinCategoryPractical => 'Punkty praktyczne';
 }

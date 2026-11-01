@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
+import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
 
 /// Zapis i odczyt pinezek z lokalnej bazy.
@@ -36,6 +37,7 @@ class PinsRepository {
             note: Value(pin.note),
             address: Value(pin.address),
             sourceUrl: Value(pin.sourceUrl),
+            category: Value(pin.category.key),
           ),
         );
   }
@@ -45,12 +47,16 @@ class PinsRepository {
     String? name,
     String? note,
     String? address,
+    PinCategory? category,
   }) {
     return (_db.update(_db.pins)..where((t) => t.id.equals(id))).write(
       PinsCompanion(
         name: Value(name),
         note: Value(note),
         address: Value(address),
+        category: category == null
+            ? const Value.absent()
+            : Value(category.key),
       ),
     );
   }
@@ -68,6 +74,7 @@ class PinsRepository {
     note: row.note,
     address: row.address,
     sourceUrl: row.sourceUrl,
+    category: PinCategory.fromKey(row.category),
   );
 }
 

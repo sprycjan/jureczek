@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 import 'package:jureczek/features/map/presentation/pin_details_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
@@ -12,6 +13,7 @@ void main() {
     String? note,
     String? address,
     String? sourceUrl,
+    PinCategory category = PinCategory.standard,
   }) => PlacePin(
     id: 'a',
     lat: 50.061389,
@@ -21,6 +23,7 @@ void main() {
     note: note,
     address: address,
     sourceUrl: sourceUrl,
+    category: category,
   );
 
   Future<void> pumpSheet(
@@ -53,7 +56,7 @@ void main() {
   testWidgets('pokazuje współrzędne i datę dodania', (tester) async {
     await pumpSheet(tester, pin: pin());
 
-    expect(find.text('Miejsce'), findsOneWidget);
+    expect(find.text('Pinezka'), findsOneWidget);
     expect(find.text('50.0614, 19.9383'), findsOneWidget);
     expect(find.textContaining('Dodano'), findsOneWidget);
     expect(find.textContaining('2026'), findsOneWidget);
@@ -185,5 +188,35 @@ void main() {
     await pumpSheet(tester, pin: pin(), notice: 'Ta pinezka już jest');
 
     expect(find.text('Ta pinezka już jest'), findsOneWidget);
+  });
+
+  testWidgets('pokazuje typ pinezki', (tester) async {
+    await pumpSheet(tester, pin: pin(category: PinCategory.nature));
+
+    expect(find.text('Natura i widoki'), findsOneWidget);
+  });
+
+  testWidgets('w edycji zmienia typ i przekazuje go do zapisu', (
+    tester,
+  ) async {
+    PinDetailsInput? saved;
+    await pumpSheet(
+      tester,
+      pin: pin(category: PinCategory.nature),
+      onSave: (details) async {
+        saved = details;
+        return true;
+      },
+    );
+
+    await tester.tap(find.text('Edytuj'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pin-category-gastronomy')));
+    await tester.pump();
+    await tester.tap(find.text('Zapisz'));
+    await tester.pumpAndSettle();
+
+    expect(saved?.category, PinCategory.gastronomy);
+    expect(find.text('Gastronomia'), findsOneWidget);
   });
 }

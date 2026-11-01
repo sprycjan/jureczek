@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/pins_repository.dart';
+import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
 
 /// Pinezki z bazy – jedyne źródło prawdy dla mapy.
@@ -24,6 +25,7 @@ class PinsController {
     String? note,
     String? address,
     String? sourceUrl,
+    PinCategory category = PinCategory.fallback,
   }) async {
     final id = _uuid.v4();
     await _repository.insert(
@@ -36,6 +38,7 @@ class PinsController {
         note: _normalize(note),
         address: _normalize(address),
         sourceUrl: _normalize(sourceUrl),
+        category: category,
       ),
     );
     return id;
@@ -51,18 +54,21 @@ class PinsController {
 
   Future<void> restore(PlacePin pin) => _repository.insert(pin);
 
-  /// Zapisuje nazwę, notatkę i adres; białe znaki na brzegach są obcinane, a pusty tekst to `null`.
+  /// Zapisuje nazwę, notatkę, adres i (gdy podany) typ; białe znaki na brzegach
+  /// są obcinane, a pusty tekst to `null`.
   Future<void> updateDetails(
     String id, {
     String? name,
     String? note,
     String? address,
+    PinCategory? category,
   }) {
     return _repository.updateDetails(
       id,
       name: _normalize(name),
       note: _normalize(note),
       address: _normalize(address),
+      category: category,
     );
   }
 

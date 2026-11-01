@@ -26,7 +26,7 @@ tags: [jureczek, przeglad]
 | v6 | Klikalne POI: tap → karta „Dodaj pinezkę”, long-tap → pinezka z nazwą POI | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v6 – klikalne POI]] |
 | v7 | Animacja spadania nowej pinezki + stuknięcie wibracją | ✅ działa na telefonie – [[v7 – animacja spadania pinezki]] |
 | v8 | Styl „Nocturnal Expedition” (kolory, czcionki Epilogue/Space Grotesk), paleta mapy, nowa ikona | 🧪 sprawdzone przez adb, poprawki czekają na potwierdzenie – [[v8 – styl Nocturnal Expedition]] |
-| v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🚧 w planie |
+| v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v9 – kategorie pinezek]] |
 | v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🚧 w planie |
 | v11+ | Patrz [[Backlog]] | — |
 

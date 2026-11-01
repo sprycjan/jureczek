@@ -86,6 +86,18 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('standard'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -96,6 +108,7 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     note,
     address,
     sourceUrl,
+    category,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -162,6 +175,12 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
         sourceUrl.isAcceptableOrUnknown(data['source_url']!, _sourceUrlMeta),
       );
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
     return context;
   }
 
@@ -203,6 +222,10 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
         DriftSqlType.string,
         data['${effectivePrefix}source_url'],
       ),
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
     );
   }
 
@@ -218,13 +241,16 @@ class PinRow extends DataClass implements Insertable<PinRow> {
   final double lng;
   final DateTime createdAt;
 
-  /// Dodane w schemacie 2 (v3); puste dla starszych pinezek.
+  /// Nazwa i notatka (od v3).
   final String? name;
   final String? note;
 
-  /// Dodane w schemacie 3 (v5): adres i link, z którego udostępniono miejsce.
+  /// Adres i link, z którego udostępniono miejsce (od v5).
   final String? address;
   final String? sourceUrl;
+
+  /// Dodane w schemacie 4 (v9): klucz [PinCategory].
+  final String category;
   const PinRow({
     required this.id,
     required this.lat,
@@ -234,6 +260,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     this.note,
     this.address,
     this.sourceUrl,
+    required this.category,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -254,6 +281,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     if (!nullToAbsent || sourceUrl != null) {
       map['source_url'] = Variable<String>(sourceUrl);
     }
+    map['category'] = Variable<String>(category);
     return map;
   }
 
@@ -271,6 +299,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       sourceUrl: sourceUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(sourceUrl),
+      category: Value(category),
     );
   }
 
@@ -288,6 +317,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       note: serializer.fromJson<String?>(json['note']),
       address: serializer.fromJson<String?>(json['address']),
       sourceUrl: serializer.fromJson<String?>(json['sourceUrl']),
+      category: serializer.fromJson<String>(json['category']),
     );
   }
   @override
@@ -302,6 +332,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       'note': serializer.toJson<String?>(note),
       'address': serializer.toJson<String?>(address),
       'sourceUrl': serializer.toJson<String?>(sourceUrl),
+      'category': serializer.toJson<String>(category),
     };
   }
 
@@ -314,6 +345,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     Value<String?> note = const Value.absent(),
     Value<String?> address = const Value.absent(),
     Value<String?> sourceUrl = const Value.absent(),
+    String? category,
   }) => PinRow(
     id: id ?? this.id,
     lat: lat ?? this.lat,
@@ -323,6 +355,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     note: note.present ? note.value : this.note,
     address: address.present ? address.value : this.address,
     sourceUrl: sourceUrl.present ? sourceUrl.value : this.sourceUrl,
+    category: category ?? this.category,
   );
   PinRow copyWithCompanion(PinsCompanion data) {
     return PinRow(
@@ -334,6 +367,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       note: data.note.present ? data.note.value : this.note,
       address: data.address.present ? data.address.value : this.address,
       sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -347,14 +381,24 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           ..write('name: $name, ')
           ..write('note: $note, ')
           ..write('address: $address, ')
-          ..write('sourceUrl: $sourceUrl')
+          ..write('sourceUrl: $sourceUrl, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, lat, lng, createdAt, name, note, address, sourceUrl);
+  int get hashCode => Object.hash(
+    id,
+    lat,
+    lng,
+    createdAt,
+    name,
+    note,
+    address,
+    sourceUrl,
+    category,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -366,7 +410,8 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           other.name == this.name &&
           other.note == this.note &&
           other.address == this.address &&
-          other.sourceUrl == this.sourceUrl);
+          other.sourceUrl == this.sourceUrl &&
+          other.category == this.category);
 }
 
 class PinsCompanion extends UpdateCompanion<PinRow> {
@@ -378,6 +423,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
   final Value<String?> note;
   final Value<String?> address;
   final Value<String?> sourceUrl;
+  final Value<String> category;
   final Value<int> rowid;
   const PinsCompanion({
     this.id = const Value.absent(),
@@ -388,6 +434,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.note = const Value.absent(),
     this.address = const Value.absent(),
     this.sourceUrl = const Value.absent(),
+    this.category = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PinsCompanion.insert({
@@ -399,6 +446,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.note = const Value.absent(),
     this.address = const Value.absent(),
     this.sourceUrl = const Value.absent(),
+    this.category = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        lat = Value(lat),
@@ -413,6 +461,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Expression<String>? note,
     Expression<String>? address,
     Expression<String>? sourceUrl,
+    Expression<String>? category,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -424,6 +473,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       if (note != null) 'note': note,
       if (address != null) 'address': address,
       if (sourceUrl != null) 'source_url': sourceUrl,
+      if (category != null) 'category': category,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -437,6 +487,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Value<String?>? note,
     Value<String?>? address,
     Value<String?>? sourceUrl,
+    Value<String>? category,
     Value<int>? rowid,
   }) {
     return PinsCompanion(
@@ -448,6 +499,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       note: note ?? this.note,
       address: address ?? this.address,
       sourceUrl: sourceUrl ?? this.sourceUrl,
+      category: category ?? this.category,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -479,6 +531,9 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     if (sourceUrl.present) {
       map['source_url'] = Variable<String>(sourceUrl.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -496,6 +551,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
           ..write('note: $note, ')
           ..write('address: $address, ')
           ..write('sourceUrl: $sourceUrl, ')
+          ..write('category: $category, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -523,6 +579,7 @@ typedef $$PinsTableCreateCompanionBuilder =
       Value<String?> note,
       Value<String?> address,
       Value<String?> sourceUrl,
+      Value<String> category,
       Value<int> rowid,
     });
 typedef $$PinsTableUpdateCompanionBuilder =
@@ -535,6 +592,7 @@ typedef $$PinsTableUpdateCompanionBuilder =
       Value<String?> note,
       Value<String?> address,
       Value<String?> sourceUrl,
+      Value<String> category,
       Value<int> rowid,
     });
 
@@ -583,6 +641,11 @@ class $$PinsTableFilterComposer extends Composer<_$AppDatabase, $PinsTable> {
 
   ColumnFilters<String> get sourceUrl => $composableBuilder(
     column: $table.sourceUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -634,6 +697,11 @@ class $$PinsTableOrderingComposer extends Composer<_$AppDatabase, $PinsTable> {
     column: $table.sourceUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PinsTableAnnotationComposer
@@ -668,6 +736,9 @@ class $$PinsTableAnnotationComposer
 
   GeneratedColumn<String> get sourceUrl =>
       $composableBuilder(column: $table.sourceUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 }
 
 class $$PinsTableTableManager
@@ -706,6 +777,7 @@ class $$PinsTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<String?> address = const Value.absent(),
                 Value<String?> sourceUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion(
                 id: id,
@@ -716,6 +788,7 @@ class $$PinsTableTableManager
                 note: note,
                 address: address,
                 sourceUrl: sourceUrl,
+                category: category,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -728,6 +801,7 @@ class $$PinsTableTableManager
                 Value<String?> note = const Value.absent(),
                 Value<String?> address = const Value.absent(),
                 Value<String?> sourceUrl = const Value.absent(),
+                Value<String> category = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion.insert(
                 id: id,
@@ -738,6 +812,7 @@ class $$PinsTableTableManager
                 note: note,
                 address: address,
                 sourceUrl: sourceUrl,
+                category: category,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

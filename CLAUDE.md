@@ -27,10 +27,11 @@ After every change, update the vault without asking (use `/vault-update`): versi
 - Look up library docs with Context7 (`ctx7`); training data for Mapbox v3 / Riverpod 3 is unreliable.
 
 ## Gotchas
+- Pin images: PNG 3x in `app/assets/markers/` rendered from `assets/markers/src/*.svg` by `app/tool/render_pins.py` (headless Chrome; tip on the bottom edge). Never hand-edit the PNGs.
 - Mapbox SDK v3, not v2: `viewport: CameraViewportState`; `map.addInteraction(TapInteraction.onMap / LongTapInteraction.onMap)` instead of listeners; `Position(lng, lat)` (lng first); `PointAnnotation` needs PNG bytes.
 - Riverpod 3 pauses providers without listeners. In tests: `container.listen(p, (_, _) {})` → `pumpEventQueue()` → `read(p).requireValue`; `read(p.future)` hangs.
 - The drift DB is the single source of truth (`StreamProvider` over `watchAll()`, writes through controllers). Ids are UUID v4.
-- Schema changes: bump `schemaVersion`, hand-write `if (from < N)` in `onUpgrade`, and add a migration test that builds the old schema with raw SQL + `PRAGMA user_version` (`test/core/database/app_database_migration_test.dart`).
+- Schema changes: bump `schemaVersion`, hand-write `if (from < N)` in `onUpgrade`, and add a migration test that builds the old schema with raw SQL + `PRAGMA user_version` (`test/core/database/app_database_migration_test.dart`). Upgrades from schema < 4 wipe the DB on purpose (v9 reset); real migrations start at 4 → 5.
 - Never log `ClientException.toString()` — it contains the URL with `access_token`; use `e.message`.
 - Flutter 3.41: a `SnackBar` with an action needs `persist: false` or it never closes.
 - Keep UI clear of the Mapbox logo/attribution (license requirement).

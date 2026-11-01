@@ -315,6 +315,60 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Gotowe'**
   String get placeAdjustDone;
+
+  /// No description provided for @pinCategoryLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Typ pinezki'**
+  String get pinCategoryLabel;
+
+  /// No description provided for @pinCategoryStandard.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pinezka'**
+  String get pinCategoryStandard;
+
+  /// No description provided for @pinCategoryGastronomy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Gastronomia'**
+  String get pinCategoryGastronomy;
+
+  /// No description provided for @pinCategoryPlaces.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsca i zabytki'**
+  String get pinCategoryPlaces;
+
+  /// No description provided for @pinCategoryNature.
+  ///
+  /// In pl, this message translates to:
+  /// **'Natura i widoki'**
+  String get pinCategoryNature;
+
+  /// No description provided for @pinCategoryActivities.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywności i szlaki'**
+  String get pinCategoryActivities;
+
+  /// No description provided for @pinCategoryTravel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podróż i baza vana'**
+  String get pinCategoryTravel;
+
+  /// No description provided for @pinCategoryEntertainment.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozrywka i kultura'**
+  String get pinCategoryEntertainment;
+
+  /// No description provided for @pinCategoryPractical.
+  ///
+  /// In pl, this message translates to:
+  /// **'Punkty praktyczne'**
+  String get pinCategoryPractical;
 }
 
 class _AppLocalizationsDelegate

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
 
 /// Teksty z formularza pinezki, przed obcięciem białych znaków.
-typedef PinDetailsInput = ({String name, String address, String note});
+typedef PinDetailsInput = ({
+  String name,
+  String address,
+  String note,
+  PinCategory category,
+});
 
 /// Zapisuje dane pinezki; zwraca `false`, gdy się nie udało.
 typedef SavePinDetails = Future<bool> Function(PinDetailsInput details);

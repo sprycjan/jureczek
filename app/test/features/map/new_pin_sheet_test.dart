@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/place_suggestion.dart';
 import 'package:jureczek/features/map/presentation/new_pin_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
@@ -64,6 +65,31 @@ void main() {
       expect(saved?.name, 'Metropolia');
       expect(saved?.address, 'Jana Kilińskiego 4, 80-452 Gdańsk');
       expect(saved?.note, 'Kino');
+      expect(saved?.category, PinCategory.standard);
+    });
+
+    testWidgets('wybrany typ pinezki trafia do zapisu', (tester) async {
+      PinDetailsInput? saved;
+      await pump(
+        tester,
+        NewPinSheet(
+          place: mall,
+          onSave: (details) async {
+            saved = details;
+            return true;
+          },
+        ),
+      );
+
+      expect(find.text('Pinezka'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('pin-category-practical')));
+      await tester.pump();
+      expect(find.text('Punkty praktyczne'), findsOneWidget);
+
+      await tester.tap(find.text('Zapisz'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.category, PinCategory.practical);
     });
 
     testWidgets('nieudany zapis pokazuje błąd', (tester) async {

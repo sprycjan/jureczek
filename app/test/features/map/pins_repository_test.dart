@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
+import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
 void main() {
@@ -30,6 +31,24 @@ void main() {
     expect(saved.lat, 50.06);
     expect(saved.lng, 19.94);
     expect(saved.createdAt, createdAt);
+    expect(saved.category, PinCategory.standard);
+  });
+
+  test('updateDetails zmienia typ; bez typu zostawia dotychczasowy', () async {
+    await repository.insert(pin('a', DateTime(2026, 11, 1)));
+
+    await repository.updateDetails('a', category: PinCategory.travel);
+    expect((await repository.findById('a'))?.category, PinCategory.travel);
+
+    await repository.updateDetails('a', name: 'Postój');
+    expect((await repository.findById('a'))?.category, PinCategory.travel);
+  });
+
+  test('nieznany typ w bazie to domyślna pinezka', () async {
+    await repository.insert(pin('a', DateTime(2026, 11, 1)));
+    await db.customStatement("UPDATE pins SET category = 'kosmos'");
+
+    expect((await repository.findById('a'))?.category, PinCategory.standard);
   });
 
   test('watchAll zwraca pinezki od najstarszej', () async {

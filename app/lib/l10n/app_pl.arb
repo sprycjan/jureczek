@@ -43,5 +43,14 @@
   "shareSearchByName": "Szukaj w wyszukiwarce",
   "placeAdjust": "Popraw położenie",
   "placeAdjustHint": "Przesuń mapę, żeby pinezka wskazywała miejsce",
-  "placeAdjustDone": "Gotowe"
+  "placeAdjustDone": "Gotowe",
+  "pinCategoryLabel": "Typ pinezki",
+  "pinCategoryStandard": "Pinezka",
+  "pinCategoryGastronomy": "Gastronomia",
+  "pinCategoryPlaces": "Miejsca i zabytki",
+  "pinCategoryNature": "Natura i widoki",
+  "pinCategoryActivities": "Aktywności i szlaki",
+  "pinCategoryTravel": "Podróż i baza vana",
+  "pinCategoryEntertainment": "Rozrywka i kultura",
+  "pinCategoryPractical": "Punkty praktyczne"
 }

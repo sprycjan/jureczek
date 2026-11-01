@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 56" width="48" height="56" fill="none">
+  <defs>
+    <filter id="shadow-default" x="-20%" y="-10%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <g transform="translate(6, 4)" filter="url(#shadow-default)">
+    <!-- Base Pin (36x44dp) -->
+    <path d="M18 0 C8.06 0 0 8.06 0 18 C0 29.5 15.2 42.4 17.1 43.6 C17.65 44.05 18.35 44.05 18.9 43.6 C20.8 42.4 36 29.5 36 18 C36 8.06 27.94 0 18 0 Z" fill="#E65100"/>
+    <!-- Inner Symbol: Steaming Coffee Cup -->
+    <g transform="translate(9, 8)" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 5h10v5a5 5 0 0 1-10 0V5z"/>
+      <path d="M12 7h1.5a2 2 0 0 1 0 4H12"/>
+      <path d="M1 16h14"/>
+      <path d="M5 1v2M9 1v2" stroke-width="1.3"/>
+    </g>
+  </g>
+</svg>

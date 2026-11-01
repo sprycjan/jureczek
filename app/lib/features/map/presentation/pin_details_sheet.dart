@@ -3,10 +3,12 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
+import 'pin_category_picker.dart';
 import 'pin_form_fields.dart';
 
-/// Dolny arkusz po tapnięciu w pinezkę: podgląd, edycja nazwy, adresu i notatki, usuwanie.
+/// Dolny arkusz po tapnięciu w pinezkę: podgląd, edycja typu, nazwy, adresu i notatki, usuwanie.
 class PinDetailsSheet extends StatefulWidget {
   const PinDetailsSheet({
     super.key,
@@ -31,6 +33,8 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late String? _name = widget.pin.name;
   late String? _note = widget.pin.note;
   late String? _address = widget.pin.address;
+  late PinCategory _category = widget.pin.category;
+  late PinCategory _editedCategory = _category;
   bool _editing = false;
   bool _saving = false;
   bool _saveFailed = false;
@@ -51,6 +55,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     _nameController.text = _name ?? '';
     _noteController.text = _note ?? '';
     _addressController.text = _address ?? '';
+    _editedCategory = _category;
     setState(() {
       _editing = true;
       _saveFailed = false;
@@ -63,6 +68,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       name: _nameController.text,
       address: _addressController.text,
       note: _noteController.text,
+      category: _editedCategory,
     ));
     if (!mounted) return;
     setState(() {
@@ -72,6 +78,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         _name = _nonEmpty(_nameController.text);
         _note = _nonEmpty(_noteController.text);
         _address = _nonEmpty(_addressController.text);
+        _category = _editedCategory;
         _editing = false;
       }
     });
@@ -127,7 +134,18 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
           ),
           const SizedBox(height: 8),
         ],
-        Text(l10n.pinSheetTitle, style: theme.textTheme.labelLarge),
+        Row(
+          children: [
+            PinCategoryImage(_category, height: 20),
+            const SizedBox(width: 6),
+            Text(
+              _category.label(l10n),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 4),
         Text(_name ?? l10n.pinUnnamed, style: theme.textTheme.titleLarge),
         if (_address != null) ...[
@@ -192,6 +210,11 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       children: [
         Text(l10n.pinSheetTitle, style: theme.textTheme.labelLarge),
         const SizedBox(height: 12),
+        PinCategoryPicker(
+          value: _editedCategory,
+          onChanged: (category) => setState(() => _editedCategory = category),
+        ),
+        const SizedBox(height: 16),
         PinFormFields(
           name: _nameController,
           address: _addressController,

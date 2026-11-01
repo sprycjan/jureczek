@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import 'pin_category.dart';
+
 /// Miejsce zaznaczone na mapie: pozycja, data dodania, nazwa, notatka,
-/// adres i link źródłowy (v5).
+/// adres i link źródłowy (v5), typ pinezki (v9).
 @immutable
 class PlacePin {
   const PlacePin({
@@ -13,6 +15,7 @@ class PlacePin {
     this.note,
     this.address,
     this.sourceUrl,
+    this.category = PinCategory.fallback,
   });
 
   final String id;
@@ -27,6 +30,8 @@ class PlacePin {
 
   /// Link, z którego udostępniono miejsce (np. `maps.app.goo.gl`); tylko do odczytu.
   final String? sourceUrl;
+
+  final PinCategory category;
 
   static const maxNameLength = 80;
   static const maxNoteLength = 1000;
