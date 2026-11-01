@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -12,7 +12,8 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [x] Tapnięcie w pinezkę otwiera podgląd i edycję (v2 + v3)
 - [x] Usuwanie pinezek z „Cofnij” (v2)
 - [ ] Przeciąganie pinezek (`isDraggable` + `dragEvents`)
-- [ ] Kategorie (restauracja, zabytek, nocleg…) z różnymi ikonami
+- [ ] Kategorie (restauracja, zabytek, nocleg…) z różnymi ikonami – w planie v9
+- [x] Animacja spadania nowej pinezki z wibracją (v7)
 - [x] Pinezka z klikniętego POI mapy, z nazwą (v6, [[v6 – klikalne POI]])
 - [ ] Chowanie ikony POI pod pinezką (`StandardPOIsState(hide: true)` + `setFeatureState`)
 - [ ] Kategoria/ikona pinezki z POI (`maki`, `class`), gdy będą kategorie
@@ -29,7 +30,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Prawdziwa wysuwana szuflada narzędzi, gdy narzędzi będzie więcej (v4 ma stałą kolumnę)
 
 ## Planowanie
-- [ ] Wyjazdy/urlopy jako kontener na miejsca, z datami
+- [ ] Wyjazdy/urlopy jako kontener na miejsca, z datami – foldery w planie v10 (bez dat)
 - [ ] Synchronizacja z chmurą / backend
 
 ## Infrastruktura

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Size;
 
+import '../../../core/haptics/haptics.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../share/application/shared_place_controller.dart';
 import '../application/place_search_controller.dart';
@@ -14,6 +15,7 @@ import '../domain/poi_place.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
+import 'pin_drop.dart';
 import 'pin_form_fields.dart';
 import 'place_adjust_overlay.dart';
 import 'place_search_field.dart';
@@ -26,6 +28,18 @@ final _polandViewport = CameraViewportState(
 );
 
 const _pinAsset = 'assets/markers/pin.png';
+
+/// Skala obrazka pinezki na mapie. Mapbox rysuje go w pikselach fizycznych,
+/// więc nakładka [PinDrop] dzieli rozmiar przez `devicePixelRatio`.
+const _pinIconSize = 0.6;
+const _pinImageSize = Size(96, 128);
+
+/// Zapas na narysowanie pinezki przez Mapbox, zanim zniknie nakładka –
+/// bez niego przez klatkę nie widać żadnej i pinezka miga.
+const _mapRenderDelay = Duration(milliseconds: 150);
+
+/// Czas zamykania arkusza – nowa pinezka spada dopiero na odsłoniętą mapę.
+const _sheetCloseDelay = Duration(milliseconds: 250);
 
 /// Zoom po przelocie do wyniku wyszukiwania lub udostępnionego miejsca.
 const _resultZoom = 15.0;
@@ -49,11 +63,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   MapboxMap? _map;
   PointAnnotationManager? _pinManager;
   Uint8List? _pinImage;
+  MemoryImage? _pinDropImage;
   Cancelable? _tapEvents;
 
   /// Pinezki narysowane na mapie i odwrotne mapowanie dla tapnięć.
   final _annotationsByPinId = <String, PointAnnotation>{};
   final _pinIdByAnnotationId = <String, String>{};
+
+  /// Nowe pinezki, które jeszcze spadają: na mapie są niewidoczne,
+  /// a nad mapą leci ich nakładka [PinDrop].
+  final _droppingIds = <String>{};
+
+  /// Osobny notifier, żeby start i koniec spadania nie przebudowywały całego ekranu.
+  final _drops = ValueNotifier(const <({String id, Offset anchor})>[]);
 
   /// Ostatni stan z bazy, do którego doprowadzamy mapę.
   List<PlacePin> _pins = const [];
@@ -78,6 +100,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   void dispose() {
     _tapEvents?.cancel();
+    _drops.dispose();
     _searchText.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -88,6 +111,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await _placeOrnaments(map);
     final bytes = await rootBundle.load(_pinAsset);
     _pinImage = bytes.buffer.asUint8List();
+    final dropImage = MemoryImage(_pinImage!);
+    _pinDropImage = dropImage;
+    if (mounted) await precacheImage(dropImage, context);
     final manager = await map.annotations.createPointAnnotationManager();
     _pinManager = manager;
     _tapEvents = manager.tapEvents(onTap: _onPinTapped);
@@ -115,22 +141,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       LongTapInteraction(StandardPOIs(), (poi, _) {
         final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
         if (place == null) return;
-        _run(
-          () => ref
-              .read(pinsControllerProvider)
-              .add(lat: place.lat, lng: place.lng, name: place.name),
-        );
+        _addPinAt(place.lat, place.lng, name: place.name);
       }),
     );
 
     map.addInteraction(
       LongTapInteraction.onMap((context) {
         final position = context.point.coordinates;
-        _run(
-          () => ref
-              .read(pinsControllerProvider)
-              .add(lat: position.lat.toDouble(), lng: position.lng.toDouble()),
-        );
+        _addPinAt(position.lat.toDouble(), position.lng.toDouble());
       }),
     );
 
@@ -204,12 +222,80 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           geometry: Point(coordinates: Position(pin.lng, pin.lat)),
           image: image,
           iconAnchor: IconAnchor.BOTTOM,
-          iconSize: 0.6,
+          iconSize: _pinIconSize,
+          iconOpacity: _droppingIds.contains(pin.id) ? 0 : 1,
         ),
       );
       _annotationsByPinId[pin.id] = annotation;
       _pinIdByAnnotationId[annotation.id] = pin.id;
     }
+  }
+
+  Future<void> _setPinOpacity(String id, double opacity) {
+    return _sync = _sync
+        .then((_) async {
+          final manager = _pinManager;
+          final annotation = _annotationsByPinId[id];
+          if (manager == null || annotation == null) return;
+          if (annotation.iconOpacity == opacity) return;
+          annotation.iconOpacity = opacity;
+          await manager.update(annotation);
+        })
+        .catchError((Object e) {
+          debugPrint('Zmiana widoczności pinezki nie powiodła się: $e');
+        });
+  }
+
+  /// Long-tap: zapis, a potem pinezka spada nad palcem, żeby było widać,
+  /// że już stoi.
+  Future<void> _addPinAt(double lat, double lng, {String? name}) async {
+    final id = await _run(
+      () =>
+          ref.read(pinsControllerProvider).add(lat: lat, lng: lng, name: name),
+    );
+    if (id == null) return;
+    _holdPin(id);
+    await _dropPin(id, lat: lat, lng: lng);
+  }
+
+  /// Nowa pinezka zostaje na mapie niewidoczna, dopóki nie spadnie [_dropPin].
+  void _holdPin(String id) {
+    _droppingIds.add(id);
+    _setPinOpacity(id, 0);
+  }
+
+  Future<void> _dropPin(
+    String id, {
+    required double lat,
+    required double lng,
+  }) async {
+    final map = _map;
+    if (map == null || _pinDropImage == null || !mounted) return _landPin(id);
+    try {
+      final pixel = await map.pixelForCoordinate(
+        Point(coordinates: Position(lng, lat)),
+      );
+      if (!mounted) return;
+      _drops.value = [
+        ..._drops.value,
+        (id: id, anchor: Offset(pixel.x, pixel.y)),
+      ];
+    } catch (e) {
+      debugPrint('Pozycja spadającej pinezki nieznana: $e');
+      _landPin(id);
+    }
+  }
+
+  /// Nakładka znika dopiero, gdy pod nią stoi już widoczna pinezka Mapbox.
+  Future<void> _landPin(String id) async {
+    _droppingIds.remove(id);
+    await _setPinOpacity(id, 1);
+    await Future<void>.delayed(_mapRenderDelay);
+    if (!mounted) return;
+    _drops.value = [
+      for (final drop in _drops.value)
+        if (drop.id != id) drop,
+    ];
   }
 
   void _onPinTapped(PointAnnotation annotation) {
@@ -408,12 +494,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (result != null) await _showResult(result, fly: false);
   }
 
-  /// Formularz z danymi wyniku; pinezka powstaje dopiero po „Zapisz”.
-  void _addResultPin(PlaceResult result) {
+  /// Formularz z danymi wyniku; pinezka powstaje dopiero po „Zapisz”
+  /// i spada, gdy arkusz się zamknie.
+  Future<void> _addResultPin(PlaceResult result) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    String? addedId;
 
-    showModalBottomSheet<void>(
+    await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -421,7 +509,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         place: result,
         onSave: (details) async {
           try {
-            await ref
+            addedId = await ref
                 .read(pinsControllerProvider)
                 .add(
                   lat: result.lat,
@@ -435,6 +523,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             debugPrint('Zapis pinezki nie powiódł się: $e');
             return false;
           }
+          _holdPin(addedId!);
           if (sheetContext.mounted) Navigator.of(sheetContext).pop();
           _clearResult();
           messenger
@@ -444,6 +533,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         },
       ),
     );
+
+    final id = addedId;
+    if (id == null) return;
+    await Future<void>.delayed(_sheetCloseDelay);
+    await _dropPin(id, lat: result.lat, lng: result.lng);
   }
 
   /// Nowe udostępnienie zastępuje wszystko, co było otwarte.
@@ -534,6 +628,31 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               styleUri: MapboxStyles.STANDARD,
               viewport: _polandViewport,
               onMapCreated: _onMapCreated,
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: RepaintBoundary(
+                  child: ValueListenableBuilder(
+                    valueListenable: _drops,
+                    builder: (context, drops, _) => Stack(
+                      children: [
+                        for (final drop in drops)
+                          PinDrop(
+                            key: ValueKey(drop.id),
+                            image: _pinDropImage!,
+                            anchor: drop.anchor,
+                            size:
+                                _pinImageSize *
+                                (_pinIconSize /
+                                    MediaQuery.devicePixelRatioOf(context)),
+                            onImpact: ref.read(hapticsProvider).tap,
+                            onLanded: () => _landPin(drop.id),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
             SafeArea(
               child: Padding(

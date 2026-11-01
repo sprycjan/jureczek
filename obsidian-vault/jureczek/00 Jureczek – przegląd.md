@@ -23,7 +23,11 @@ tags: [jureczek, przeglad]
 | v4 | Wyszukiwarka miejsc (Mapbox Search Box): lupa w kolumnie narzędzi → podpowiedzi → przelot + „Dodaj pinezkę” | ✅ działa na telefonie – [[v4 – wyszukiwarka miejsc]] |
 | v5 | Kompas pod lupą, skala na dole po prawej (wcześniej pod paskiem statusu) | 🧪 skala sprawdzona, kompas do sprawdzenia na telefonie – [[v5 – kompas i skala]] |
 | v6 | Klikalne POI: tap → karta „Dodaj pinezkę”, long-tap → pinezka z nazwą POI | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v6 – klikalne POI]] |
-| v7+ | Patrz [[Backlog]] | — |
+| v7 | Animacja spadania nowej pinezki + stuknięcie wibracją | ✅ działa na telefonie – [[v7 – animacja spadania pinezki]] |
+| v8 | Styl „Nocturnal Expedition” (kolory, czcionki Epilogue/Space Grotesk), paleta mapy, nowa ikona | 🚧 w planie |
+| v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🚧 w planie |
+| v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🚧 w planie |
+| v11+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

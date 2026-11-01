@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Stuknięcie przy postawieniu pinezki, niezależne od wibracji dotykowych systemu. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:label="Jureczek"
         android:name="${applicationName}"

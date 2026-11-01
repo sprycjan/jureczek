@@ -16,18 +16,19 @@ class PinsController {
   final PinsRepository _repository;
   static const _uuid = Uuid();
 
-  /// Teksty jak w [updateDetails]: obcięte, puste to `null`.
-  Future<void> add({
+  /// Zwraca id nowej pinezki. Teksty jak w [updateDetails]: obcięte, puste to `null`.
+  Future<String> add({
     required double lat,
     required double lng,
     String? name,
     String? note,
     String? address,
     String? sourceUrl,
-  }) {
-    return _repository.insert(
+  }) async {
+    final id = _uuid.v4();
+    await _repository.insert(
       PlacePin(
-        id: _uuid.v4(),
+        id: id,
         lat: lat,
         lng: lng,
         createdAt: DateTime.now(),
@@ -37,6 +38,7 @@ class PinsController {
         sourceUrl: _normalize(sourceUrl),
       ),
     );
+    return id;
   }
 
   /// Usuwa pinezkę i zwraca ją, żeby dało się cofnąć przez [restore].

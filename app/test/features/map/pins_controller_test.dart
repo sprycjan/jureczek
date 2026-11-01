@@ -44,6 +44,12 @@ void main() {
     expect(pin.createdAt.difference(before).inSeconds, lessThan(5));
   });
 
+  test('add zwraca id zapisanej pinezki', () async {
+    final id = await controller().add(lat: 50.06, lng: 19.94);
+
+    expect(await pinIds(), [id]);
+  });
+
   test('add zapisuje nazwę, obciętą; pusta nazwa to null', () async {
     await controller().add(lat: 50.05, lng: 19.93, name: ' Wawel ');
     await controller().add(lat: 52.23, lng: 21.01, name: '  ');
