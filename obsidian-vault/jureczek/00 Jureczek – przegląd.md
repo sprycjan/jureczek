@@ -13,6 +13,7 @@ tags: [jureczek, przeglad]
 - Baza lokalna: drift (SQLite) – [[ADR-005 Drift jako baza lokalna]]
 - Token Mapbox przez `--dart-define-from-file` – [[ADR-003 Token Mapbox]]
 - Kod w `app/`, notatki w `obsidian-vault/` – [[ADR-004 Struktura repo (app)]]
+- Styl: ciemny „Nocturnal Expedition”, czcionki Epilogue + Space Grotesk, paleta mapy Standard – [[ADR-006 Styl Nocturnal Expedition]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -24,7 +25,7 @@ tags: [jureczek, przeglad]
 | v5 | Kompas pod lupą, skala na dole po prawej (wcześniej pod paskiem statusu) | 🧪 skala sprawdzona, kompas do sprawdzenia na telefonie – [[v5 – kompas i skala]] |
 | v6 | Klikalne POI: tap → karta „Dodaj pinezkę”, long-tap → pinezka z nazwą POI | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v6 – klikalne POI]] |
 | v7 | Animacja spadania nowej pinezki + stuknięcie wibracją | ✅ działa na telefonie – [[v7 – animacja spadania pinezki]] |
-| v8 | Styl „Nocturnal Expedition” (kolory, czcionki Epilogue/Space Grotesk), paleta mapy, nowa ikona | 🚧 w planie |
+| v8 | Styl „Nocturnal Expedition” (kolory, czcionki Epilogue/Space Grotesk), paleta mapy, nowa ikona | 🧪 sprawdzone przez adb, poprawki czekają na potwierdzenie – [[v8 – styl Nocturnal Expedition]] |
 | v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🚧 w planie |
 | v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🚧 w planie |
 | v11+ | Patrz [[Backlog]] | — |

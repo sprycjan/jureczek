@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Size;
 
 import '../../../core/haptics/haptics.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../share/application/shared_place_controller.dart';
 import '../application/place_search_controller.dart';
@@ -12,6 +13,7 @@ import '../domain/duplicate_pin.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
+import 'map_palette.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
@@ -442,8 +444,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         CircleAnnotationOptions(
           geometry: point,
           circleRadius: 9,
-          circleColor: Colors.blue.toARGB32(),
-          circleStrokeColor: Colors.white.toARGB32(),
+          circleColor: Nocturnal.secondary.toARGB32(),
+          circleStrokeColor: Nocturnal.surface.toARGB32(),
           circleStrokeWidth: 3,
         ),
       );
@@ -628,6 +630,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               styleUri: MapboxStyles.STANDARD,
               viewport: _polandViewport,
               onMapCreated: _onMapCreated,
+              onStyleLoadedListener: (_) {
+                final map = _map;
+                if (map != null) applyMapPalette(map);
+              },
             ),
             Positioned.fill(
               child: IgnorePointer(

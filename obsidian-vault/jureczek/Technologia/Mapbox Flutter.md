@@ -95,4 +95,18 @@ map.addInteraction(TapInteraction(StandardPOIs(), (poi, context) {
 - Interakcja na featuresecie ma pierwszeństwo przed `TapInteraction.onMap`. Tap w pinezkę stojącą na POI otwiera tylko arkusz pinezki (sprawdzone przez adb).
 - Inne pola: `group`, `category` (`class`), `maki`; stan `StandardPOIsState(hide:)` do chowania ikony.
 
-Powiązane: [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]
+## Własna paleta Standard (v8)
+Standard ładowany przez `styleUri: MapboxStyles.STANDARD` ma import `basemap`. Kolory zmienia się w kodzie, bez Mapbox Studio:
+```dart
+await map.setStyleImportConfigProperties('basemap', {
+  'colorLand': '#465249', 'colorWater': '#4d7480', 'colorGreenspace': '#3b5245',
+  'colorRoads': '#89938b', 'colorTrunks': '#bec9c0', 'colorMotorways': '#b8875a',
+  'colorPlaceLabels': '#0d1511', 'colorRoadLabels': '#151d19',
+  'colorPointOfInterestLabels': '#0d1511', 'colorAdminBoundaries': '#2e3732',
+});
+```
+- Wołać w `MapWidget(onStyleLoadedListener: …)` – po każdym załadowaniu stylu.
+- `map.style.*` jest deprecated; metody są na `MapboxMap`.
+- Etykiety mają automatyczną obwódkę kontrastową: ciemny tekst dostaje jasną obwódkę.
+
+Powiązane: [[v8 – styl Nocturnal Expedition]], [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]

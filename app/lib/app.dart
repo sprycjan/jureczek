@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/config/app_config.dart';
+import 'core/theme/app_theme.dart';
 import 'features/map/presentation/map_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -15,7 +16,7 @@ class JureczekApp extends StatelessWidget {
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: Colors.red, useMaterial3: true),
+      theme: appTheme,
       locale: const Locale('pl'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [

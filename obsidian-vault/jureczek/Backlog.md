@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -23,6 +23,8 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Lokalizacja użytkownika i przycisk „moja lokalizacja” (uprawnienia `ACCESS_FINE/COARSE_LOCATION`, obsługa odmowy)
 - [ ] Zapamiętywanie ostatniej pozycji kamery
 - [ ] Przełącznik stylów (Standard / Outdoors / Satellite)
+- [x] Własna paleta mapy w stylu aplikacji (v8)
+- [ ] Generator ikony aplikacji w repo (skrypt), dziś tylko opis w [[v8 – styl Nocturnal Expedition]]
 - [x] Wyszukiwanie miejsc (Mapbox Search Box, v4, [[v4 – wyszukiwarka miejsc]])
 - [ ] Lepsze trafianie w sławne miejsca w wyszukiwarce, np. `proximity` tylko przy przybliżonej mapie – [[v4 – wyszukiwarka miejsc]]. Na razie zostaje jak jest (decyzja z 2026-10-26); płatne API, np. Google Places, odpada.
 - [ ] Ponowienie wyszukiwania po błędzie bez zmiany tekstu (np. tap w komunikat)
