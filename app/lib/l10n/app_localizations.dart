@@ -369,6 +369,258 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Punkty praktyczne'**
   String get pinCategoryPractical;
+
+  /// No description provided for @folderLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Folder'**
+  String get folderLabel;
+
+  /// No description provided for @folderNew.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowy folder'**
+  String get folderNew;
+
+  /// No description provided for @folderEditTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Edytuj folder'**
+  String get folderEditTitle;
+
+  /// No description provided for @folderQuickCreateTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowy folder'**
+  String get folderQuickCreateTitle;
+
+  /// No description provided for @folderNameLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nazwa folderu lub trasy'**
+  String get folderNameLabel;
+
+  /// No description provided for @folderNameHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'np. Dzika Andaluzja kamperem, Bałkany 2025'**
+  String get folderNameHint;
+
+  /// No description provided for @folderNameRequired.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podaj nazwę folderu'**
+  String get folderNameRequired;
+
+  /// No description provided for @folderDescriptionLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Krótki opis lub notatki załogi'**
+  String get folderDescriptionLabel;
+
+  /// No description provided for @folderDescriptionHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Klify, bezpieczne dzikie parcele, dostęp do czystej wody i prądu…'**
+  String get folderDescriptionHint;
+
+  /// No description provided for @folderIconLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ikona kategorii'**
+  String get folderIconLabel;
+
+  /// No description provided for @folderIconHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz 1'**
+  String get folderIconHint;
+
+  /// No description provided for @folderColorLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kolor akcentowy wyprawy'**
+  String get folderColorLabel;
+
+  /// No description provided for @folderPreviewName.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowa lista'**
+  String get folderPreviewName;
+
+  /// No description provided for @folderPreviewDescription.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dzikie postoje, bezpłatne parcele i punkty z wodą…'**
+  String get folderPreviewDescription;
+
+  /// No description provided for @folderCreate.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utwórz'**
+  String get folderCreate;
+
+  /// No description provided for @folderCreateAndAddPins.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utwórz folder i dodaj pierwsze pinezki'**
+  String get folderCreateAndAddPins;
+
+  /// No description provided for @folderSaveError.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zapisać folderu'**
+  String get folderSaveError;
+
+  /// No description provided for @folderClose.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknij'**
+  String get folderClose;
+
+  /// No description provided for @folderPinCount.
+  ///
+  /// In pl, this message translates to:
+  /// **'{count, plural, =0{Brak miejsc} =1{1 miejsce} few{{count} miejsca} many{{count} miejsc} other{{count} miejsca}}'**
+  String folderPinCount(int count);
+
+  /// No description provided for @folderMenu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Więcej'**
+  String get folderMenu;
+
+  /// No description provided for @folderEdit.
+  ///
+  /// In pl, this message translates to:
+  /// **'Edytuj'**
+  String get folderEdit;
+
+  /// No description provided for @folderIconCamper.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kamper'**
+  String get folderIconCamper;
+
+  /// No description provided for @folderIconMountains.
+  ///
+  /// In pl, this message translates to:
+  /// **'Góry'**
+  String get folderIconMountains;
+
+  /// No description provided for @folderIconBeach.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybrzeże'**
+  String get folderIconBeach;
+
+  /// No description provided for @folderIconCamping.
+  ///
+  /// In pl, this message translates to:
+  /// **'Biwak'**
+  String get folderIconCamping;
+
+  /// No description provided for @folderIconHiking.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szlak'**
+  String get folderIconHiking;
+
+  /// No description provided for @folderIconCafe.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kawiarnia'**
+  String get folderIconCafe;
+
+  /// No description provided for @folderIconCompass.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kompas'**
+  String get folderIconCompass;
+
+  /// No description provided for @folderColorEmerald.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szmaragd leśny'**
+  String get folderColorEmerald;
+
+  /// No description provided for @folderColorAmber.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bursztyn latarni'**
+  String get folderColorAmber;
+
+  /// No description provided for @folderColorGlacier.
+  ///
+  /// In pl, this message translates to:
+  /// **'Błękit lodowcowy'**
+  String get folderColorGlacier;
+
+  /// No description provided for @folderColorHeather.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmierzch wrzosowy'**
+  String get folderColorHeather;
+
+  /// No description provided for @folderColorRaspberry.
+  ///
+  /// In pl, this message translates to:
+  /// **'Malina'**
+  String get folderColorRaspberry;
+
+  /// No description provided for @homeGreeting.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cześć Podróżniku!'**
+  String get homeGreeting;
+
+  /// No description provided for @homeSubtitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dokąd ruszamy kamperem na kolejną wyprawę?'**
+  String get homeSubtitle;
+
+  /// No description provided for @homeFoldersTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Moje listy podróży'**
+  String get homeFoldersTitle;
+
+  /// No description provided for @homeAllPins.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mapa – wszystkie pinezki'**
+  String get homeAllPins;
+
+  /// No description provided for @homeEmptyTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie masz jeszcze żadnego folderu'**
+  String get homeEmptyTitle;
+
+  /// No description provided for @homeEmptyMessage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Foldery zbierają pinezki jednej podróży albo o wspólnym mianowniku – np. „Portugalia 2026” czy „Ciekawe miejsca”.'**
+  String get homeEmptyMessage;
+
+  /// No description provided for @homeEmptyAction.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utwórz pierwszy folder'**
+  String get homeEmptyAction;
+
+  /// No description provided for @mapAllPins.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie pinezki'**
+  String get mapAllPins;
+
+  /// No description provided for @mapBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wróć do listy folderów'**
+  String get mapBack;
 }
 
 class _AppLocalizationsDelegate

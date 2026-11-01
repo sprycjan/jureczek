@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../folders/presentation/folder_picker.dart';
 import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
 import 'pin_category_picker.dart';
@@ -16,6 +17,7 @@ class PinDetailsSheet extends StatefulWidget {
     required this.onDelete,
     required this.onSave,
     this.notice,
+    this.canMoveFolder = false,
   });
 
   final PlacePin pin;
@@ -24,6 +26,9 @@ class PinDetailsSheet extends StatefulWidget {
 
   /// Komunikat nad nazwą, np. „Ta pinezka już jest” po udostępnieniu duplikatu.
   final String? notice;
+
+  /// W edycji można przenieść pinezkę do innego folderu (v10).
+  final bool canMoveFolder;
 
   @override
   State<PinDetailsSheet> createState() => _PinDetailsSheetState();
@@ -35,6 +40,8 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late String? _address = widget.pin.address;
   late PinCategory _category = widget.pin.category;
   late PinCategory _editedCategory = _category;
+  late String _folderId = widget.pin.folderId;
+  late String _editedFolderId = _folderId;
   bool _editing = false;
   bool _saving = false;
   bool _saveFailed = false;
@@ -56,6 +63,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     _noteController.text = _note ?? '';
     _addressController.text = _address ?? '';
     _editedCategory = _category;
+    _editedFolderId = _folderId;
     setState(() {
       _editing = true;
       _saveFailed = false;
@@ -69,6 +77,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       address: _addressController.text,
       note: _noteController.text,
       category: _editedCategory,
+      folderId: widget.canMoveFolder ? _editedFolderId : null,
     ));
     if (!mounted) return;
     setState(() {
@@ -79,6 +88,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         _note = _nonEmpty(_noteController.text);
         _address = _nonEmpty(_addressController.text);
         _category = _editedCategory;
+        _folderId = _editedFolderId;
         _editing = false;
       }
     });
@@ -215,6 +225,16 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
           onChanged: (category) => setState(() => _editedCategory = category),
         ),
         const SizedBox(height: 16),
+        if (widget.canMoveFolder) ...[
+          FolderPicker(
+            value: _editedFolderId,
+            offerDefault: false,
+            onChanged: (id) {
+              if (id != null) setState(() => _editedFolderId = id);
+            },
+          ),
+          const SizedBox(height: 16),
+        ],
         PinFormFields(
           name: _nameController,
           address: _addressController,

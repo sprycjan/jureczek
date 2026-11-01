@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../folders/presentation/folder_picker.dart';
+
 import '../../../l10n/app_localizations.dart';
 import '../domain/pin_category.dart';
 import '../domain/place_suggestion.dart';
@@ -9,10 +11,18 @@ import 'pin_form_fields.dart';
 /// Arkusz „Nowa pinezka”: typ pinezki i dane z long-tapu, wyniku lub udostępnienia
 /// do poprawienia przed zapisem.
 class NewPinSheet extends StatefulWidget {
-  const NewPinSheet({super.key, required this.place, required this.onSave});
+  const NewPinSheet({
+    super.key,
+    required this.place,
+    required this.onSave,
+    this.chooseFolder = false,
+  });
 
   final PlaceResult place;
   final SavePinDetails onSave;
+
+  /// Wybór folderu – poza trybem folderu na mapie (v10).
+  final bool chooseFolder;
 
   @override
   State<NewPinSheet> createState() => _NewPinSheetState();
@@ -23,6 +33,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
   late final _address = TextEditingController(text: widget.place.address);
   final _note = TextEditingController();
   var _category = PinCategory.fallback;
+  String? _folderId;
   bool _saving = false;
   bool _saveFailed = false;
 
@@ -41,6 +52,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
       address: _address.text,
       note: _note.text,
       category: _category,
+      folderId: _folderId,
     ));
     if (!mounted || ok) return;
     setState(() {
@@ -73,6 +85,13 @@ class _NewPinSheetState extends State<NewPinSheet> {
                 onChanged: (category) => setState(() => _category = category),
               ),
               const SizedBox(height: 16),
+              if (widget.chooseFolder) ...[
+                FolderPicker(
+                  value: _folderId,
+                  onChanged: (id) => setState(() => _folderId = id),
+                ),
+                const SizedBox(height: 16),
+              ],
               PinFormFields(name: _name, address: _address, note: _note),
               if (_saveFailed) ...[
                 const SizedBox(height: 8),

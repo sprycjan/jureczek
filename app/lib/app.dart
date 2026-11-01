@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
+import 'features/home/presentation/home_screen.dart';
 import 'features/map/presentation/map_screen.dart';
 import 'l10n/app_localizations.dart';
 
@@ -25,7 +26,9 @@ class JureczekApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: MapScreen(accessToken: accessToken),
+      home: accessToken.isEmpty
+          ? const MissingTokenView()
+          : HomeScreen(accessToken: accessToken),
     );
   }
 }

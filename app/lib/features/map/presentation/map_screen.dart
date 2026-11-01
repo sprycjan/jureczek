@@ -6,6 +6,8 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Size;
 import '../../../core/haptics/haptics.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../folders/application/folders_providers.dart';
+import '../../folders/presentation/folder_badge.dart';
 import '../../share/application/shared_place_controller.dart';
 import '../application/place_search_controller.dart';
 import '../application/pins_providers.dart';
@@ -40,10 +42,7 @@ String _lookImageId(_PinLook look) =>
 /// Rozmiar PNG (szerokość, wysokość) z nagłówka IHDR.
 Size _pngSize(Uint8List bytes) {
   final data = ByteData.sublistView(bytes);
-  return Size(
-    data.getUint32(16).toDouble(),
-    data.getUint32(20).toDouble(),
-  );
+  return Size(data.getUint32(16).toDouble(), data.getUint32(20).toDouble());
 }
 
 /// Zapas na narysowanie pinezki przez Mapbox, zanim zniknie nakładka –
@@ -63,9 +62,13 @@ const _toolsPadding = 16.0;
 const _toolSize = 48.0;
 
 class MapScreen extends ConsumerStatefulWidget {
-  const MapScreen({super.key, required this.accessToken});
+  const MapScreen({super.key, required this.accessToken, this.folderId});
 
   final String accessToken;
+
+  /// Tryb folderu (v10): widać tylko jego pinezki i do niego trafiają nowe.
+  /// `null` – wszystkie pinezki, wybór folderu w formularzu, udostępnienia.
+  final String? folderId;
 
   @override
   ConsumerState<MapScreen> createState() => _MapScreenState();
@@ -121,6 +124,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _searchOpen = false;
   final _searchText = TextEditingController();
   final _searchFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Udostępnienia obsługuje tylko mapa wszystkich pinezek; ekran startowy
+    // otwiera ją, gdy udostępnienie się zaczyna – stąd stan bieżący na starcie.
+    if (widget.folderId == null) {
+      ref.listenManual(sharedPlaceControllerProvider, (previous, next) {
+        if (previous == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _onSharedPlace(next);
+          });
+        } else {
+          _onSharedPlace(next);
+        }
+      }, fireImmediately: true);
+    }
+  }
 
   @override
   void dispose() {
@@ -230,8 +251,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
   }
 
+  /// Pinezki widoczne w tym trybie mapy.
+  List<PlacePin> _visible(List<PlacePin> all) {
+    final folderId = widget.folderId;
+    if (folderId == null) return all;
+    return [
+      for (final pin in all)
+        if (pin.folderId == folderId) pin,
+    ];
+  }
+
   void _scheduleSync(List<PlacePin> pins) {
-    _pins = pins;
+    _pins = _visible(pins);
     _sync = _sync.then((_) => _syncPins()).catchError((Object e) {
       debugPrint('Synchronizacja pinezek nie powiodła się: $e');
     });
@@ -364,6 +395,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           _deletePin(pin.id);
         },
         onSave: (details) => _savePinDetails(pin.id, details),
+        canMoveFolder: true,
       ),
     );
     if (_selectedPinId == pin.id) _selectPin(null);
@@ -371,7 +403,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _selectPin(String? id) {
     _selectedPinId = id;
-    _scheduleSync(_pins);
+    _scheduleSync(ref.read(pinsProvider).value ?? _pins);
   }
 
   /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
@@ -385,6 +417,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             note: details.note,
             address: details.address,
             category: details.category,
+            folderId: details.folderId,
           );
       return true;
     } catch (e) {
@@ -557,12 +590,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       isScrollControlled: true,
       builder: (sheetContext) => NewPinSheet(
         place: result,
+        chooseFolder: widget.folderId == null,
         onSave: (details) async {
           category = details.category;
           try {
+            final folderId =
+                widget.folderId ??
+                details.folderId ??
+                await ref.read(foldersControllerProvider).ensureDefault();
             addedId = await ref
                 .read(pinsControllerProvider)
                 .add(
+                  folderId: folderId,
                   lat: result.lat,
                   lng: result.lng,
                   name: details.name,
@@ -597,7 +636,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final l10n = AppLocalizations.of(context);
     switch (state) {
       case SharedPlaceLoading():
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        // Zamyka arkusze i dialogi nad mapą, ale nie samą mapę (pod nią jest start).
+        final mapRoute = ModalRoute.of(context);
+        Navigator.of(context).popUntil((route) => route == mapRoute);
         if (_searchOpen) _closeSearch();
         _clearResult();
       case SharedPlaceReady(:final place):
@@ -633,7 +674,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.accessToken.isEmpty) {
-      return const _MissingTokenView();
+      return const MissingTokenView();
     }
 
     ref.listen(pinsProvider, (_, next) {
@@ -646,10 +687,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         default:
       }
     });
-    ref.listen(
-      sharedPlaceControllerProvider,
-      (_, next) => _onSharedPlace(next),
-    );
 
     final l10n = AppLocalizations.of(context);
     final result = _result;
@@ -709,6 +746,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
               ),
             ),
+            if (!_searchOpen)
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(_toolsPadding),
+                  child: _MapModeChip(folderId: widget.folderId),
+                ),
+              ),
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(_toolsPadding),
@@ -795,8 +839,73 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 }
 
-class _MissingTokenView extends StatelessWidget {
-  const _MissingTokenView();
+/// Lewy górny róg mapy: powrót do listy folderów i nazwa bieżącego folderu.
+class _MapModeChip extends ConsumerWidget {
+  const _MapModeChip({required this.folderId});
+
+  final String? folderId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final folder = folderId == null
+        ? null
+        : ref
+              .watch(foldersProvider)
+              .value
+              ?.where((f) => f.id == folderId)
+              .firstOrNull;
+    return ConstrainedBox(
+      // Zostawia miejsce na kolumnę narzędzi po prawej.
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.sizeOf(context).width - 2 * _toolsPadding - 72,
+      ),
+      child: Material(
+        color: theme.colorScheme.surface,
+        elevation: 3,
+        shape: const StadiumBorder(),
+        child: InkWell(
+          customBorder: const StadiumBorder(),
+          onTap: () => Navigator.of(context).maybePop(),
+          child: Semantics(
+            button: true,
+            label: l10n.mapBack,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 6, 16, 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.arrow_back, size: 20),
+                  const SizedBox(width: 8),
+                  if (folder != null)
+                    FolderBadge(
+                      icon: folder.icon,
+                      color: folder.color,
+                      size: 28,
+                    )
+                  else
+                    Icon(Icons.map_outlined, color: theme.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      folder?.name ?? l10n.mapAllPins,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MissingTokenView extends StatelessWidget {
+  const MissingTokenView({super.key});
 
   @override
   Widget build(BuildContext context) {

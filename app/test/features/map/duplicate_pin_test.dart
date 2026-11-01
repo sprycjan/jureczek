@@ -3,8 +3,13 @@ import 'package:jureczek/features/map/domain/duplicate_pin.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
 void main() {
-  PlacePin pin(String id, double lat, double lng) =>
-      PlacePin(id: id, lat: lat, lng: lng, createdAt: DateTime(2026));
+  PlacePin pin(String id, double lat, double lng) => PlacePin(
+    folderId: 'f',
+    id: id,
+    lat: lat,
+    lng: lng,
+    createdAt: DateTime(2026),
+  );
 
   group('duplicateThresholdMeters', () {
     test('przy zoomie 15 obcięty do 30 m', () {

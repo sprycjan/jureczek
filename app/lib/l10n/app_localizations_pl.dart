@@ -150,4 +150,144 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get pinCategoryPractical => 'Punkty praktyczne';
+
+  @override
+  String get folderLabel => 'Folder';
+
+  @override
+  String get folderNew => 'Nowy folder';
+
+  @override
+  String get folderEditTitle => 'Edytuj folder';
+
+  @override
+  String get folderQuickCreateTitle => 'Nowy folder';
+
+  @override
+  String get folderNameLabel => 'Nazwa folderu lub trasy';
+
+  @override
+  String get folderNameHint => 'np. Dzika Andaluzja kamperem, Bałkany 2025';
+
+  @override
+  String get folderNameRequired => 'Podaj nazwę folderu';
+
+  @override
+  String get folderDescriptionLabel => 'Krótki opis lub notatki załogi';
+
+  @override
+  String get folderDescriptionHint =>
+      'Klify, bezpieczne dzikie parcele, dostęp do czystej wody i prądu…';
+
+  @override
+  String get folderIconLabel => 'Ikona kategorii';
+
+  @override
+  String get folderIconHint => 'Wybierz 1';
+
+  @override
+  String get folderColorLabel => 'Kolor akcentowy wyprawy';
+
+  @override
+  String get folderPreviewName => 'Nowa lista';
+
+  @override
+  String get folderPreviewDescription =>
+      'Dzikie postoje, bezpłatne parcele i punkty z wodą…';
+
+  @override
+  String get folderCreate => 'Utwórz';
+
+  @override
+  String get folderCreateAndAddPins => 'Utwórz folder i dodaj pierwsze pinezki';
+
+  @override
+  String get folderSaveError => 'Nie udało się zapisać folderu';
+
+  @override
+  String get folderClose => 'Zamknij';
+
+  @override
+  String folderPinCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count miejsca',
+      many: '$count miejsc',
+      few: '$count miejsca',
+      one: '1 miejsce',
+      zero: 'Brak miejsc',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get folderMenu => 'Więcej';
+
+  @override
+  String get folderEdit => 'Edytuj';
+
+  @override
+  String get folderIconCamper => 'Kamper';
+
+  @override
+  String get folderIconMountains => 'Góry';
+
+  @override
+  String get folderIconBeach => 'Wybrzeże';
+
+  @override
+  String get folderIconCamping => 'Biwak';
+
+  @override
+  String get folderIconHiking => 'Szlak';
+
+  @override
+  String get folderIconCafe => 'Kawiarnia';
+
+  @override
+  String get folderIconCompass => 'Kompas';
+
+  @override
+  String get folderColorEmerald => 'Szmaragd leśny';
+
+  @override
+  String get folderColorAmber => 'Bursztyn latarni';
+
+  @override
+  String get folderColorGlacier => 'Błękit lodowcowy';
+
+  @override
+  String get folderColorHeather => 'Zmierzch wrzosowy';
+
+  @override
+  String get folderColorRaspberry => 'Malina';
+
+  @override
+  String get homeGreeting => 'Cześć Podróżniku!';
+
+  @override
+  String get homeSubtitle => 'Dokąd ruszamy kamperem na kolejną wyprawę?';
+
+  @override
+  String get homeFoldersTitle => 'Moje listy podróży';
+
+  @override
+  String get homeAllPins => 'Mapa – wszystkie pinezki';
+
+  @override
+  String get homeEmptyTitle => 'Nie masz jeszcze żadnego folderu';
+
+  @override
+  String get homeEmptyMessage =>
+      'Foldery zbierają pinezki jednej podróży albo o wspólnym mianowniku – np. „Portugalia 2026” czy „Ciekawe miejsca”.';
+
+  @override
+  String get homeEmptyAction => 'Utwórz pierwszy folder';
+
+  @override
+  String get mapAllPins => 'Wszystkie pinezki';
+
+  @override
+  String get mapBack => 'Wróć do listy folderów';
 }

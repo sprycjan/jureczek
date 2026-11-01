@@ -21,6 +21,7 @@ class PinsController {
   Future<String> add({
     required double lat,
     required double lng,
+    required String folderId,
     String? name,
     String? note,
     String? address,
@@ -34,6 +35,7 @@ class PinsController {
         lat: lat,
         lng: lng,
         createdAt: DateTime.now(),
+        folderId: folderId,
         name: _normalize(name),
         note: _normalize(note),
         address: _normalize(address),
@@ -62,6 +64,7 @@ class PinsController {
     String? note,
     String? address,
     PinCategory? category,
+    String? folderId,
   }) {
     return _repository.updateDetails(
       id,
@@ -69,6 +72,7 @@ class PinsController {
       note: _normalize(note),
       address: _normalize(address),
       category: category,
+      folderId: folderId,
     );
   }
 

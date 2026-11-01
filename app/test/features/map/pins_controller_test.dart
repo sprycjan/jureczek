@@ -37,7 +37,7 @@ void main() {
 
   test('add zapisuje pinezkę z podanymi współrzędnymi i datą', () async {
     final before = DateTime.now();
-    await controller().add(lat: 50.06, lng: 19.94);
+    await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
 
     final pin = (await pins()).single;
     expect(pin.lat, 50.06);
@@ -46,8 +46,9 @@ void main() {
   });
 
   test('add zapisuje typ pinezki, domyślnie standardowy', () async {
-    final plain = await controller().add(lat: 50.06, lng: 19.94);
+    final plain = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
     final food = await controller().add(
+      folderId: 'f',
       lat: 50.07,
       lng: 19.95,
       category: PinCategory.gastronomy,
@@ -59,14 +60,19 @@ void main() {
   });
 
   test('add zwraca id zapisanej pinezki', () async {
-    final id = await controller().add(lat: 50.06, lng: 19.94);
+    final id = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
 
     expect(await pinIds(), [id]);
   });
 
   test('add zapisuje nazwę, obciętą; pusta nazwa to null', () async {
-    await controller().add(lat: 50.05, lng: 19.93, name: ' Wawel ');
-    await controller().add(lat: 52.23, lng: 21.01, name: '  ');
+    await controller().add(
+      folderId: 'f',
+      lat: 50.05,
+      lng: 19.93,
+      name: ' Wawel ',
+    );
+    await controller().add(folderId: 'f', lat: 52.23, lng: 21.01, name: '  ');
 
     final names = (await pins()).map((p) => p.name).toSet();
     expect(names, {'Wawel', null});
@@ -74,6 +80,7 @@ void main() {
 
   test('add zapisuje notatkę, adres i link; puste teksty to null', () async {
     await controller().add(
+      folderId: 'f',
       lat: 54.38,
       lng: 18.60,
       name: 'Galeria Metropolia',
@@ -90,6 +97,7 @@ void main() {
 
   test('updateDetails zapisuje adres, a link zostaje bez zmian', () async {
     await controller().add(
+      folderId: 'f',
       lat: 54.38,
       lng: 18.60,
       sourceUrl: 'https://maps.app.goo.gl/abc',
@@ -104,15 +112,15 @@ void main() {
   });
 
   test('kolejne pinezki mają unikalne id', () async {
-    await controller().add(lat: 52.23, lng: 21.01);
-    await controller().add(lat: 54.35, lng: 18.65);
-    await controller().add(lat: 51.11, lng: 17.04);
+    await controller().add(folderId: 'f', lat: 52.23, lng: 21.01);
+    await controller().add(folderId: 'f', lat: 54.35, lng: 18.65);
+    await controller().add(folderId: 'f', lat: 51.11, lng: 17.04);
 
     expect((await pinIds()).toSet(), hasLength(3));
   });
 
   test('remove usuwa pinezkę i ją zwraca', () async {
-    await controller().add(lat: 50.06, lng: 19.94);
+    await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
     final id = (await pinIds()).single;
 
     final removed = await controller().remove(id);
@@ -126,7 +134,7 @@ void main() {
   });
 
   test('restore przywraca usuniętą pinezkę z tym samym id', () async {
-    await controller().add(lat: 50.06, lng: 19.94);
+    await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
     final id = (await pinIds()).single;
     final removed = await controller().remove(id);
 
@@ -138,7 +146,7 @@ void main() {
   test(
     'updateDetails obcina białe znaki i zapisuje pusty tekst jako null',
     () async {
-      await controller().add(lat: 50.06, lng: 19.94);
+      await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
       final id = (await pinIds()).single;
 
       await controller().updateDetails(id, name: '  Wawel ', note: '   ');
@@ -150,7 +158,7 @@ void main() {
   );
 
   test('restore przywraca też nazwę i notatkę', () async {
-    await controller().add(lat: 50.06, lng: 19.94);
+    await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
     final id = (await pinIds()).single;
     await controller().updateDetails(id, name: 'Wawel', note: 'Bilety');
     final removed = await controller().remove(id);

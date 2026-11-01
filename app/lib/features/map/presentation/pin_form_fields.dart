@@ -10,6 +10,10 @@ typedef PinDetailsInput = ({
   String address,
   String note,
   PinCategory category,
+
+  /// Wybrany folder; `null` to domyślny „Pinezki” albo „bez zmiany”, gdy
+  /// arkusz nie pokazuje wyboru folderu.
+  String? folderId,
 });
 
 /// Zapisuje dane pinezki; zwraca `false`, gdy się nie udało.

@@ -7,7 +7,9 @@ import 'package:jureczek/features/map/presentation/pin_drop.dart';
 void main() {
   const anchor = Offset(200, 300);
   const size = Size(60, 80);
-  final image = MemoryImage(File('assets/markers/standard_default.png').readAsBytesSync());
+  final image = MemoryImage(
+    File('assets/markers/standard_default.png').readAsBytesSync(),
+  );
 
   Future<void> pumpDrop(
     WidgetTester tester, {

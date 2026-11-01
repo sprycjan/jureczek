@@ -3,7 +3,7 @@ tags: [jureczek, przeglad]
 ---
 # Jureczek – przegląd
 
-**Jureczek** to aplikacja mobilna (Android) do planowania urlopów i wycieczek oraz zaznaczania miejsc, które chcę odwiedzić. Celem jest uporządkowanie wszystkiego, co dzieje się przy planowaniu wakacji.
+**Jureczek** to aplikacja mobilna (Android) do planowania urlopów i wycieczek oraz zaznaczania miejsc, które chcę odwiedzić. Od v10 startuje od listy folderów (podróży), a mapa pokazuje pinezki folderu albo wszystkie. Celem jest uporządkowanie wszystkiego, co dzieje się przy planowaniu wakacji.
 
 ## Stos technologiczny
 - Flutter (Dart), tylko Android – [[ADR-001 Flutter]]
@@ -13,6 +13,7 @@ tags: [jureczek, przeglad]
 - Baza lokalna: drift (SQLite) – [[ADR-005 Drift jako baza lokalna]]
 - Token Mapbox przez `--dart-define-from-file` – [[ADR-003 Token Mapbox]]
 - Kod w `app/`, notatki w `obsidian-vault/` – [[ADR-004 Struktura repo (app)]]
+- Foldery pinezek (każda pinezka w jednym folderze, ekran startowy z listą) – [[ADR-007 Foldery pinezek]]
 - Styl: ciemny „Nocturnal Expedition”, czcionki Epilogue + Space Grotesk, paleta mapy Standard – [[ADR-006 Styl Nocturnal Expedition]]
 
 ## Roadmapa
@@ -27,7 +28,7 @@ tags: [jureczek, przeglad]
 | v7 | Animacja spadania nowej pinezki + stuknięcie wibracją | ✅ działa na telefonie – [[v7 – animacja spadania pinezki]] |
 | v8 | Styl „Nocturnal Expedition” (kolory, czcionki Epilogue/Space Grotesk), paleta mapy, nowa ikona | 🧪 sprawdzone przez adb, poprawki czekają na potwierdzenie – [[v8 – styl Nocturnal Expedition]] |
 | v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v9 – kategorie pinezek]] |
-| v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🚧 w planie |
+| v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v10 – foldery i ekran startowy]] |
 | v11+ | Patrz [[Backlog]] | — |
 
 ## Inne

@@ -1,6 +1,8 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
+import 'package:jureczek/features/folders/data/folders_repository.dart';
+import 'package:jureczek/features/folders/domain/trip_folder.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
 import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
@@ -41,6 +43,7 @@ void main() {
 
       await repository.insert(
         PlacePin(
+          folderId: 'f',
           id: 'nowa',
           lat: 50.06,
           lng: 19.94,
@@ -48,10 +51,56 @@ void main() {
           category: PinCategory.nature,
         ),
       );
-      expect(
-        (await repository.findById('nowa'))?.category,
-        PinCategory.nature,
-      );
+      expect((await repository.findById('nowa'))?.category, PinCategory.nature);
     },
   );
+
+  /// Baza w stanie z v9 (schemat 4): pinezki z typem, bez folderów.
+  AppDatabase schema4({required bool withPin}) => AppDatabase(
+    NativeDatabase.memory(
+      setup: (raw) {
+        raw.execute('''
+          CREATE TABLE pins (
+            id TEXT NOT NULL,
+            lat REAL NOT NULL,
+            lng REAL NOT NULL,
+            created_at INTEGER NOT NULL,
+            name TEXT NULL,
+            note TEXT NULL,
+            address TEXT NULL,
+            source_url TEXT NULL,
+            category TEXT NOT NULL DEFAULT 'standard',
+            PRIMARY KEY (id)
+          )
+        ''');
+        if (withPin) {
+          raw.execute(
+            "INSERT INTO pins VALUES ('p1', 50.06, 19.94, 1792886400, 'Wawel', NULL, NULL, NULL, 'places')",
+          );
+        }
+        raw.execute('PRAGMA user_version = 4');
+      },
+    ),
+  );
+
+  test('migracja 4 → 5 przenosi pinezki do folderu „Pinezki”', () async {
+    final db = schema4(withPin: true);
+    addTearDown(db.close);
+
+    final folders = await FoldersRepository(db).watchAll().first;
+    expect(folders.single.name, TripFolder.defaultName);
+    expect(folders.single.pinCount, 1);
+
+    final pin = await PinsRepository(db).findById('p1');
+    expect(pin?.name, 'Wawel');
+    expect(pin?.category, PinCategory.places);
+    expect(pin?.folderId, folders.single.id);
+  });
+
+  test('migracja 4 → 5 bez pinezek nie tworzy folderu', () async {
+    final db = schema4(withPin: false);
+    addTearDown(db.close);
+
+    expect(await FoldersRepository(db).watchAll().first, isEmpty);
+  });
 }

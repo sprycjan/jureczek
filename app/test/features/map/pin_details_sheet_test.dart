@@ -15,6 +15,7 @@ void main() {
     String? sourceUrl,
     PinCategory category = PinCategory.standard,
   }) => PlacePin(
+    folderId: 'f',
     id: 'a',
     lat: 50.061389,
     lng: 19.938333,
@@ -196,9 +197,7 @@ void main() {
     expect(find.text('Natura i widoki'), findsOneWidget);
   });
 
-  testWidgets('w edycji zmienia typ i przekazuje go do zapisu', (
-    tester,
-  ) async {
+  testWidgets('w edycji zmienia typ i przekazuje go do zapisu', (tester) async {
     PinDetailsInput? saved;
     await pumpSheet(
       tester,

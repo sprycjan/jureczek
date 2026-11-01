@@ -73,6 +73,7 @@ flutter:
 
   assets:
     - assets/markers/
+    - assets/landscapes/
     - assets/fonts/OFL-Epilogue.txt
     - assets/fonts/OFL-SpaceGrotesk.txt
 

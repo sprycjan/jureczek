@@ -24,40 +24,64 @@ class PinsRepository {
     return row == null ? null : _toDomain(row);
   }
 
+  /// Zapisuje pinezkę i podnosi jej folder na górę listy.
   Future<void> insert(PlacePin pin) {
-    return _db
-        .into(_db.pins)
-        .insert(
-          PinsCompanion.insert(
-            id: pin.id,
-            lat: pin.lat,
-            lng: pin.lng,
-            createdAt: pin.createdAt,
-            name: Value(pin.name),
-            note: Value(pin.note),
-            address: Value(pin.address),
-            sourceUrl: Value(pin.sourceUrl),
-            category: Value(pin.category.key),
-          ),
-        );
+    return _db.transaction(() async {
+      await _db
+          .into(_db.pins)
+          .insert(
+            PinsCompanion.insert(
+              id: pin.id,
+              lat: pin.lat,
+              lng: pin.lng,
+              createdAt: pin.createdAt,
+              name: Value(pin.name),
+              note: Value(pin.note),
+              address: Value(pin.address),
+              sourceUrl: Value(pin.sourceUrl),
+              category: Value(pin.category.key),
+              folderId: pin.folderId,
+            ),
+          );
+      await _touchFolder(pin.folderId, DateTime.now());
+    });
   }
 
+  /// Zapisuje dane pinezki; [category] i [folderId] tylko gdy podane.
+  /// Folder przed i po zmianie idzie na górę listy, docelowy najwyżej.
   Future<void> updateDetails(
     String id, {
     String? name,
     String? note,
     String? address,
     PinCategory? category,
+    String? folderId,
   }) {
-    return (_db.update(_db.pins)..where((t) => t.id.equals(id))).write(
-      PinsCompanion(
-        name: Value(name),
-        note: Value(note),
-        address: Value(address),
-        category: category == null
-            ? const Value.absent()
-            : Value(category.key),
-      ),
+    return _db.transaction(() async {
+      final before = await findById(id);
+      if (before == null) return;
+      await (_db.update(_db.pins)..where((t) => t.id.equals(id))).write(
+        PinsCompanion(
+          name: Value(name),
+          note: Value(note),
+          address: Value(address),
+          category: category == null
+              ? const Value.absent()
+              : Value(category.key),
+          folderId: folderId == null ? const Value.absent() : Value(folderId),
+        ),
+      );
+      final now = DateTime.now();
+      await _touchFolder(before.folderId, now);
+      if (folderId != null && folderId != before.folderId) {
+        await _touchFolder(folderId, now.add(const Duration(milliseconds: 1)));
+      }
+    });
+  }
+
+  Future<void> _touchFolder(String id, DateTime at) {
+    return (_db.update(_db.folders)..where((t) => t.id.equals(id))).write(
+      FoldersCompanion(updatedAtMs: Value(at.millisecondsSinceEpoch)),
     );
   }
 
@@ -70,6 +94,7 @@ class PinsRepository {
     lat: row.lat,
     lng: row.lng,
     createdAt: row.createdAt,
+    folderId: row.folderId,
     name: row.name,
     note: row.note,
     address: row.address,

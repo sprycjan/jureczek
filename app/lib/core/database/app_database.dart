@@ -1,13 +1,16 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../features/folders/data/folders_table.dart';
+import '../../features/folders/domain/trip_folder.dart';
 import '../../features/map/data/pins_table.dart';
 
 part 'app_database.g.dart';
 
 /// Lokalna baza aplikacji (SQLite przez drift) – ADR-005.
-@DriftDatabase(tables: [Pins])
+@DriftDatabase(tables: [Pins, Folders])
 class AppDatabase extends _$AppDatabase {
   /// Do testów, np. `AppDatabase(NativeDatabase.memory())`.
   AppDatabase(super.e);
@@ -15,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'jureczek'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -27,9 +30,44 @@ class AppDatabase extends _$AppDatabase {
           await m.deleteTable(table.actualTableName);
         }
         await m.createAll();
+        return;
+      }
+      if (from < 5) {
+        await _addFolders(m);
       }
     },
   );
+
+  /// v10: tabela folderów i obowiązkowe `folder_id` w pinezkach. Istniejące
+  /// pinezki trafiają do folderu „Pinezki”, tworzonego tylko wtedy, gdy jakieś są.
+  Future<void> _addFolders(Migrator m) async {
+    await m.createTable(folders);
+    final count = await customSelect(
+      'SELECT COUNT(*) AS c FROM pins',
+    ).map((row) => row.read<int>('c')).getSingle();
+    var folderId = '';
+    if (count > 0) {
+      folderId = const Uuid().v4();
+      final now = DateTime.now();
+      await into(folders).insert(
+        FoldersCompanion.insert(
+          id: folderId,
+          name: TripFolder.defaultName,
+          icon: FolderIcon.camper.key,
+          color: FolderColor.emerald.key,
+          createdAt: now,
+          updatedAtMs: now.millisecondsSinceEpoch,
+        ),
+      );
+    }
+    await m.alterTable(
+      TableMigration(
+        pins,
+        newColumns: [pins.folderId],
+        columnTransformer: {pins.folderId: Constant(folderId)},
+      ),
+    );
+  }
 }
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {

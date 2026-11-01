@@ -23,10 +23,7 @@ const mapPalette = <String, Object>{
 /// Nakłada [mapPalette] na Standard; błąd nie psuje mapy, zostaje domyślny wygląd.
 Future<void> applyMapPalette(MapboxMap map) async {
   try {
-    await map.setStyleImportConfigProperties(
-      _standardImportId,
-      mapPalette,
-    );
+    await map.setStyleImportConfigProperties(_standardImportId, mapPalette);
   } catch (e) {
     debugPrint('Paleta mapy nie została nałożona: $e');
   }

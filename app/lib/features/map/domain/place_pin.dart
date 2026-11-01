@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'pin_category.dart';
 
 /// Miejsce zaznaczone na mapie: pozycja, data dodania, nazwa, notatka,
-/// adres i link źródłowy (v5), typ pinezki (v9).
+/// adres i link źródłowy (v5), typ pinezki (v9), folder (v10).
 @immutable
 class PlacePin {
   const PlacePin({
@@ -11,6 +11,7 @@ class PlacePin {
     required this.lat,
     required this.lng,
     required this.createdAt,
+    required this.folderId,
     this.name,
     this.note,
     this.address,
@@ -22,6 +23,9 @@ class PlacePin {
   final double lat;
   final double lng;
   final DateTime createdAt;
+
+  /// Folder pinezki (v10) – każda pinezka należy do dokładnie jednego.
+  final String folderId;
 
   /// Opcjonalne; `null` oznacza brak (nigdy pusty tekst).
   final String? name;

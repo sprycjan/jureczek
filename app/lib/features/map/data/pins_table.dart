@@ -19,6 +19,9 @@ class Pins extends Table {
   /// Dodane w schemacie 4 (v9): klucz [PinCategory].
   TextColumn get category => text().withDefault(const Constant('standard'))();
 
+  /// Dodane w schemacie 5 (v10): folder, do którego należy pinezka (obowiązkowy).
+  TextColumn get folderId => text()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

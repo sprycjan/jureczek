@@ -195,4 +195,24 @@ final ThemeData appTheme = ThemeData(
   progressIndicatorTheme: const ProgressIndicatorThemeData(
     color: Nocturnal.primary,
   ),
+  // Zaznaczony chip jak wybrany typ pinezki: ciemne tło z zieloną obwódką.
+  chipTheme: ChipThemeData(
+    backgroundColor: Nocturnal.surfaceContainerLow,
+    selectedColor: Nocturnal.surfaceContainerHighest,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
+    side: WidgetStateBorderSide.resolveWith(
+      (states) => states.contains(WidgetState.selected)
+          ? const BorderSide(color: Nocturnal.primary, width: 1.5)
+          : const BorderSide(color: Nocturnal.outlineVariant),
+    ),
+    labelStyle: WidgetStateTextStyle.resolveWith(
+      (states) => _textTheme.labelLarge!.copyWith(
+        color: states.contains(WidgetState.selected)
+            ? Nocturnal.primary
+            : Nocturnal.onSurface,
+      ),
+    ),
+  ),
 );

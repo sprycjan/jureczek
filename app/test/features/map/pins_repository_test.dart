@@ -15,8 +15,13 @@ void main() {
   });
   tearDown(() => db.close());
 
-  PlacePin pin(String id, DateTime createdAt) =>
-      PlacePin(id: id, lat: 50.06, lng: 19.94, createdAt: createdAt);
+  PlacePin pin(String id, DateTime createdAt) => PlacePin(
+    folderId: 'f',
+    id: id,
+    lat: 50.06,
+    lng: 19.94,
+    createdAt: createdAt,
+  );
 
   test('na starcie baza jest pusta', () async {
     expect(await repository.watchAll().first, isEmpty);
@@ -95,6 +100,7 @@ void main() {
   test('insert zapisuje nazwę i notatkę', () async {
     await repository.insert(
       PlacePin(
+        folderId: 'f',
         id: 'a',
         lat: 50.05,
         lng: 19.93,
