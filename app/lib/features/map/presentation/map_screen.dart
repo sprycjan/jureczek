@@ -302,6 +302,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pins = _pins;
     final wantedIds = {for (final pin in pins) pin.id};
 
+    var changed = false;
     final stale = _annotationsByPinId.keys
         .where((id) => !wantedIds.contains(id))
         .toList();
@@ -310,9 +311,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _pinIdByAnnotationId.remove(annotation.id);
       _lookByPinId.remove(id);
       await manager.delete(annotation);
+      changed = true;
     }
 
-    var lookChanged = false;
     for (final pin in pins) {
       final look = (pin.category, pin.id == _selectedPinId);
       final existing = _annotationsByPinId[pin.id];
@@ -323,7 +324,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ..iconImage = _lookImageId(look);
         await manager.update(existing);
         _lookByPinId[pin.id] = look;
-        lookChanged = true;
+        changed = true;
         continue;
       }
       final annotation = await manager.create(
@@ -339,13 +340,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _annotationsByPinId[pin.id] = annotation;
       _pinIdByAnnotationId[annotation.id] = pin.id;
       _lookByPinId[pin.id] = look;
+      changed = true;
     }
-    if (lookChanged) await _repaintMap();
+    if (changed) await _repaintMap();
   }
 
   /// Mapa jako TextureView (TLHC) pokazuje klatkę o jedną „spóźnioną”:
-  /// po zmianie wyglądu pinezki Mapbox rysuje jedną klatkę na żądanie,
-  /// a na ekranie zostaje poprzednia – dopóki mapy się nie poruszy.
+  /// po zmianie pinezek (wygląd, widoczność, dodanie, usunięcie) Mapbox
+  /// rysuje jedną klatkę na żądanie, a na ekranie zostaje
+  /// poprzednia – dopóki mapy się nie poruszy.
   /// Dodatkowe przerysowanie wypycha właściwą klatkę na ekran.
   Future<void> _repaintMap() async {
     final map = _map;
@@ -364,6 +367,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           if (annotation.iconOpacity == opacity) return;
           annotation.iconOpacity = opacity;
           await manager.update(annotation);
+          await _repaintMap();
         })
         .catchError((Object e) {
           debugPrint('Zmiana widoczności pinezki nie powiodła się: $e');

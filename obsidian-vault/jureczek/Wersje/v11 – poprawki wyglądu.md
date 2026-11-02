@@ -67,6 +67,10 @@ Pierwsza z trzech wersji po uwagach użytkownika z [[Backlog]] („Moje uwagi”
 - [x] `flutter analyze`: 0 issues, `flutter test`: 153/153
 - [x] P30 przez adb: dwie pinezki (gastronomia, zabytek). Przy otwartym arkuszu pinezka jest zaznaczona (większa, biała obwódka), po zamknięciu wraca do zwykłej.
 - [ ] Użytkownik: zaznaczanie pinezek
+- **Nowa pinezka spadała i znikała, a pojawiała się dopiero po przesunięciu mapy** (użytkownik, 2026-11-02). To ta sama spóźniona klatka: po wylądowaniu `iconOpacity` 0 → 1 nie trafiało na ekran, a nakładka spadania znikała. Poprawka: `_setPinOpacity` też woła `_repaintMap()`. `_syncPins` przerysowuje mapę po każdej zmianie: dodaniu, usunięciu i zmianie wyglądu.
+- [x] `flutter analyze`: 0 issues, `flutter test`: 153/153
+- [x] P30 przez adb: nowa pinezka po wylądowaniu zostaje widoczna bez ruszania mapy, a usunięta pinezka znika od razu
+- [ ] Użytkownik: stawianie nowej pinezki
 
 ## Otwarte
 > Po v11 numeracja przesunięta: v12 = [[v12 – własny styl mapy]], przełącznik stylów → v13, kolor pinezki → v14.

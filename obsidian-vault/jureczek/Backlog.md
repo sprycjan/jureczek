@@ -61,6 +61,7 @@ Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – w
 - [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v14
 - [ ] Mruganie mapy i płynność przejścia do mapy (v11: zasłona + TLHC/TextureView) – czeka na potwierdzenie użytkownika
 - [x] Zaznaczona pinezka pokazywała się z opóźnieniem o krok (klatka TLHC) – `triggerRepaint` po zmianie wyglądu, [[v11 – poprawki wyglądu]]
+- [x] Nowa pinezka znikała po wylądowaniu do czasu ruszenia mapy (ta sama klatka TLHC)
 - [x] Więcej ikon kategorii i kolorów akcentów folderów (v11: 15 ikon, 9 kolorów)
 - [x] Obrazek przy dodawaniu folderu usunięty (v11), później dodamy coś innego
 - [ ] Coś zamiast obrazka w formularzu folderu (pomysł użytkownika na później)
