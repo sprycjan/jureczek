@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 import 'package:jureczek/features/map/presentation/pin_details_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
@@ -14,6 +15,7 @@ void main() {
     String? address,
     String? sourceUrl,
     PinCategory category = PinCategory.standard,
+    PinColor? color,
   }) => PlacePin(
     folderId: 'f',
     id: 'a',
@@ -25,6 +27,7 @@ void main() {
     address: address,
     sourceUrl: sourceUrl,
     category: category,
+    color: color,
   );
 
   Future<void> pumpSheet(
@@ -34,6 +37,11 @@ void main() {
     SavePinDetails? onSave,
     String? notice,
   }) {
+    // Wysoki ekran (jak P30, 360×780 dp, z zapasem) – arkusz z wyborem koloru (v14)
+    // nie mieści się w domyślnym 800×600 px.
+    tester.view.physicalSize = const Size(1080, 2700);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
     return tester.pumpWidget(
       MaterialApp(
         locale: const Locale('pl'),
@@ -217,5 +225,54 @@ void main() {
 
     expect(saved?.category, PinCategory.gastronomy);
     expect(find.text('Gastronomia'), findsOneWidget);
+  });
+
+  testWidgets('w edycji pokazuje zapisany kolor i przywraca domyślny', (
+    tester,
+  ) async {
+    PinDetailsInput? saved;
+    await pumpSheet(
+      tester,
+      pin: pin(category: PinCategory.nature, color: PinColor.coral),
+      onSave: (details) async {
+        saved = details;
+        return true;
+      },
+    );
+
+    await tester.tap(find.text('Edytuj'));
+    await tester.pumpAndSettle();
+    expect(find.text('Koralowy'), findsOneWidget);
+
+    await tester.tap(find.text('Domyślny'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Zapisz'));
+    await tester.tap(find.text('Zapisz'));
+    await tester.pumpAndSettle();
+
+    expect(saved?.category, PinCategory.nature);
+    expect(saved?.color, isNull);
+  });
+
+  testWidgets('w edycji zmienia kolor', (tester) async {
+    PinDetailsInput? saved;
+    await pumpSheet(
+      tester,
+      pin: pin(),
+      onSave: (details) async {
+        saved = details;
+        return true;
+      },
+    );
+
+    await tester.tap(find.text('Edytuj'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('pin-color-sky')));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Zapisz'));
+    await tester.tap(find.text('Zapisz'));
+    await tester.pumpAndSettle();
+
+    expect(saved?.color, PinColor.sky);
   });
 }

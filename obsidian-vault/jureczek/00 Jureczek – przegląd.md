@@ -16,6 +16,8 @@ tags: [jureczek, przeglad]
 - Foldery pinezek (każda pinezka w jednym folderze, ekran startowy z listą) – [[ADR-007 Foldery pinezek]]
 - Styl: ciemny „Nocturnal Expedition”, czcionki Epilogue + Space Grotesk – [[ADR-006 Styl Nocturnal Expedition]]
 - Mapa: własny klasyczny styl JSON w assetach (Streets v8) – [[ADR-008 Własny klasyczny styl mapy]]
+- Lokalizacja: `geolocator` + kropka położenia Mapbox – [[ADR-009 Lokalizacja przez geolocator]]
+- Kolor pinezki: warstwy z `render_pins.py` barwione w aplikacji – [[ADR-010 Kolor pinezki z warstw]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -33,7 +35,7 @@ tags: [jureczek, przeglad]
 | v11 | Poprawki wyglądu: „Cześć!”, pejzaż z łagodnym przejściem, podgląd folderu bez obrazka, 15 ikon i 9 kolorów folderów, zaokrąglona wyszukiwarka, mapa bez mrugania | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v11 – poprawki wyglądu]] |
 | v12 | Własny ciemny styl mapy (VanVenture) z assetu zamiast Standardu z paletą; POI z warstwy `poi-label` | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v12 – własny styl mapy]] |
 | v13 | Przełącznik stylów mapy: Domyślny / Teren / 3D; przyciski + / − | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v13 – przełącznik stylów mapy]] |
-| v14 | Własny kolor pinezki (24 opcje, schemat 6) | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
+| v14 | Moja lokalizacja, ikony POI, mniej etykiet miejscowości, snackbary znikają z mapą, własny kolor pinezki (24 kolory, schemat 6) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v14 – lokalizacja, ikony POI i kolor pinezki]] |
 | v15+ | Patrz [[Backlog]] | — |
 
 ## Inne

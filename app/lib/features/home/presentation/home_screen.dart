@@ -65,8 +65,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _openMap(String? folderId) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            MapScreen(accessToken: widget.accessToken, folderId: folderId),
+        // Własny ScaffoldMessenger: snackbary mapy („Dodano pinezkę”, „Cofnij”)
+        // znikają razem z nią, a nie zostają na ekranie startowym.
+        builder: (_) => ScaffoldMessenger(
+          child: MapScreen(accessToken: widget.accessToken, folderId: folderId),
+        ),
       ),
     );
   }

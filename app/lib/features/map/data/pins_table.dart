@@ -22,6 +22,9 @@ class Pins extends Table {
   /// Dodane w schemacie 5 (v10): folder, do którego należy pinezka (obowiązkowy).
   TextColumn get folderId => text()();
 
+  /// Dodane w schemacie 6 (v14): klucz [PinColor]; `null` – kolor kategorii.
+  TextColumn get color => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

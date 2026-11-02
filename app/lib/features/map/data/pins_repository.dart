@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
 /// Zapis i odczyt pinezek z lokalnej bazy.
@@ -40,6 +41,7 @@ class PinsRepository {
               address: Value(pin.address),
               sourceUrl: Value(pin.sourceUrl),
               category: Value(pin.category.key),
+              color: Value(pin.color?.key),
               folderId: pin.folderId,
             ),
           );
@@ -48,6 +50,8 @@ class PinsRepository {
   }
 
   /// Zapisuje dane pinezki; [category] i [folderId] tylko gdy podane.
+  /// Kolor idzie razem z typem (wygląd pinezki): przy podanym [category]
+  /// zapisywany jest też [color], a `null` przywraca kolor kategorii.
   /// Folder przed i po zmianie idzie na górę listy, docelowy najwyżej.
   Future<void> updateDetails(
     String id, {
@@ -55,6 +59,7 @@ class PinsRepository {
     String? note,
     String? address,
     PinCategory? category,
+    PinColor? color,
     String? folderId,
   }) {
     return _db.transaction(() async {
@@ -68,6 +73,7 @@ class PinsRepository {
           category: category == null
               ? const Value.absent()
               : Value(category.key),
+          color: category == null ? const Value.absent() : Value(color?.key),
           folderId: folderId == null ? const Value.absent() : Value(folderId),
         ),
       );
@@ -100,6 +106,7 @@ class PinsRepository {
     address: row.address,
     sourceUrl: row.sourceUrl,
     category: PinCategory.fromKey(row.category),
+    color: PinColor.fromKey(row.color),
   );
 }
 

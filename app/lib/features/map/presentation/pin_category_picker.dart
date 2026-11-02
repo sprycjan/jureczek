@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
+import 'pin_image.dart';
 
 extension PinCategoryLabel on PinCategory {
   String label(AppLocalizations l10n) => switch (this) {
@@ -16,34 +18,20 @@ extension PinCategoryLabel on PinCategory {
   };
 }
 
-/// Obrazek pinezki danego typu w rozmiarze z mapy (36 dp szerokości korpusu).
-class PinCategoryImage extends StatelessWidget {
-  const PinCategoryImage(this.category, {super.key, this.height = 32});
-
-  final PinCategory category;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.asset(
-      category.asset(),
-      height: height,
-      fit: BoxFit.contain,
-      excludeFromSemantics: true,
-    );
-  }
-}
-
 /// Wybór typu pinezki: rząd 8 pinezek, wybrana podświetlona; nazwa wybranej pod spodem.
 class PinCategoryPicker extends StatelessWidget {
   const PinCategoryPicker({
     super.key,
     required this.value,
     required this.onChanged,
+    this.color,
   });
 
   final PinCategory value;
   final ValueChanged<PinCategory> onChanged;
+
+  /// Wybrany własny kolor – pinezki w rzędzie pokazują się w nim (v14).
+  final PinColor? color;
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +50,15 @@ class PinCategoryPicker extends StatelessWidget {
                 color: colors.onSurfaceVariant,
               ),
             ),
-            const Spacer(),
-            Text(
-              value.label(l10n),
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colors.primary,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                value.label(l10n),
+                textAlign: TextAlign.end,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: colors.primary,
+                ),
               ),
             ),
           ],
@@ -109,7 +101,7 @@ class PinCategoryPicker extends StatelessWidget {
                             ),
                           ),
                           alignment: Alignment.center,
-                          child: PinCategoryImage(category),
+                          child: PinImage(category, color: color),
                         ),
                       ),
                     ),

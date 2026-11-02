@@ -214,6 +214,168 @@ abstract class AppLocalizations {
   /// **'Szukaj miejsca'**
   String get searchHint;
 
+  /// No description provided for @pinColorLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kolor'**
+  String get pinColorLabel;
+
+  /// No description provided for @pinColorDefault.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kolor typu'**
+  String get pinColorDefault;
+
+  /// No description provided for @pinColorReset.
+  ///
+  /// In pl, this message translates to:
+  /// **'Domyślny'**
+  String get pinColorReset;
+
+  /// No description provided for @pinColorRed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czerwony'**
+  String get pinColorRed;
+
+  /// No description provided for @pinColorRaspberry.
+  ///
+  /// In pl, this message translates to:
+  /// **'Malinowy'**
+  String get pinColorRaspberry;
+
+  /// No description provided for @pinColorRose.
+  ///
+  /// In pl, this message translates to:
+  /// **'Różowy'**
+  String get pinColorRose;
+
+  /// No description provided for @pinColorCoral.
+  ///
+  /// In pl, this message translates to:
+  /// **'Koralowy'**
+  String get pinColorCoral;
+
+  /// No description provided for @pinColorOrange.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pomarańczowy'**
+  String get pinColorOrange;
+
+  /// No description provided for @pinColorAmber.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bursztynowy'**
+  String get pinColorAmber;
+
+  /// No description provided for @pinColorGold.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złoty'**
+  String get pinColorGold;
+
+  /// No description provided for @pinColorOlive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oliwkowy'**
+  String get pinColorOlive;
+
+  /// No description provided for @pinColorLime.
+  ///
+  /// In pl, this message translates to:
+  /// **'Limonkowy'**
+  String get pinColorLime;
+
+  /// No description provided for @pinColorGreen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zielony'**
+  String get pinColorGreen;
+
+  /// No description provided for @pinColorMint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miętowy'**
+  String get pinColorMint;
+
+  /// No description provided for @pinColorTeal.
+  ///
+  /// In pl, this message translates to:
+  /// **'Morski'**
+  String get pinColorTeal;
+
+  /// No description provided for @pinColorCyan.
+  ///
+  /// In pl, this message translates to:
+  /// **'Turkusowy'**
+  String get pinColorCyan;
+
+  /// No description provided for @pinColorSky.
+  ///
+  /// In pl, this message translates to:
+  /// **'Błękitny'**
+  String get pinColorSky;
+
+  /// No description provided for @pinColorBlue.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niebieski'**
+  String get pinColorBlue;
+
+  /// No description provided for @pinColorNavy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Granatowy'**
+  String get pinColorNavy;
+
+  /// No description provided for @pinColorViolet.
+  ///
+  /// In pl, this message translates to:
+  /// **'Fioletowy'**
+  String get pinColorViolet;
+
+  /// No description provided for @pinColorPurple.
+  ///
+  /// In pl, this message translates to:
+  /// **'Purpurowy'**
+  String get pinColorPurple;
+
+  /// No description provided for @pinColorOrchid.
+  ///
+  /// In pl, this message translates to:
+  /// **'Liliowy'**
+  String get pinColorOrchid;
+
+  /// No description provided for @pinColorBrown.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brązowy'**
+  String get pinColorBrown;
+
+  /// No description provided for @pinColorSand.
+  ///
+  /// In pl, this message translates to:
+  /// **'Piaskowy'**
+  String get pinColorSand;
+
+  /// No description provided for @pinColorSlate.
+  ///
+  /// In pl, this message translates to:
+  /// **'Łupkowy'**
+  String get pinColorSlate;
+
+  /// No description provided for @pinColorGraphite.
+  ///
+  /// In pl, this message translates to:
+  /// **'Grafitowy'**
+  String get pinColorGraphite;
+
+  /// No description provided for @pinColorBlack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czarny'**
+  String get pinColorBlack;
+
   /// No description provided for @mapZoomIn.
   ///
   /// In pl, this message translates to:
@@ -225,6 +387,48 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Oddal'**
   String get mapZoomOut;
+
+  /// No description provided for @mapMyLocation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Moja lokalizacja'**
+  String get mapMyLocation;
+
+  /// No description provided for @locationServiceOff.
+  ///
+  /// In pl, this message translates to:
+  /// **'Lokalizacja w telefonie jest wyłączona'**
+  String get locationServiceOff;
+
+  /// No description provided for @locationTurnOn.
+  ///
+  /// In pl, this message translates to:
+  /// **'Włącz'**
+  String get locationTurnOn;
+
+  /// No description provided for @locationDenied.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bez zgody na lokalizację nie pokażę, gdzie jesteś'**
+  String get locationDenied;
+
+  /// No description provided for @locationDeniedForever.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostęp do lokalizacji jest zablokowany – włącz go w ustawieniach aplikacji'**
+  String get locationDeniedForever;
+
+  /// No description provided for @locationOpenSettings.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ustawienia'**
+  String get locationOpenSettings;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się ustalić położenia'**
+  String get locationUnavailable;
 
   /// No description provided for @mapStylesOpen.
   ///

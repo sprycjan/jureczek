@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Stuknięcie przy postawieniu pinezki, niezależne od wibracji dotykowych systemu. -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- „Moja lokalizacja” na mapie (v14); system pyta dopiero po tapnięciu przycisku. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:label="Jureczek"
         android:name="${applicationName}"

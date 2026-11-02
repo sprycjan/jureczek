@@ -158,3 +158,10 @@ Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], 
 - Standard: `setStyleImportConfigProperties('basemap', {'theme': 'faded', 'show3dObjects': true})` po wczytaniu. Motywy: `default`, `faded`, `monochrome`, `custom`.
 - `standard-satellite`: kafelki `mapbox.satellite` dla naszego tokenu zwracają 429 (`x-rate-limit-limit: -1`), reszta API działa.
 - Test endpointów curlem: bez nagłówka `User-Agent` jak SDK nawet vector tiles dają 429 – używać `-A "MapboxCommon/24.33.0 Android"`.
+
+## Kropka położenia i ikony POI (v14)
+- Kropka: `map.location.updateSettings(LocationComponentSettings(enabled: true, pulsingEnabled: true, showAccuracyRing: true))`. Zgody SDK nie prosi – robi to `geolocator` ([[ADR-009 Lokalizacja przez geolocator]]). Bez zgody kropka się nie pokazuje.
+- Styl klasyczny z ikonami: `"sprite": "mapbox://sprites/mapbox/dark-v11"` (119 ikon `maki`, szare, nie SDF – `icon-color` nie działa). `icon-image: ["coalesce", ["image", ["get", "maki"]], ["image", "marker"]]`.
+- Inne sprite'y: `streets-v12` / `outdoors-v12` – kolorowe kółka z ikonami (ponad 400 obrazków).
+- `symbolrank` w `place_label` (mniejszy = ważniejszy) da się sprawdzić Tilequery API: `/v4/mapbox.mapbox-streets-v8/tilequery/<lng>,<lat>.json?layers=place_label&radius=20000`. W filtrze jedno `["step", ["zoom"], …]` zwracające warunki logiczne, może być wewnątrz `all`.
+

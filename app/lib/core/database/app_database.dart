@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'jureczek'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -33,7 +33,11 @@ class AppDatabase extends _$AppDatabase {
         return;
       }
       if (from < 5) {
+        // Przebudowa tabeli w _addFolders tworzy ją od razu w bieżącym
+        // schemacie, razem z kolumną koloru (6).
         await _addFolders(m);
+      } else if (from < 6) {
+        await m.addColumn(pins, pins.color);
       }
     },
   );
@@ -63,8 +67,11 @@ class AppDatabase extends _$AppDatabase {
     await m.alterTable(
       TableMigration(
         pins,
-        newColumns: [pins.folderId],
-        columnTransformer: {pins.folderId: Constant(folderId)},
+        newColumns: [pins.folderId, pins.color],
+        columnTransformer: {
+          pins.folderId: Constant(folderId),
+          pins.color: const Constant<String>(null),
+        },
       ),
     );
   }

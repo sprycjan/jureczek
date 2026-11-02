@@ -4,11 +4,13 @@ import '../../folders/presentation/folder_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_suggestion.dart';
 import 'pin_category_picker.dart';
+import 'pin_color_picker.dart';
 import 'pin_form_fields.dart';
 
-/// Arkusz „Nowa pinezka”: typ pinezki i dane z long-tapu, wyniku lub udostępnienia
+/// Arkusz „Nowa pinezka”: typ i kolor pinezki oraz dane z long-tapu, wyniku lub udostępnienia
 /// do poprawienia przed zapisem.
 class NewPinSheet extends StatefulWidget {
   const NewPinSheet({
@@ -33,6 +35,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
   late final _address = TextEditingController(text: widget.place.address);
   final _note = TextEditingController();
   var _category = PinCategory.fallback;
+  PinColor? _color;
   String? _folderId;
   bool _saving = false;
   bool _saveFailed = false;
@@ -52,6 +55,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
       address: _address.text,
       note: _note.text,
       category: _category,
+      color: _color,
       folderId: _folderId,
     ));
     if (!mounted || ok) return;
@@ -82,7 +86,13 @@ class _NewPinSheetState extends State<NewPinSheet> {
               const SizedBox(height: 12),
               PinCategoryPicker(
                 value: _category,
+                color: _color,
                 onChanged: (category) => setState(() => _category = category),
+              ),
+              const SizedBox(height: 12),
+              PinColorPicker(
+                value: _color,
+                onChanged: (color) => setState(() => _color = color),
               ),
               const SizedBox(height: 16),
               if (widget.chooseFolder) ...[

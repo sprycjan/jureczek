@@ -11,6 +11,7 @@
     }
   },
   "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf",
+  "sprite": "mapbox://sprites/mapbox/dark-v11",
   "layers": [
     {
       "id": "background",
@@ -177,10 +178,14 @@
       "minzoom": 12,
       "filter": ["<=", ["get", "filterrank"], ["step", ["zoom"], 1, 14, 2, 16, 3, 17, 5]],
       "layout": {
+        "icon-image": ["coalesce", ["image", ["get", "maki"]], ["image", "marker"]],
+        "icon-size": 0.9,
         "text-field": ["get", "name"],
         "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
         "text-size": 10.5,
-        "text-max-width": 8
+        "text-max-width": 8,
+        "text-anchor": "top",
+        "text-offset": [0, 0.9]
       },
       "paint": { "text-color": "#a5c3b1", "text-halo-color": "#315041", "text-halo-width": 1.2 }
     },
@@ -201,8 +206,19 @@
       "type": "symbol",
       "source": "composite",
       "source-layer": "place_label",
-      "filter": ["match", ["get", "type"], ["suburb", "town", "village"], true, false],
+      "filter": [
+        "all",
+        ["match", ["get", "type"], ["suburb", "town", "village"], true, false],
+        [
+          "step", ["zoom"],
+          ["all", ["!=", ["get", "type"], "suburb"], ["<=", ["get", "symbolrank"], 12]],
+          7, ["all", ["!=", ["get", "type"], "suburb"], ["<=", ["get", "symbolrank"], 14]],
+          9, ["all", ["!=", ["get", "type"], "suburb"], ["<=", ["get", "symbolrank"], 16]],
+          11, true
+        ]
+      ],
       "layout": {
+        "symbol-sort-key": ["get", "symbolrank"],
         "text-field": ["get", "name"],
         "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
         "text-size": 11
@@ -214,8 +230,13 @@
       "type": "symbol",
       "source": "composite",
       "source-layer": "place_label",
-      "filter": ["==", ["get", "type"], "city"],
+      "filter": [
+        "all",
+        ["==", ["get", "type"], "city"],
+        ["<=", ["get", "symbolrank"], ["step", ["zoom"], 9, 5, 11, 7, 18]]
+      ],
       "layout": {
+        "symbol-sort-key": ["get", "symbolrank"],
         "text-field": ["get", "name"],
         "text-font": ["DIN Pro Bold", "Arial Unicode MS Bold"],
         "text-size": ["interpolate", ["linear"], ["zoom"], 4, 11, 10, 14, 14, 17]

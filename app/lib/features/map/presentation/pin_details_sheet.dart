@@ -5,11 +5,14 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../folders/presentation/folder_picker.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 import 'pin_category_picker.dart';
+import 'pin_color_picker.dart';
+import 'pin_image.dart';
 import 'pin_form_fields.dart';
 
-/// Dolny arkusz po tapnięciu w pinezkę: podgląd, edycja typu, nazwy, adresu i notatki, usuwanie.
+/// Dolny arkusz po tapnięciu w pinezkę: podgląd, edycja typu, koloru, nazwy, adresu i notatki, usuwanie.
 class PinDetailsSheet extends StatefulWidget {
   const PinDetailsSheet({
     super.key,
@@ -40,6 +43,8 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late String? _address = widget.pin.address;
   late PinCategory _category = widget.pin.category;
   late PinCategory _editedCategory = _category;
+  late PinColor? _color = widget.pin.color;
+  late PinColor? _editedColor = _color;
   late String _folderId = widget.pin.folderId;
   late String _editedFolderId = _folderId;
   bool _editing = false;
@@ -63,6 +68,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     _noteController.text = _note ?? '';
     _addressController.text = _address ?? '';
     _editedCategory = _category;
+    _editedColor = _color;
     _editedFolderId = _folderId;
     setState(() {
       _editing = true;
@@ -77,6 +83,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       address: _addressController.text,
       note: _noteController.text,
       category: _editedCategory,
+      color: _editedColor,
       folderId: widget.canMoveFolder ? _editedFolderId : null,
     ));
     if (!mounted) return;
@@ -88,6 +95,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         _note = _nonEmpty(_noteController.text);
         _address = _nonEmpty(_addressController.text);
         _category = _editedCategory;
+        _color = _editedColor;
         _folderId = _editedFolderId;
         _editing = false;
       }
@@ -146,7 +154,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         ],
         Row(
           children: [
-            PinCategoryImage(_category, height: 20),
+            PinImage(_category, color: _color, height: 20),
             const SizedBox(width: 6),
             Text(
               _category.label(l10n),
@@ -222,7 +230,13 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         const SizedBox(height: 12),
         PinCategoryPicker(
           value: _editedCategory,
+          color: _editedColor,
           onChanged: (category) => setState(() => _editedCategory = category),
+        ),
+        const SizedBox(height: 12),
+        PinColorPicker(
+          value: _editedColor,
+          onChanged: (color) => setState(() => _editedColor = color),
         ),
         const SizedBox(height: 16),
         if (widget.canMoveFolder) ...[

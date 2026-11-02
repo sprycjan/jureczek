@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_suggestion.dart';
 import 'package:jureczek/features/map/presentation/new_pin_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
@@ -10,6 +11,11 @@ import 'package:jureczek/l10n/app_localizations.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, Widget child) {
+    // Wysoki ekran (jak P30, 360×780 dp, z zapasem) – arkusz z wyborem koloru (v14)
+    // nie mieści się w domyślnym 800×600 px.
+    tester.view.physicalSize = const Size(1080, 2700);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
     return tester.pumpWidget(
       MaterialApp(
         locale: const Locale('pl'),
@@ -90,6 +96,48 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(saved?.category, PinCategory.practical);
+    });
+
+    testWidgets('kolor: domyślnie kolor typu, wybór i powrót do domyślnego', (
+      tester,
+    ) async {
+      PinDetailsInput? saved;
+      await pump(
+        tester,
+        NewPinSheet(
+          place: mall,
+          onSave: (details) async {
+            saved = details;
+            return true;
+          },
+        ),
+      );
+
+      expect(find.text('Kolor typu'), findsOneWidget);
+      expect(find.text('Domyślny'), findsNothing);
+      expect(find.byKey(const ValueKey('pin-color-black')), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is InkWell && '${w.key}'.contains('pin-color-'),
+        ),
+        findsNWidgets(24),
+      );
+
+      await tester.tap(find.byKey(const ValueKey('pin-color-gold')));
+      await tester.pump();
+      expect(find.text('Złoty'), findsOneWidget);
+
+      await tester.tap(find.text('Domyślny'));
+      await tester.pump();
+      expect(find.text('Kolor typu'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('pin-color-navy')));
+      await tester.pump();
+      await tester.ensureVisible(find.text('Zapisz'));
+      await tester.tap(find.text('Zapisz'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.color, PinColor.navy);
     });
 
     testWidgets('nieudany zapis pokazuje błąd', (tester) async {

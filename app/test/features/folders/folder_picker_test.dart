@@ -84,6 +84,8 @@ void main() {
     );
     expect(chip.selected, isTrue);
 
+    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
+    await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
     expect(saved.single.folderId, isNull);
@@ -100,6 +102,8 @@ void main() {
 
     await tester.tap(find.text('Portugalia'));
     await tester.pump();
+    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
+    await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
 
@@ -120,6 +124,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bałkany'), findsOneWidget);
+    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
+    await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
 

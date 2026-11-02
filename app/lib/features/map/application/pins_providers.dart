@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../data/pins_repository.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
 /// Pinezki z bazy – jedyne źródło prawdy dla mapy.
@@ -27,6 +28,7 @@ class PinsController {
     String? address,
     String? sourceUrl,
     PinCategory category = PinCategory.fallback,
+    PinColor? color,
   }) async {
     final id = _uuid.v4();
     await _repository.insert(
@@ -41,6 +43,7 @@ class PinsController {
         address: _normalize(address),
         sourceUrl: _normalize(sourceUrl),
         category: category,
+        color: color,
       ),
     );
     return id;
@@ -56,7 +59,7 @@ class PinsController {
 
   Future<void> restore(PlacePin pin) => _repository.insert(pin);
 
-  /// Zapisuje nazwę, notatkę, adres i (gdy podany) typ; białe znaki na brzegach
+  /// Zapisuje nazwę, notatkę, adres i (gdy podany) typ razem z kolorem; białe znaki na brzegach
   /// są obcinane, a pusty tekst to `null`.
   Future<void> updateDetails(
     String id, {
@@ -64,6 +67,7 @@ class PinsController {
     String? note,
     String? address,
     PinCategory? category,
+    PinColor? color,
     String? folderId,
   }) {
     return _repository.updateDetails(
@@ -72,6 +76,7 @@ class PinsController {
       note: _normalize(note),
       address: _normalize(address),
       category: category,
+      color: color,
       folderId: folderId,
     );
   }

@@ -72,10 +72,114 @@ class AppLocalizationsPl extends AppLocalizations {
   String get searchHint => 'Szukaj miejsca';
 
   @override
+  String get pinColorLabel => 'Kolor';
+
+  @override
+  String get pinColorDefault => 'Kolor typu';
+
+  @override
+  String get pinColorReset => 'Domyślny';
+
+  @override
+  String get pinColorRed => 'Czerwony';
+
+  @override
+  String get pinColorRaspberry => 'Malinowy';
+
+  @override
+  String get pinColorRose => 'Różowy';
+
+  @override
+  String get pinColorCoral => 'Koralowy';
+
+  @override
+  String get pinColorOrange => 'Pomarańczowy';
+
+  @override
+  String get pinColorAmber => 'Bursztynowy';
+
+  @override
+  String get pinColorGold => 'Złoty';
+
+  @override
+  String get pinColorOlive => 'Oliwkowy';
+
+  @override
+  String get pinColorLime => 'Limonkowy';
+
+  @override
+  String get pinColorGreen => 'Zielony';
+
+  @override
+  String get pinColorMint => 'Miętowy';
+
+  @override
+  String get pinColorTeal => 'Morski';
+
+  @override
+  String get pinColorCyan => 'Turkusowy';
+
+  @override
+  String get pinColorSky => 'Błękitny';
+
+  @override
+  String get pinColorBlue => 'Niebieski';
+
+  @override
+  String get pinColorNavy => 'Granatowy';
+
+  @override
+  String get pinColorViolet => 'Fioletowy';
+
+  @override
+  String get pinColorPurple => 'Purpurowy';
+
+  @override
+  String get pinColorOrchid => 'Liliowy';
+
+  @override
+  String get pinColorBrown => 'Brązowy';
+
+  @override
+  String get pinColorSand => 'Piaskowy';
+
+  @override
+  String get pinColorSlate => 'Łupkowy';
+
+  @override
+  String get pinColorGraphite => 'Grafitowy';
+
+  @override
+  String get pinColorBlack => 'Czarny';
+
+  @override
   String get mapZoomIn => 'Przybliż';
 
   @override
   String get mapZoomOut => 'Oddal';
+
+  @override
+  String get mapMyLocation => 'Moja lokalizacja';
+
+  @override
+  String get locationServiceOff => 'Lokalizacja w telefonie jest wyłączona';
+
+  @override
+  String get locationTurnOn => 'Włącz';
+
+  @override
+  String get locationDenied =>
+      'Bez zgody na lokalizację nie pokażę, gdzie jesteś';
+
+  @override
+  String get locationDeniedForever =>
+      'Dostęp do lokalizacji jest zablokowany – włącz go w ustawieniach aplikacji';
+
+  @override
+  String get locationOpenSettings => 'Ustawienia';
+
+  @override
+  String get locationUnavailable => 'Nie udało się ustalić położenia';
 
   @override
   String get mapStylesOpen => 'Style mapy';

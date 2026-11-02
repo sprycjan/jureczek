@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
 /// Teksty z formularza pinezki, przed obcięciem białych znaków.
@@ -10,6 +11,9 @@ typedef PinDetailsInput = ({
   String address,
   String note,
   PinCategory category,
+
+  /// Własny kolor (v14); `null` – kolor typu.
+  PinColor? color,
 
   /// Wybrany folder; `null` to domyślny „Pinezki” albo „bez zmiany”, gdy
   /// arkusz nie pokazuje wyboru folderu.

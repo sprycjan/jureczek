@@ -16,6 +16,9 @@ tags: [jureczek, srodowisko]
 - ⚠️ APK zbudowany przez `flutter run` na emulator ma tylko `x86_64`. Na telefonie (arm64) taki APK pada przy starcie (`Could not find 'libflutter.so'`). Na telefon zawsze buduj przez `flutter run -d <telefon>`.
 - Gesty: długie przytrzymanie to `input swipe x y x y 1200`, a tapnięcie to `input tap x y`. Tekst: `input text "Bilety%sonline"` (`%s` = spacja, bez polskich znaków).
 - Podgląd bazy (debug build): `adb exec-out run-as pl.mc.jureczek cat app_flutter/jureczek.sqlite > j.sqlite`, potem `sqlite3 j.sqlite`.
+- Zgoda na lokalizację bez klikania: `adb shell pm grant pl.mc.jureczek android.permission.ACCESS_FINE_LOCATION` (i `…COARSE…`). `pm revoke` zabija aplikację.
+- ⚠️ „Wstecz” na ekranie startowym zamyka aplikację – kolejne gesty trafiają w pulpit telefonu. Powrót: `adb shell monkey -p pl.mc.jureczek -c android.intent.category.LAUNCHER 1`.
+- Kopia bazy przed instalacją nowej wersji (pinezki już znikały): polecenie z „Podgląd bazy” do pliku poza repo.
 - Test migracji na urządzeniu: zbuduj lokalnie bazę w starym schemacie (`sqlite3`, `PRAGMA user_version = N`), `adb push` do `/data/local/tmp`, a potem `run-as pl.mc.jureczek cp` do `app_flutter/jureczek.sqlite` przy zatrzymanej aplikacji.
 
 ## ⚠️ Pułapka: Gradle vs Java 25

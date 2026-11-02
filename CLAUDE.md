@@ -27,7 +27,7 @@ After every change, update the vault without asking (use `/vault-update`): versi
 - Look up library docs with Context7 (`ctx7`); training data for Mapbox v3 / Riverpod 3 is unreliable.
 
 ## Gotchas
-- Pin images: PNG 3x in `app/assets/markers/` rendered from `assets/markers/src/*.svg` by `app/tool/render_pins.py` (headless Chrome; tip on the bottom edge). Never hand-edit the PNGs.
+- Pin images: PNG 3x in `app/assets/markers/` rendered from `assets/markers/src/*.svg` by `app/tool/render_pins.py` (headless Chrome; tip on the bottom edge). Never hand-edit the PNGs. The same script writes tint layers to `assets/markers/tint/` (body/overlay/accent), which `renderPinPng` colours for custom pin colours; `pin_image_test` checks they match the PNGs.
 - Mapbox SDK v3, not v2: `viewport: CameraViewportState`; `map.addInteraction(TapInteraction.onMap / LongTapInteraction.onMap)` instead of listeners; `Position(lng, lat)` (lng first); `PointAnnotation` needs PNG bytes.
 - Riverpod 3 pauses providers without listeners. In tests: `container.listen(p, (_, _) {})` → `pumpEventQueue()` → `read(p).requireValue`; `read(p.future)` hangs.
 - The drift DB is the single source of truth (`StreamProvider` over `watchAll()`, writes through controllers). Ids are UUID v4.

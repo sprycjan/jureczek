@@ -8,6 +8,7 @@ import 'package:jureczek/features/folders/application/folders_providers.dart';
 import 'package:jureczek/features/folders/presentation/folder_form_screen.dart';
 import 'package:jureczek/features/home/presentation/home_screen.dart';
 import 'package:jureczek/features/map/application/pins_providers.dart';
+import 'package:jureczek/features/map/presentation/map_screen.dart';
 import 'package:jureczek/l10n/app_localizations.dart';
 
 void main() {
@@ -25,7 +26,7 @@ void main() {
     await db.close();
   });
 
-  Future<void> pumpHome(WidgetTester tester) async {
+  Future<void> pumpHome(WidgetTester tester, {String token = 'pk.test'}) async {
     // Ekran jak P30: 1080×2340 px, 3x.
     tester.view.physicalSize = const Size(1080, 2340);
     tester.view.devicePixelRatio = 3;
@@ -40,7 +41,7 @@ void main() {
             AppLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
           ],
-          home: const HomeScreen(accessToken: 'pk.test'),
+          home: HomeScreen(accessToken: token),
         ),
       ),
     );
@@ -96,5 +97,27 @@ void main() {
       tester.getTopLeft(find.text('Portugalia')).dy,
       lessThan(tester.getTopLeft(find.text('Bałkany')).dy),
     );
+  });
+
+  testWidgets('snackbar z mapy znika po powrocie na ekran startowy', (
+    tester,
+  ) async {
+    // Bez tokenu mapa to sam komunikat – wystarczy, żeby sprawdzić trasę.
+    await pumpHome(tester, token: '');
+    await tester.tap(find.text('Mapa – wszystkie pinezki'));
+    await tester.pumpAndSettle();
+
+    final mapContext = tester.element(find.byType(MissingTokenView));
+    ScaffoldMessenger.of(
+      mapContext,
+    ).showSnackBar(const SnackBar(content: Text('Dodano pinezkę')));
+    await tester.pump();
+    expect(find.text('Dodano pinezkę'), findsOneWidget);
+
+    Navigator.of(mapContext).pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MissingTokenView), findsNothing);
+    expect(find.text('Dodano pinezkę'), findsNothing);
   });
 }

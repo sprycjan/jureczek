@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
 import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
 void main() {
@@ -47,6 +48,44 @@ void main() {
 
     await repository.updateDetails('a', name: 'Postój');
     expect((await repository.findById('a'))?.category, PinCategory.travel);
+  });
+
+  test(
+    'kolor: zapis, zmiana razem z typem, null przywraca kolor typu',
+    () async {
+      await repository.insert(
+        PlacePin(
+          folderId: 'f',
+          id: 'a',
+          lat: 50.06,
+          lng: 19.94,
+          createdAt: DateTime(2026, 11, 2),
+          color: PinColor.teal,
+        ),
+      );
+      expect((await repository.findById('a'))?.color, PinColor.teal);
+
+      // Bez typu kolor zostaje.
+      await repository.updateDetails('a', name: 'Postój');
+      expect((await repository.findById('a'))?.color, PinColor.teal);
+
+      await repository.updateDetails(
+        'a',
+        category: PinCategory.nature,
+        color: PinColor.black,
+      );
+      expect((await repository.findById('a'))?.color, PinColor.black);
+
+      await repository.updateDetails('a', category: PinCategory.nature);
+      expect((await repository.findById('a'))?.color, isNull);
+    },
+  );
+
+  test('nieznany kolor w bazie to kolor typu', () async {
+    await repository.insert(pin('a', DateTime(2026, 11, 1)));
+    await db.customStatement("UPDATE pins SET color = 'tęcza'");
+
+    expect((await repository.findById('a'))?.color, isNull);
   });
 
   test('nieznany typ w bazie to domyślna pinezka', () async {

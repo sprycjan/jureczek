@@ -109,6 +109,15 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<String> color = GeneratedColumn<String>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -121,6 +130,7 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     sourceUrl,
     category,
     folderId,
+    color,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -201,6 +211,12 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     } else if (isInserting) {
       context.missing(_folderIdMeta);
     }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
     return context;
   }
 
@@ -250,6 +266,10 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
         DriftSqlType.string,
         data['${effectivePrefix}folder_id'],
       )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color'],
+      ),
     );
   }
 
@@ -278,6 +298,9 @@ class PinRow extends DataClass implements Insertable<PinRow> {
 
   /// Dodane w schemacie 5 (v10): folder, do którego należy pinezka (obowiązkowy).
   final String folderId;
+
+  /// Dodane w schemacie 6 (v14): klucz [PinColor]; `null` – kolor kategorii.
+  final String? color;
   const PinRow({
     required this.id,
     required this.lat,
@@ -289,6 +312,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     this.sourceUrl,
     required this.category,
     required this.folderId,
+    this.color,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -311,6 +335,9 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     }
     map['category'] = Variable<String>(category);
     map['folder_id'] = Variable<String>(folderId);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<String>(color);
+    }
     return map;
   }
 
@@ -330,6 +357,9 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           : Value(sourceUrl),
       category: Value(category),
       folderId: Value(folderId),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
     );
   }
 
@@ -349,6 +379,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       sourceUrl: serializer.fromJson<String?>(json['sourceUrl']),
       category: serializer.fromJson<String>(json['category']),
       folderId: serializer.fromJson<String>(json['folderId']),
+      color: serializer.fromJson<String?>(json['color']),
     );
   }
   @override
@@ -365,6 +396,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       'sourceUrl': serializer.toJson<String?>(sourceUrl),
       'category': serializer.toJson<String>(category),
       'folderId': serializer.toJson<String>(folderId),
+      'color': serializer.toJson<String?>(color),
     };
   }
 
@@ -379,6 +411,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     Value<String?> sourceUrl = const Value.absent(),
     String? category,
     String? folderId,
+    Value<String?> color = const Value.absent(),
   }) => PinRow(
     id: id ?? this.id,
     lat: lat ?? this.lat,
@@ -390,6 +423,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     sourceUrl: sourceUrl.present ? sourceUrl.value : this.sourceUrl,
     category: category ?? this.category,
     folderId: folderId ?? this.folderId,
+    color: color.present ? color.value : this.color,
   );
   PinRow copyWithCompanion(PinsCompanion data) {
     return PinRow(
@@ -403,6 +437,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       sourceUrl: data.sourceUrl.present ? data.sourceUrl.value : this.sourceUrl,
       category: data.category.present ? data.category.value : this.category,
       folderId: data.folderId.present ? data.folderId.value : this.folderId,
+      color: data.color.present ? data.color.value : this.color,
     );
   }
 
@@ -418,7 +453,8 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           ..write('address: $address, ')
           ..write('sourceUrl: $sourceUrl, ')
           ..write('category: $category, ')
-          ..write('folderId: $folderId')
+          ..write('folderId: $folderId, ')
+          ..write('color: $color')
           ..write(')'))
         .toString();
   }
@@ -435,6 +471,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     sourceUrl,
     category,
     folderId,
+    color,
   );
   @override
   bool operator ==(Object other) =>
@@ -449,7 +486,8 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           other.address == this.address &&
           other.sourceUrl == this.sourceUrl &&
           other.category == this.category &&
-          other.folderId == this.folderId);
+          other.folderId == this.folderId &&
+          other.color == this.color);
 }
 
 class PinsCompanion extends UpdateCompanion<PinRow> {
@@ -463,6 +501,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
   final Value<String?> sourceUrl;
   final Value<String> category;
   final Value<String> folderId;
+  final Value<String?> color;
   final Value<int> rowid;
   const PinsCompanion({
     this.id = const Value.absent(),
@@ -475,6 +514,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.sourceUrl = const Value.absent(),
     this.category = const Value.absent(),
     this.folderId = const Value.absent(),
+    this.color = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PinsCompanion.insert({
@@ -488,6 +528,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.sourceUrl = const Value.absent(),
     this.category = const Value.absent(),
     required String folderId,
+    this.color = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        lat = Value(lat),
@@ -505,6 +546,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Expression<String>? sourceUrl,
     Expression<String>? category,
     Expression<String>? folderId,
+    Expression<String>? color,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -518,6 +560,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       if (sourceUrl != null) 'source_url': sourceUrl,
       if (category != null) 'category': category,
       if (folderId != null) 'folder_id': folderId,
+      if (color != null) 'color': color,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -533,6 +576,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Value<String?>? sourceUrl,
     Value<String>? category,
     Value<String>? folderId,
+    Value<String?>? color,
     Value<int>? rowid,
   }) {
     return PinsCompanion(
@@ -546,6 +590,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       sourceUrl: sourceUrl ?? this.sourceUrl,
       category: category ?? this.category,
       folderId: folderId ?? this.folderId,
+      color: color ?? this.color,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -583,6 +628,9 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     if (folderId.present) {
       map['folder_id'] = Variable<String>(folderId.value);
     }
+    if (color.present) {
+      map['color'] = Variable<String>(color.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -602,6 +650,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
           ..write('sourceUrl: $sourceUrl, ')
           ..write('category: $category, ')
           ..write('folderId: $folderId, ')
+          ..write('color: $color, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1099,6 +1148,7 @@ typedef $$PinsTableCreateCompanionBuilder =
       Value<String?> sourceUrl,
       Value<String> category,
       required String folderId,
+      Value<String?> color,
       Value<int> rowid,
     });
 typedef $$PinsTableUpdateCompanionBuilder =
@@ -1113,6 +1163,7 @@ typedef $$PinsTableUpdateCompanionBuilder =
       Value<String?> sourceUrl,
       Value<String> category,
       Value<String> folderId,
+      Value<String?> color,
       Value<int> rowid,
     });
 
@@ -1171,6 +1222,11 @@ class $$PinsTableFilterComposer extends Composer<_$AppDatabase, $PinsTable> {
 
   ColumnFilters<String> get folderId => $composableBuilder(
     column: $table.folderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get color => $composableBuilder(
+    column: $table.color,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1232,6 +1288,11 @@ class $$PinsTableOrderingComposer extends Composer<_$AppDatabase, $PinsTable> {
     column: $table.folderId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PinsTableAnnotationComposer
@@ -1272,6 +1333,9 @@ class $$PinsTableAnnotationComposer
 
   GeneratedColumn<String> get folderId =>
       $composableBuilder(column: $table.folderId, builder: (column) => column);
+
+  GeneratedColumn<String> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
 }
 
 class $$PinsTableTableManager
@@ -1312,6 +1376,7 @@ class $$PinsTableTableManager
                 Value<String?> sourceUrl = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 Value<String> folderId = const Value.absent(),
+                Value<String?> color = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion(
                 id: id,
@@ -1324,6 +1389,7 @@ class $$PinsTableTableManager
                 sourceUrl: sourceUrl,
                 category: category,
                 folderId: folderId,
+                color: color,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1338,6 +1404,7 @@ class $$PinsTableTableManager
                 Value<String?> sourceUrl = const Value.absent(),
                 Value<String> category = const Value.absent(),
                 required String folderId,
+                Value<String?> color = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion.insert(
                 id: id,
@@ -1350,6 +1417,7 @@ class $$PinsTableTableManager
                 sourceUrl: sourceUrl,
                 category: category,
                 folderId: folderId,
+                color: color,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

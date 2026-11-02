@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart' hide Size;
 
 import '../../../core/haptics/haptics.dart';
+import '../../../core/location/user_location.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../folders/application/folders_providers.dart';
@@ -15,6 +16,7 @@ import '../application/place_search_controller.dart';
 import '../application/pins_providers.dart';
 import '../domain/duplicate_pin.dart';
 import '../domain/pin_category.dart';
+import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
@@ -25,6 +27,7 @@ import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
 import 'pin_drop.dart';
 import 'pin_form_fields.dart';
+import 'pin_image.dart';
 import 'place_adjust_overlay.dart';
 import 'place_search_field.dart';
 import 'search_result_card.dart';
@@ -35,12 +38,14 @@ final _polandViewport = CameraViewportState(
   zoom: 5.3,
 );
 
-/// Wygląd pinezki na mapie: typ i to, czy jest zaznaczona (otwarty arkusz).
-typedef _PinLook = (PinCategory, bool);
+/// Wygląd pinezki na mapie: typ, to, czy jest zaznaczona (otwarty arkusz),
+/// i własny kolor (v14; `null` – kolor typu).
+typedef _PinLook = (PinCategory, bool, PinColor?);
 
 /// Id obrazka w stylu mapy – jeden bitmap na wygląd, wspólny dla wszystkich pinezek.
 String _lookImageId(_PinLook look) =>
-    'pin-${look.$1.key}-${look.$2 ? 'selected' : 'default'}';
+    'pin-${look.$1.key}-${look.$2 ? 'selected' : 'default'}'
+    '-${look.$3?.key ?? 'auto'}';
 
 /// Rozmiar PNG (szerokość, wysokość) z nagłówka IHDR.
 Size _pngSize(Uint8List bytes) {
@@ -65,6 +70,9 @@ const _fitPadding = 48.0;
 /// Zoom po przelocie do wyniku wyszukiwania lub udostępnionego miejsca.
 const _resultZoom = 15.0;
 
+/// Najmniejszy zoom po „Moja lokalizacja” – okolica z ulicami.
+const _myLocationZoom = 14.0;
+
 /// Odstęp narzędzi od krawędzi ekranu (pod paskiem statusu).
 const _toolsPadding = 16.0;
 
@@ -88,11 +96,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   MapboxMap? _map;
   PointAnnotationManager? _pinManager;
 
-  /// PNG pinezek 3x dla każdego wyglądu; gotowe, gdy niepuste.
+  /// PNG pinezek 3x dla każdego wyglądu; gotowe, gdy niepuste. Wyglądy bez
+  /// własnego koloru są wczytane od razu, kolorowe składane przy pierwszym użyciu.
   final _pinImages = <_PinLook, Uint8List>{};
 
   /// Obrazki spadających pinezek, zdekodowane zawczasu (`precacheImage`).
-  final _dropImages = <PinCategory, MemoryImage>{};
+  final _dropImages = <(PinCategory, PinColor?), MemoryImage>{};
 
   /// Mapbox rysuje obrazek w pikselach fizycznych: PNG 3x × ta skala = rozmiar w dp.
   double _pinIconSize = 1;
@@ -112,7 +121,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Osobny notifier, żeby start i koniec spadania nie przebudowywały całego ekranu.
   final _drops = ValueNotifier(
-    const <({String id, Offset anchor, PinCategory category})>[],
+    const <({String id, Offset anchor, MemoryImage image, Size size})>[],
   );
 
   /// Ostatni stan z bazy, do którego doprowadzamy mapę.
@@ -147,6 +156,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Bieżący styl mapy i rozwinięta lista stylów (v13).
   MapStyleOption _style = MapStyleOption.vanventure;
   bool _stylesOpen = false;
+
+  /// Trwa ustalanie położenia po „Moja lokalizacja” (v14).
+  bool _locating = false;
 
   @override
   void initState() {
@@ -251,6 +263,72 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
+  Future<void> _showUserPuck() async {
+    try {
+      await _map?.location.updateSettings(
+        LocationComponentSettings(
+          enabled: true,
+          pulsingEnabled: true,
+          showAccuracyRing: true,
+          puckBearingEnabled: false,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Włączenie znacznika położenia nie powiodło się: $e');
+    }
+  }
+
+  /// „Moja lokalizacja”: zgoda (pytanie tylko tu), kropka położenia i przelot.
+  /// Odmowę i wyłączoną lokalizację tłumaczy snackbar, w razie potrzeby
+  /// z przejściem do ustawień.
+  Future<void> _goToMyLocation() async {
+    if (_locating) return;
+    final service = ref.read(userLocationServiceProvider);
+    setState(() => _locating = true);
+    final result = await service.locate();
+    if (!mounted) return;
+    setState(() => _locating = false);
+    final l10n = AppLocalizations.of(context);
+    switch (result) {
+      case UserLocationFound(:final lat, :final lng):
+        await _showUserPuck();
+        final map = _map;
+        if (map == null) return;
+        try {
+          final zoom = (await map.getCameraState()).zoom;
+          await map.flyTo(
+            CameraOptions(
+              center: Point(coordinates: Position(lng, lat)),
+              zoom: zoom < _myLocationZoom ? _myLocationZoom : zoom,
+            ),
+            MapAnimationOptions(duration: 1200),
+          );
+        } catch (e) {
+          debugPrint('Przelot do położenia nie powiódł się: $e');
+        }
+      case UserLocationServiceOff():
+        _showError(
+          l10n.locationServiceOff,
+          action: SnackBarAction(
+            label: l10n.locationTurnOn,
+            onPressed: service.openLocationSettings,
+          ),
+        );
+      case UserLocationDenied():
+        _showError(l10n.locationDenied);
+      case UserLocationDeniedForever():
+        _showError(
+          l10n.locationDeniedForever,
+          action: SnackBarAction(
+            label: l10n.locationOpenSettings,
+            onPressed: service.openAppSettings,
+          ),
+        );
+      case UserLocationUnavailable():
+        _showError(l10n.locationUnavailable);
+    }
+  }
+
   void _toggleStyles() {
     if (_searchOpen) _closeSearch();
     setState(() => _stylesOpen = !_stylesOpen);
@@ -276,7 +354,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Pinezka stoi czubkiem na punkcie, więc u góry trzeba miejsca na jej
         // wysokość – ponad narzędziami pod paskiem statusu.
         final pinHeight =
-            _pngSize(_pinImages[(PinCategory.fallback, false)]!).height /
+            _pngSize(_pinImages[(PinCategory.fallback, false, null)]!).height /
             pinImageScale;
         final camera = await map.cameraForCoordinatesPadding(
           [
@@ -308,6 +386,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (mounted) _styleReady.value = true;
     });
     await _placeOrnaments(map);
+    // Zgoda dana wcześniej – kropka położenia od razu, bez pytania na starcie.
+    if (await ref.read(userLocationServiceProvider).hasPermission()) {
+      await _showUserPuck();
+    }
     await _loadPinImages();
     final manager = await map.annotations.createPointAnnotationManager();
     _pinManager = manager;
@@ -400,13 +482,31 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _pinIconSize = MediaQuery.devicePixelRatioOf(context) / pinImageScale;
     for (final category in PinCategory.values) {
       for (final selected in [false, true]) {
-        final data = await rootBundle.load(category.asset(selected: selected));
-        _pinImages[(category, selected)] = data.buffer.asUint8List();
+        await _pinImage((category, selected, null));
       }
-      final drop = MemoryImage(_pinImages[(category, false)]!);
-      _dropImages[category] = drop;
-      if (mounted) await precacheImage(drop, context);
+      await _dropImage(category, null);
     }
+  }
+
+  /// PNG wyglądu z pamięci albo wczytany/złożony teraz.
+  Future<Uint8List> _pinImage(_PinLook look) async {
+    final cached = _pinImages[look];
+    if (cached != null) return cached;
+    final bytes = await renderPinPng(
+      rootBundle,
+      look.$1,
+      selected: look.$2,
+      color: look.$3,
+    );
+    return _pinImages[look] = bytes;
+  }
+
+  Future<MemoryImage> _dropImage(PinCategory category, PinColor? color) async {
+    final cached = _dropImages[(category, color)];
+    if (cached != null) return cached;
+    final image = MemoryImage(await _pinImage((category, false, color)));
+    if (mounted) await precacheImage(image, context);
+    return _dropImages[(category, color)] = image;
   }
 
   /// Mapa leży pod paskiem statusu, więc kompas schodzi pod narzędzia (lupa, style),
@@ -467,12 +567,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     for (final pin in pins) {
-      final look = (pin.category, pin.id == _selectedPinId);
+      final look = (pin.category, pin.id == _selectedPinId, pin.color);
       final existing = _annotationsByPinId[pin.id];
       if (existing != null) {
         if (_lookByPinId[pin.id] == look) continue;
         existing
-          ..image = _pinImages[look]
+          ..image = await _pinImage(look)
           ..iconImage = _lookImageId(look);
         await manager.update(existing);
         _lookByPinId[pin.id] = look;
@@ -482,7 +582,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       final annotation = await manager.create(
         PointAnnotationOptions(
           geometry: Point(coordinates: Position(pin.lng, pin.lat)),
-          image: _pinImages[look],
+          image: await _pinImage(look),
           iconImage: _lookImageId(look),
           iconAnchor: IconAnchor.BOTTOM,
           iconSize: _pinIconSize,
@@ -537,17 +637,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     required double lat,
     required double lng,
     required PinCategory category,
+    required PinColor? color,
   }) async {
     final map = _map;
     if (map == null || _dropImages.isEmpty || !mounted) return _landPin(id);
     try {
+      final image = await _dropImage(category, color);
       final pixel = await map.pixelForCoordinate(
         Point(coordinates: Position(lng, lat)),
       );
       if (!mounted) return;
       _drops.value = [
         ..._drops.value,
-        (id: id, anchor: Offset(pixel.x, pixel.y), category: category),
+        (
+          id: id,
+          anchor: Offset(pixel.x, pixel.y),
+          image: image,
+          size: _pngSize(image.bytes) / pinImageScale,
+        ),
       ];
     } catch (e) {
       debugPrint('Pozycja spadającej pinezki nieznana: $e');
@@ -614,6 +721,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             note: details.note,
             address: details.address,
             category: details.category,
+            color: details.color,
             folderId: details.folderId,
           );
       return true;
@@ -783,6 +891,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final messenger = ScaffoldMessenger.of(context);
     String? addedId;
     var category = PinCategory.fallback;
+    PinColor? color;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -793,6 +902,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         chooseFolder: widget.folderId == null,
         onSave: (details) async {
           category = details.category;
+          color = details.color;
           try {
             final folderId =
                 widget.folderId ??
@@ -809,6 +919,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   note: details.note,
                   sourceUrl: result.sourceUrl,
                   category: details.category,
+                  color: details.color,
                 );
           } catch (e) {
             debugPrint('Zapis pinezki nie powiódł się: $e');
@@ -828,7 +939,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final id = addedId;
     if (id == null) return;
     await Future<void>.delayed(_sheetCloseDelay);
-    await _dropPin(id, lat: result.lat, lng: result.lng, category: category);
+    await _dropPin(
+      id,
+      lat: result.lat,
+      lng: result.lng,
+      category: category,
+      color: color,
+    );
   }
 
   /// Nowe udostępnienie zastępuje wszystko, co było otwarte.
@@ -865,10 +982,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  void _showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _showError(String message, {SnackBarAction? action}) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: action,
+          // Snackbar z akcją bez tego nie znika sam (Flutter 3.41).
+          persist: action == null ? null : false,
+        ),
+      );
   }
 
   @override
@@ -950,11 +1074,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         for (final drop in drops)
                           PinDrop(
                             key: ValueKey(drop.id),
-                            image: _dropImages[drop.category]!,
+                            image: drop.image,
                             anchor: drop.anchor,
-                            size:
-                                _pngSize(_pinImages[(drop.category, false)]!) /
-                                pinImageScale,
+                            size: drop.size,
                             onImpact: ref.read(hapticsProvider).tap,
                             onLanded: () => _landPin(drop.id),
                           ),
@@ -1028,17 +1150,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
               ),
             ),
-            // Przybliżanie i oddalanie: prawa krawędź, na środku wysokości –
+            // Przybliżanie, oddalanie i „Moja lokalizacja”: prawa krawędź, na środku wysokości –
             // z dala od narzędzi u góry, karty wyniku i skali na dole.
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: const EdgeInsets.only(right: _toolsPadding),
-                child: MapZoomButtons(
-                  zoomInTooltip: l10n.mapZoomIn,
-                  zoomOutTooltip: l10n.mapZoomOut,
-                  onZoomIn: () => _zoomBy(1),
-                  onZoomOut: () => _zoomBy(-1),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 12,
+                  children: [
+                    MapZoomButtons(
+                      zoomInTooltip: l10n.mapZoomIn,
+                      zoomOutTooltip: l10n.mapZoomOut,
+                      onZoomIn: () => _zoomBy(1),
+                      onZoomOut: () => _zoomBy(-1),
+                    ),
+                    MapToolButton(
+                      icon: _locating
+                          ? Icons.location_searching
+                          : Icons.my_location,
+                      tooltip: l10n.mapMyLocation,
+                      onPressed: _goToMyLocation,
+                    ),
+                  ],
                 ),
               ),
             ),
