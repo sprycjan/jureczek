@@ -19,6 +19,7 @@ import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
 import 'map_style.dart';
+import 'map_style_picker.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
@@ -143,6 +144,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Timer? _curtainFallback;
   final _searchFocus = FocusNode();
 
+  /// Bieżący styl mapy i rozwinięta lista stylów (v13).
+  MapStyleOption _style = MapStyleOption.vanventure;
+  bool _stylesOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -173,8 +178,67 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _onStyleLoaded() {
+    if (_styleLoaded) {
+      _onStyleSwitched();
+      return;
+    }
     _styleLoaded = true;
     _updateCurtain();
+  }
+
+  /// Zmiana stylu: lista się zamyka, kamera pochyla się do 3D albo prostuje.
+  Future<void> _selectStyle(MapStyleOption style) async {
+    setState(() => _stylesOpen = false);
+    final map = _map;
+    if (map == null || style == _style) return;
+    final pitch = style.pitch;
+    setState(() => _style = style);
+    try {
+      await map.setStyleURI(style.uri);
+      if ((await map.getCameraState()).pitch != pitch) {
+        await map.easeTo(
+          CameraOptions(pitch: pitch),
+          MapAnimationOptions(duration: 800),
+        );
+      }
+    } catch (e) {
+      debugPrint('Zmiana stylu mapy nie powiodła się: $e');
+    }
+  }
+
+  /// Nowy styl nie ma obrazków pinezek (dodawanych do stylu przy tworzeniu
+  /// anotacji), więc pinezki rysujemy od nowa. Znacznik wyniku też.
+  Future<void> _onStyleSwitched() async {
+    final map = _map;
+    if (map == null) return;
+    final config = _style.basemapConfig;
+    if (config.isNotEmpty) {
+      try {
+        await map.setStyleImportConfigProperties('basemap', config);
+      } catch (e) {
+        debugPrint('Konfiguracja stylu Standard nie powiodła się: $e');
+      }
+    }
+    _sync = _sync
+        .then((_) async {
+          await _pinManager?.deleteAll();
+          _annotationsByPinId.clear();
+          _pinIdByAnnotationId.clear();
+          _lookByPinId.clear();
+        })
+        .catchError((Object e) {
+          debugPrint(
+            'Czyszczenie pinezek po zmianie stylu nie powiodło się: $e',
+          );
+        });
+    _scheduleSync(ref.read(pinsProvider).value ?? _pins);
+    final result = _result;
+    if (result != null && !_adjusting) await _showResult(result, fly: false);
+  }
+
+  void _toggleStyles() {
+    if (_searchOpen) _closeSearch();
+    setState(() => _stylesOpen = !_stylesOpen);
   }
 
   void _updateCurtain() {
@@ -270,6 +334,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }),
     );
 
+    // Style oparte na Standardzie (satelita, 3D) mają POI w featuresecie `poi`.
+    map.addInteraction(
+      TapInteraction(StandardPOIs(), (poi, _) {
+        _searchFocus.unfocus();
+        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        if (place != null) _showResult(place, fly: false);
+      }),
+    );
+    map.addInteraction(
+      LongTapInteraction(StandardPOIs(), (poi, _) {
+        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        if (place != null) _addResultPin(place);
+      }),
+    );
+
     map.addInteraction(
       LongTapInteraction.onMap((context) {
         final position = context.point.coordinates;
@@ -288,10 +367,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     // Tap w mapę chowa podpowiedzi i klawiaturę; tekst w polu zostaje.
     map.addInteraction(
-      TapInteraction.onMap(
-        (_) => _searchFocus.unfocus(),
-        stopPropagation: false,
-      ),
+      TapInteraction.onMap((_) {
+        _searchFocus.unfocus();
+        if (_stylesOpen && mounted) setState(() => _stylesOpen = false);
+      }, stopPropagation: false),
     );
 
     _scheduleSync(ref.read(pinsProvider).value ?? const []);
@@ -315,14 +394,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
   }
 
-  /// Mapa leży pod paskiem statusu, więc kompas schodzi pod lupę,
+  /// Mapa leży pod paskiem statusu, więc kompas schodzi pod narzędzia (lupa, style),
   /// a skala na dół – po prawej, bo lewy dół zajmuje logo i atrybucja Mapbox.
   Future<void> _placeOrnaments(MapboxMap map) async {
     final insets = MediaQuery.paddingOf(context);
     await map.compass.updateSettings(
       CompassSettings(
         position: OrnamentPosition.TOP_RIGHT,
-        marginTop: insets.top + _toolsPadding + _toolSize + 12,
+        marginTop: insets.top + _toolsPadding + 2 * (_toolSize + 12),
         marginRight: _toolsPadding + 4,
       ),
     );
@@ -556,7 +635,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (_searchOpen) {
       _closeSearch();
     } else {
-      setState(() => _searchOpen = true);
+      setState(() {
+        _searchOpen = true;
+        _stylesOpen = false;
+      });
     }
   }
 
@@ -799,10 +881,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     return PopScope(
       // Wstecz najpierw zamyka wyszukiwanie, poprawianie i kartę wyniku, dopiero potem aplikację.
-      canPop: !_searchOpen && result == null && !sharing,
+      canPop: !_searchOpen && !_stylesOpen && result == null && !sharing,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        if (_searchOpen) {
+        if (_stylesOpen) {
+          setState(() => _stylesOpen = false);
+        } else if (_searchOpen) {
           _closeSearch();
         } else if (_adjusting) {
           _cancelAdjust();
@@ -914,12 +998,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               : l10n.searchOpen,
                           onPressed: _toggleSearch,
                         ),
+                        MapToolButton(
+                          icon: _stylesOpen
+                              ? Icons.close
+                              : Icons.layers_outlined,
+                          tooltip: _stylesOpen
+                              ? l10n.mapStylesClose
+                              : l10n.mapStylesOpen,
+                          onPressed: _toggleStyles,
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
+            if (_stylesOpen)
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    // Obok przycisku stylów: pod lupą, na lewo od kolumny narzędzi.
+                    padding: const EdgeInsets.only(
+                      top: _toolsPadding + _toolSize + 12,
+                      right: _toolsPadding + _toolSize + 12,
+                    ),
+                    child: MapStylePicker(
+                      selected: _style,
+                      onSelected: _selectStyle,
+                    ),
+                  ),
+                ),
+              ),
             if (_adjusting) const PlaceAdjustCrosshair(),
             if (sharing || result != null)
               Align(

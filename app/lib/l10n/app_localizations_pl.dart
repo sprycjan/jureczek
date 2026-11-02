@@ -72,6 +72,24 @@ class AppLocalizationsPl extends AppLocalizations {
   String get searchHint => 'Szukaj miejsca';
 
   @override
+  String get mapStylesOpen => 'Style mapy';
+
+  @override
+  String get mapStylesClose => 'Zamknij style mapy';
+
+  @override
+  String get mapStyleVanventure => 'Nocna wyprawa';
+
+  @override
+  String get mapStyleOutdoors => 'Teren';
+
+  @override
+  String get mapStyleSatellite => 'Satelita';
+
+  @override
+  String get mapStyleFaded3d => '3D';
+
+  @override
   String get searchError => 'Nie udało się wyszukać – sprawdź połączenie';
 
   @override

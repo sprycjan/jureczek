@@ -206,10 +206,8 @@ class _Header extends StatelessWidget {
             duration: const Duration(milliseconds: 1200),
             // Domyślny układ nie rozciąga dzieci – obrazek miał swój naturalny
             // rozmiar na środku nagłówka i twardą dolną krawędź (v11).
-            layoutBuilder: (current, previous) => Stack(
-              fit: StackFit.expand,
-              children: [...previous, ?current],
-            ),
+            layoutBuilder: (current, previous) =>
+                Stack(fit: StackFit.expand, children: [...previous, ?current]),
             child: Image.asset(
               landscape.asset,
               key: ValueKey(landscape),

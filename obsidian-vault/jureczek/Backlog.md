@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -21,7 +21,10 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 ## Mapa
 - [ ] Lokalizacja użytkownika i przycisk „moja lokalizacja” (uprawnienia `ACCESS_FINE/COARSE_LOCATION`, obsługa odmowy)
 - [ ] Zapamiętywanie ostatniej pozycji kamery
-- [ ] Przełącznik stylów (własny / Outdoors / Satelita / Faded 3D) – zaplanowany jako v13, [[v11 – poprawki wyglądu]]
+- [x] Przełącznik stylów (własny / Outdoors / Satelita / Faded 3D) – v13, [[v13 – przełącznik stylów mapy]]
+- [ ] Satelita: kafelki `mapbox.satellite` dają 429 – sprawdzić konto Mapbox
+- [ ] 3D przy małym zoomie pokazuje kosmos – mniejsze pochylenie albo przybliżenie
+- [ ] Zapamiętywanie wybranego stylu mapy (na razie świadomie bez)
 - [x] Własna paleta mapy w stylu aplikacji (v8)
 - [x] Własny ciemny styl mapy z assetu (v12, [[v12 – własny styl mapy]])
 - [ ] Ikony POI w stylu (sprite `maki`) – v12 ma same napisy
@@ -55,7 +58,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].
 - [ ] Dolne menu – decyzja: na razie brak, wraca, gdy pojawi się treść (np. „Ostatnio zapisane”, ustawienia)
 - [x] Mapa: biała obwódka wokół nazw miejscowości i POI – rozwiązane własnym stylem z ciemną obwódką (v12)
-- [ ] Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D z nachyleniem – v13
+- [x] Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D z nachyleniem – v13
 - [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
 - [ ] Dodanie większej ilości pinezek (Google Stitch) – czeka na grafiki od użytkownika
 - [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v14

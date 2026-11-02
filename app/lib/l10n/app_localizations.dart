@@ -214,6 +214,42 @@ abstract class AppLocalizations {
   /// **'Szukaj miejsca'**
   String get searchHint;
 
+  /// No description provided for @mapStylesOpen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Style mapy'**
+  String get mapStylesOpen;
+
+  /// No description provided for @mapStylesClose.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknij style mapy'**
+  String get mapStylesClose;
+
+  /// No description provided for @mapStyleVanventure.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nocna wyprawa'**
+  String get mapStyleVanventure;
+
+  /// No description provided for @mapStyleOutdoors.
+  ///
+  /// In pl, this message translates to:
+  /// **'Teren'**
+  String get mapStyleOutdoors;
+
+  /// No description provided for @mapStyleSatellite.
+  ///
+  /// In pl, this message translates to:
+  /// **'Satelita'**
+  String get mapStyleSatellite;
+
+  /// No description provided for @mapStyleFaded3d.
+  ///
+  /// In pl, this message translates to:
+  /// **'3D'**
+  String get mapStyleFaded3d;
+
   /// No description provided for @searchError.
   ///
   /// In pl, this message translates to:

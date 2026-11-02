@@ -150,3 +150,11 @@ Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], 
 - Domyślnie `MapWidget` = Hybrid Composition + `SurfaceView`. Szybkie, ale nie animuje się z trasą Fluttera i miga przy wejściu na ekran.
 - `textureView: true` + `androidHostingMode: AndroidPlatformViewHostingMode.TLHC_HC` → mapa jako tekstura w drzewie Fluttera (płynne przejścia, nakładki działają). API `@experimental`. Koszt: kopia `SurfaceTexture` na klatkę – [[v11 – poprawki wyglądu]].
 - **Pułapka TLHC: klatka spóźniona o jedną.** Mapbox rysuje na żądanie, a tekstura pokazuje poprzednią klatkę. Zmiana annotacji bez ruchu kamery (np. obrazek zaznaczonej pinezki) pojawia się dopiero przy następnym przerysowaniu. Obejście: po każdym `create`/`update`/`delete` annotacji wołać `map.triggerRepaint()` dwa razy, z odstępem ok. 150 ms (`_repaintMap` w `map_screen.dart`). Dotyczy też `iconOpacity`: bez tego wylądowana pinezka była niewidoczna.
+
+## Zmiana stylu w locie (v13)
+- `await map.setStyleURI(uri)` (nie `map.style.*` – deprecated). `onStyleLoadedListener` odpala się po każdej zmianie.
+- Managery annotacji przetrwają zmianę, ale obrazki pinezek (`image` + `iconImage`) są obrazkami stylu i giną. Rozwiązanie: `manager.deleteAll()` i utworzenie annotacji od nowa – [[v13 – przełącznik stylów mapy]].
+- Interakcje (`addInteraction`) zostają; można dodać jednocześnie `layerId: 'poi-label'` i `StandardPOIs()` – działa ta, której styl ma warstwę/featureset.
+- Standard: `setStyleImportConfigProperties('basemap', {'theme': 'faded', 'show3dObjects': true})` po wczytaniu. Motywy: `default`, `faded`, `monochrome`, `custom`.
+- `standard-satellite`: kafelki `mapbox.satellite` dla naszego tokenu zwracają 429 (`x-rate-limit-limit: -1`), reszta API działa.
+- Test endpointów curlem: bez nagłówka `User-Agent` jak SDK nawet vector tiles dają 429 – używać `-A "MapboxCommon/24.33.0 Android"`.

@@ -32,7 +32,7 @@ tags: [jureczek, przeglad]
 | v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu; mapa startuje dopasowana do pinezek | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v10 – foldery i ekran startowy]] |
 | v11 | Poprawki wyglądu: „Cześć!”, pejzaż z łagodnym przejściem, podgląd folderu bez obrazka, 15 ikon i 9 kolorów folderów, zaokrąglona wyszukiwarka, mapa bez mrugania | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v11 – poprawki wyglądu]] |
 | v12 | Własny ciemny styl mapy (VanVenture) z assetu zamiast Standardu z paletą; POI z warstwy `poi-label` | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v12 – własny styl mapy]] |
-| v13 | Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
+| v13 | Przełącznik stylów mapy: Nocna wyprawa / Teren / Satelita / 3D | 🧪 sprawdzone przez adb (satelita bez zdjęć – 429 z Mapboxa), czeka na potwierdzenie – [[v13 – przełącznik stylów mapy]] |
 | v14 | Własny kolor pinezki (24 opcje, schemat 6) | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
 | v15+ | Patrz [[Backlog]] | — |
 

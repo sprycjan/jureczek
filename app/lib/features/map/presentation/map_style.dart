@@ -13,3 +13,35 @@ const poiLabelLayerId = 'poi-label';
 /// Kolor warstwy `background` w [mapStyleUri] – zasłona przed wczytaniem
 /// stylu ma ten sam kolor, więc odsłonięcie mapy nie mruga.
 const mapBackgroundColor = Color(0xFF315041);
+
+/// Style mapy do wyboru przyciskiem „warstwy” (v13). Wybór nie jest
+/// zapamiętywany – mapa zawsze startuje w [MapStyleOption.vanventure].
+enum MapStyleOption {
+  /// Własny ciemny styl z assetu (v12).
+  vanventure(mapStyleUri),
+
+  /// Mapbox Outdoors – szlaki, poziomice, cieniowanie terenu.
+  outdoors('mapbox://styles/mapbox/outdoors-v12'),
+
+  /// Standard Satellite – zdjęcia satelitarne z drogami i etykietami.
+  satellite('mapbox://styles/mapbox/standard-satellite'),
+
+  /// Standard w wyblakłym motywie z budynkami 3D, kamera pochylona.
+  faded3d('mapbox://styles/mapbox/standard');
+
+  const MapStyleOption(this.uri);
+
+  final String uri;
+
+  /// Styl oparty na Standardzie: POI z featuresetu, konfiguracja importu `basemap`.
+  bool get isStandard => this == satellite || this == faded3d;
+
+  /// Nachylenie kamery po włączeniu stylu – 3D widać dopiero pod kątem.
+  double get pitch => this == faded3d ? 60 : 0;
+
+  /// Konfiguracja importu `basemap` nakładana po wczytaniu stylu.
+  Map<String, Object> get basemapConfig => switch (this) {
+    faded3d => const {'theme': 'faded', 'show3dObjects': true},
+    _ => const {},
+  };
+}
