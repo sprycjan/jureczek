@@ -57,7 +57,14 @@ Filtry przepisane ze starej składni (`["in", …]`) na wyrażenia (`match`, `ge
 - [ ] Użytkownik: ogólna ocena wyglądu, czytelność etykiet
 - [ ] Użytkownik: long-tap w POI stawia pinezkę z nazwą
 
-## Otwarte
+## Poprawki po teście
+- **Mapa za ciemna – rozjaśnić o ok. 20%** (użytkownik, 2026-11-02). Wszystkie kolory stylu: jasność HSL przesunięta o 20% drogi do bieli (`L' = L + 0,2·(1 − L)`), odcień i nasycenie bez zmian. Ciemne kolory zyskały najwięcej (tło `#0d1511` → `#315041`, woda `#091216` → `#254a5a`), jasne napisy prawie się nie zmieniły (`#f1f7f3` → `#f4f9f5`). Mapa wyszła bardziej zielona, bo przy stałym nasyceniu HSL jaśniejszy kolor jest żywszy.
+- Zasłona przed wczytaniem stylu ma teraz kolor tła mapy (`mapBackgroundColor` w `map_style.dart`), a nie tła aplikacji. Inaczej odsłonięcie mapy przechodziłoby z ciemnego w jaśniejszy.
+- Te same obwódki napisów rozjaśniły się razem z tłem, więc kontrast z tłem jest jak przedtem.
+- [x] `flutter analyze`: 0 issues, `flutter test`: 153/153
+- [x] P30 przez adb: Polska i Rynek Główny jaśniejsze, napisy czytelne
+- [ ] Użytkownik: czy jasność jest dobra (łatwo zmienić współczynnik)
+
 - Gęstość etykiet miejscowości przy małym zoomie (dziś bez `symbolrank`) – do oceny przez użytkownika.
 - Ikony POI (sprite `maki`) – dziś same napisy.
 - Przełącznik stylów (v13) musi teraz uwzględnić ten styl jako domyślny.

@@ -105,6 +105,7 @@ MapWidget(styleUri: mapStyleUri, …)
 - Fonty tylko z serwera Mapbox (np. `DIN Pro Medium`, `Arial Unicode MS Regular`); nieistniejący font = brak napisów.
 - Pola Streets v8: `place_label.type` (city/town/village), `class` (country/settlement…); park narodowy w `landuse_overlay`; POI w `poi_label` (`name`, `maki`, `filterrank`).
 - Klikalne POI bez Standardu: `TapInteraction(FeaturesetDescriptor(layerId: 'poi-label'), (f, _) => f.properties['name'] …)`.
+- Kolor zasłony przed wczytaniem stylu = `background-color` stylu (`mapBackgroundColor`); przy zmianie tła w JSON-ie zmienić też stałą.
 - `StandardPOIs()` i `setStyleImportConfigProperties` nie działają w stylu klasycznym (brak importu `basemap`).
 
 ## Własna paleta Standard (v8, zastąpiona w v12)

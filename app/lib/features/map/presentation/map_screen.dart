@@ -758,9 +758,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   builder: (context, ready, _) => AnimatedOpacity(
                     opacity: ready ? 0 : 1,
                     duration: const Duration(milliseconds: 200),
-                    child: ColoredBox(
-                      color: Theme.of(context).colorScheme.surface,
-                    ),
+                    child: const ColoredBox(color: mapBackgroundColor),
                   ),
                 ),
               ),
