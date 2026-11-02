@@ -116,3 +116,7 @@ await map.setStyleImportConfigProperties('basemap', {
 - PNG ma czubek na dolnej krawędzi – kotwica `BOTTOM` bez `iconOffset`.
 
 Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], [[v6 – klikalne POI]], [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]], [[v4 – wyszukiwarka miejsc]], [[ADR-001 Flutter]]
+
+## Osadzenie widoku na Androidzie (v11)
+- Domyślnie `MapWidget` = Hybrid Composition + `SurfaceView`. Szybkie, ale nie animuje się z trasą Fluttera i miga przy wejściu na ekran.
+- `textureView: true` + `androidHostingMode: AndroidPlatformViewHostingMode.TLHC_HC` → mapa jako tekstura w drzewie Fluttera (płynne przejścia, nakładki działają). API `@experimental`. Koszt: kopia `SurfaceTexture` na klatkę – [[v11 – poprawki wyglądu]].

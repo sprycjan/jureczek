@@ -51,12 +51,12 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 ## Moje uwagi
 Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]].
 - [ ] Dolne menu – decyzja: na razie brak, wraca, gdy pojawi się treść (np. „Ostatnio zapisane”, ustawienia)
-- [ ] Mapa: biała obwódka wokół nazw miejscowości i POI – spike v11 negatywny (Standard zawsze daje jasną obwódkę). Do decyzji: `lightPreset: dusk/night` albo własny styl Studio
+- [ ] Mapa: biała obwódka wokół nazw miejscowości i POI – spike v11 negatywny (Standard zawsze daje jasną obwódkę). Odłożone (2026-11-02); opcje: `lightPreset: dusk/night` albo własny styl Studio
 - [ ] Przełącznik stylów mapy: Standard / Outdoors / Satelita / Faded 3D z nachyleniem – v12
 - [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
 - [ ] Dodanie większej ilości pinezek (Google Stitch) – czeka na grafiki od użytkownika
 - [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v13
-- [x] Mruganie mapy podczas przełączania ekranu głównego do mapy (v11: zasłona do nałożenia palety)
+- [ ] Mruganie mapy i płynność przejścia do mapy (v11: zasłona + TLHC/TextureView) – czeka na potwierdzenie użytkownika
 - [x] Więcej ikon kategorii i kolorów akcentów folderów (v11: 15 ikon, 9 kolorów)
 - [x] Obrazek przy dodawaniu folderu usunięty (v11), później dodamy coś innego
 - [ ] Coś zamiast obrazka w formularzu folderu (pomysł użytkownika na później)

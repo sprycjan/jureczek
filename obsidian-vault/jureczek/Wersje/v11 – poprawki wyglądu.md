@@ -58,8 +58,14 @@ Pierwsza z trzech wersji po uwagach użytkownika z [[Backlog]] („Moje uwagi”
 - [ ] Użytkownik: nowe ikony i kolory, zapis folderu
 - [ ] Użytkownik: wygląd nagłówka o innych porach dnia
 
+## Poprawki po teście
+- **Mapa nadal migała, a przejście nie było płynne** (użytkownik, 2026-11-02). Przyczyna: `MapWidget` domyślnie osadza mapę jako `SurfaceView` w Hybrid Composition. Taka natywna powierzchnia nie bierze udziału w animacji trasy Fluttera: wskakuje od razu w pełnym rozmiarze i może pokazać pustą klatkę, więc zasłona z v11 jej nie maskuje. Poprawka: `textureView: true` + `androidHostingMode: TLHC_HC` (Texture Layer Hybrid Composition). Flutter składa mapę jak zwykły widżet, więc działa animacja i zasłona. API jest `@experimental` → `// ignore: experimental_member_use`.
+- [x] P30 przez adb: mapa renderuje się w TLHC, przesuwanie działa
+- [ ] Użytkownik: płynność przejścia i brak mignięcia po zmianie TLHC
+- Huawei P30 nie ma `screenrecord` – płynności nie da się nagrać przez adb, ocenia użytkownik.
+
 ## Otwarte
-- **Obwódka napisów** – decyzja użytkownika. Można spróbować `lightPreset: dusk/night` (cała mapa nocna, jasne napisy z ciemną obwódką) albo przejść na własny styl z Mapbox Studio (pełna kontrola `text-halo-color`, ale bez łatwej palety).
+- **Obwódka napisów** – odłożone przez użytkownika (2026-11-02). Można spróbować `lightPreset: dusk/night` (cała mapa nocna, jasne napisy z ciemną obwódką) albo przejść na własny styl z Mapbox Studio (pełna kontrola `text-halo-color`, ale bez łatwej palety).
 - **v12 – style mapy:**
   - jeden przycisk „warstwy” rozwija 4 style: Standard z paletą, Outdoors (bez klikalnych POI), `STANDARD_SATELLITE`, Faded 3D (`theme: faded`, `show3dObjects`, nachylenie ok. 60°);
   - bez zapamiętywania wyboru, wyjście z 3D prostuje kamerę;

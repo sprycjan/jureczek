@@ -734,6 +734,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           children: [
             MapWidget(
               styleUri: MapboxStyles.STANDARD,
+              // Domyślny SurfaceView (HC) nie bierze udziału w animacji trasy
+              // i pokazuje pustą klatkę – mapa „wskakiwała” i migała (v11).
+              // TLHC + TextureView składa mapę jak zwykły widżet Fluttera.
+              textureView: true,
+              // ignore: experimental_member_use
+              androidHostingMode: AndroidPlatformViewHostingMode.TLHC_HC,
               viewport: _polandViewport,
               onMapCreated: _onMapCreated,
               onStyleLoadedListener: (_) => _onStyleLoaded(),
