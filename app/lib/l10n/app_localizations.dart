@@ -229,7 +229,7 @@ abstract class AppLocalizations {
   /// No description provided for @mapStyleVanventure.
   ///
   /// In pl, this message translates to:
-  /// **'Nocna wyprawa'**
+  /// **'Domyślny'**
   String get mapStyleVanventure;
 
   /// No description provided for @mapStyleOutdoors.
@@ -237,12 +237,6 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Teren'**
   String get mapStyleOutdoors;
-
-  /// No description provided for @mapStyleSatellite.
-  ///
-  /// In pl, this message translates to:
-  /// **'Satelita'**
-  String get mapStyleSatellite;
 
   /// No description provided for @mapStyleFaded3d.
   ///

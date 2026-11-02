@@ -334,7 +334,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }),
     );
 
-    // Style oparte na Standardzie (satelita, 3D) mają POI w featuresecie `poi`.
+    // Styl 3D (Standard) ma POI w featuresecie `poi`.
     map.addInteraction(
       TapInteraction(StandardPOIs(), (poi, _) {
         _searchFocus.unfocus();

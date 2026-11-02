@@ -31,9 +31,9 @@ void main() {
     );
   }
 
-  testWidgets('pokazuje cztery style z etykietami', (tester) async {
+  testWidgets('pokazuje trzy style z etykietami', (tester) async {
     await pumpPicker(tester);
-    for (final label in ['Nocna wyprawa', 'Teren', 'Satelita', '3D']) {
+    for (final label in ['Domyślny', 'Teren', '3D']) {
       expect(find.text(label), findsOneWidget);
     }
   });
@@ -41,8 +41,8 @@ void main() {
   testWidgets('tap w styl zwraca go przez onSelected', (tester) async {
     MapStyleOption? chosen;
     await pumpPicker(tester, onSelected: (style) => chosen = style);
-    await tester.tap(find.text('Satelita'));
-    expect(chosen, MapStyleOption.satellite);
+    await tester.tap(find.text('3D'));
+    expect(chosen, MapStyleOption.faded3d);
   });
 
   testWidgets('wybrany styl jest w kolorze akcentu', (tester) async {
@@ -52,7 +52,7 @@ void main() {
     Color? colorOf(String label) =>
         tester.widget<Text>(find.text(label)).style?.color;
     expect(colorOf('Teren'), primary);
-    expect(colorOf('Satelita'), isNot(primary));
+    expect(colorOf('3D'), isNot(primary));
   });
 
   test('tylko 3D pochyla kamerę i ustawia motyw faded', () {

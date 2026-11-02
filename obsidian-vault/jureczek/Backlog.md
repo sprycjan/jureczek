@@ -22,7 +22,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Lokalizacja użytkownika i przycisk „moja lokalizacja” (uprawnienia `ACCESS_FINE/COARSE_LOCATION`, obsługa odmowy)
 - [ ] Zapamiętywanie ostatniej pozycji kamery
 - [x] Przełącznik stylów (własny / Outdoors / Satelita / Faded 3D) – v13, [[v13 – przełącznik stylów mapy]]
-- [ ] Satelita: kafelki `mapbox.satellite` dają 429 – sprawdzić konto Mapbox
+- [ ] Widok satelity – usunięty w v13 na życzenie użytkownika (kafelki `mapbox.satellite` dawały 429); wrócić, jeśli konto Mapbox pozwoli
 - [ ] 3D przy małym zoomie pokazuje kosmos – mniejsze pochylenie albo przybliżenie
 - [ ] Zapamiętywanie wybranego stylu mapy (na razie świadomie bez)
 - [x] Własna paleta mapy w stylu aplikacji (v8)

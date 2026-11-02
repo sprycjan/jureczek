@@ -86,14 +86,12 @@ extension MapStyleOptionLabels on MapStyleOption {
   IconData get icon => switch (this) {
     MapStyleOption.vanventure => Icons.dark_mode_outlined,
     MapStyleOption.outdoors => Icons.terrain_outlined,
-    MapStyleOption.satellite => Icons.satellite_alt_outlined,
     MapStyleOption.faded3d => Icons.view_in_ar_outlined,
   };
 
   String label(AppLocalizations l10n) => switch (this) {
     MapStyleOption.vanventure => l10n.mapStyleVanventure,
     MapStyleOption.outdoors => l10n.mapStyleOutdoors,
-    MapStyleOption.satellite => l10n.mapStyleSatellite,
     MapStyleOption.faded3d => l10n.mapStyleFaded3d,
   };
 }

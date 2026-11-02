@@ -1,7 +1,7 @@
 ---
 tags: [jureczek, wersja, mapbox, styl]
 wersja: v13
-status: zaimplementowana – sprawdzona przez adb, czeka na potwierdzenie użytkownika (satelita bez zdjęć – konto Mapbox)
+status: zaimplementowana – sprawdzona przez adb, czeka na potwierdzenie użytkownika
 data: 2026-11-02
 ---
 # v13 – przełącznik stylów mapy
@@ -53,8 +53,13 @@ Plan z [[v11 – poprawki wyglądu]] („Otwarte”), po [[v12 – własny styl 
 - [ ] Satelita ze zdjęciami (blokuje 429 z Mapboxa)
 - [ ] Użytkownik: ogólna ocena, nazwy stylów
 
+## Poprawki po teście
+- **„Nocna wyprawa” → „Domyślny”** (użytkownik, 2026-11-02).
+- **Satelita usunięty** (użytkownik, 2026-11-02) – zdjęcia i tak się nie ładowały (429). Zostają 3 style: Domyślny / Teren / 3D. Interakcje `StandardPOIs` zostają dla 3D.
+- [x] `flutter analyze`: 0 issues, `flutter test`: 157/157
+- [x] P30 przez adb: panel z 3 stylami, „Domyślny” zaznaczony
+
 ## Otwarte
-- Sprawdzić konto Mapbox (statystyki / limity Raster Tiles) – dlaczego `mapbox.satellite` daje 429.
 - 3D: mniejsze pochylenie przy małym zoomie albo przybliżenie przy włączaniu.
 
 Powiązane: [[00 Jureczek – przegląd]], [[v12 – własny styl mapy]], [[v11 – poprawki wyglądu]], [[v6 – klikalne POI]], [[Mapbox Flutter]], [[Backlog]]

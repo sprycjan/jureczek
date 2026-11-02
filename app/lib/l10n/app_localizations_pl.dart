@@ -78,13 +78,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get mapStylesClose => 'Zamknij style mapy';
 
   @override
-  String get mapStyleVanventure => 'Nocna wyprawa';
+  String get mapStyleVanventure => 'Domyślny';
 
   @override
   String get mapStyleOutdoors => 'Teren';
-
-  @override
-  String get mapStyleSatellite => 'Satelita';
 
   @override
   String get mapStyleFaded3d => '3D';

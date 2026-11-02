@@ -23,18 +23,12 @@ enum MapStyleOption {
   /// Mapbox Outdoors – szlaki, poziomice, cieniowanie terenu.
   outdoors('mapbox://styles/mapbox/outdoors-v12'),
 
-  /// Standard Satellite – zdjęcia satelitarne z drogami i etykietami.
-  satellite('mapbox://styles/mapbox/standard-satellite'),
-
   /// Standard w wyblakłym motywie z budynkami 3D, kamera pochylona.
   faded3d('mapbox://styles/mapbox/standard');
 
   const MapStyleOption(this.uri);
 
   final String uri;
-
-  /// Styl oparty na Standardzie: POI z featuresetu, konfiguracja importu `basemap`.
-  bool get isStandard => this == satellite || this == faded3d;
 
   /// Nachylenie kamery po włączeniu stylu – 3D widać dopiero pod kątem.
   double get pitch => this == faded3d ? 60 : 0;
