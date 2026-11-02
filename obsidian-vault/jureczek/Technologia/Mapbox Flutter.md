@@ -31,6 +31,22 @@ final _polandViewport = CameraViewportState(
 );
 ```
 
+## Kamera dopasowana do pinezek
+Widok Polski to tylko start. Po wczytaniu pinezek `_placeCamera` w `map_screen.dart` dopasowuje do nich kamerę:
+```dart
+final camera = await map.cameraForCoordinatesPadding(
+  points,                    // List<Point>
+  CameraOptions(),           // bearing/pitch z bieżącej kamery
+  MbxEdgeInsets(top: …, left: 48, bottom: …, right: 48),
+  12,                        // maxZoom – inaczej 1 pinezka = maksymalny zoom
+  null,                      // offset
+);
+await map.setCamera(camera); // bez animacji, pod zasłoną
+```
+- Działa od `onMapCreated`, czyli gdy mapa ma już rozmiar. Styl nie musi być wczytany.
+- `cameraForCoordinates(coords, padding, bearing, pitch)` nie ma `maxZoom` – jedną pinezkę przybliżyłoby maksymalnie.
+- Pinezki na mapie czeka się przez `ref.listen` (Riverpod 3 pauzuje provider bez słuchaczy, `pinsProvider.future` może wisieć).
+
 ## Ornamenty (kompas, skala)
 - Domyślnie kompas jest w prawym górnym rogu, a skala w lewym górnym. Przy mapie pełnoekranowej oba chowają się pod paskiem statusu.
 - Ustawia się je w `onMapCreated`: `map.compass.updateSettings(CompassSettings(position: OrnamentPosition.TOP_RIGHT, marginTop: …))` oraz `map.scaleBar.updateSettings(ScaleBarSettings(…))`.

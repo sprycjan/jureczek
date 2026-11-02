@@ -68,6 +68,17 @@ data: 2026-11-01
 - [ ] Użytkownik: przeniesienie pinezki do innego folderu w edycji, „+ Nowy folder” z formularza
 - [ ] Użytkownik: pejzaże o innych porach dnia
 
+## Poprawki po teście
+- **Kamera po otwarciu mapy obejmuje pinezki** (zgłoszenie użytkownika z 2026-11-02: mapa folderu „Portugalia” zawsze startowała nad Polską). `_placeCamera` w `map_screen.dart` działa raz, gdy gotowe są mapa, obrazki pinezek i pierwsza lista z bazy. Liczy kamerę przez `map.cameraForCoordinatesPadding(punkty, CameraOptions(), padding, maxZoom 12, null)` i ustawia ją `setCamera`, bez animacji.
+  - Padding: u góry pasek statusu + narzędzia + wysokość pinezki (pinezka stoi czubkiem na punkcie), po bokach 48 dp, na dole 48 dp + dolny inset.
+  - `maxZoom 12`: jedna pinezka pokazuje się z okolicą (miasteczko i sąsiednie wsie), a nie ulicę.
+  - Działa też na mapie wszystkich pinezek. Przy pustym folderze albo przy udostępnieniu (wynik leci do miejsca) zostaje widok Polski.
+  - Zasłona w kolorze tła schodzi dopiero po wczytaniu stylu **i** ustawieniu kamery, dzięki czemu Polska nie miga przed przeskokiem. Awaryjny timer 1,5 s zostaje.
+- [x] `flutter analyze`: 0 issues, `flutter test`: 153/153
+- [x] P30 przez adb: „Portugalia” (1 pinezka) → mapa wyśrodkowana na Sernancelhe, zoom 12
+- [x] P30 przez adb: „Pinezki” (5) → wszystkie widoczne, od Konina do Bochni, z marginesem od narzędzi
+- [ ] Użytkownik: wejście w folder bez mignięcia Polski
+
 ## Otwarte
 - Pinezka postawiona w teście v9 zniknęła przy instalacji v10 (baza miała schemat 5, zero pinezek, brak błędów w logach). Migracja 4 → 5 sprawdzona osobno – działa. Podobne zniknięcie było 2026-10-26 – [[Backlog]].
 - Snackbar „Dodano pinezkę” zostaje widoczny po powrocie na ekran startowy (wspólny `ScaffoldMessenger`).

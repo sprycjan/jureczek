@@ -37,7 +37,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [x] Foldery jako kontener na miejsca (v10, [[ADR-007 Foldery pinezek]])
 - [ ] Daty wyjazdu w folderze
 - [ ] Usuwanie folderu (świadomie pominięte w v10 – trzeba zdecydować, co z pinezkami)
-- [ ] Mapa folderu: kamera dopasowana do jego pinezek zamiast widoku Polski
+- [x] Mapa folderu: kamera dopasowana do jego pinezek zamiast widoku Polski ([[v10 – foldery i ekran startowy]], poprawki po teście)
 - [ ] Elementy makiety startowej pominięte w v10: pogoda, dzwonek, wyszukiwarka list, chipy filtrów (kraje), tagi, licznik „odwiedzonych”, „Ostatnio zapisane miejsca”, dolna nawigacja
 - [ ] Wybór okładki folderu (dziś stała nocna)
 - [ ] Synchronizacja z chmurą / backend

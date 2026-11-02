@@ -28,7 +28,7 @@ import 'place_adjust_overlay.dart';
 import 'place_search_field.dart';
 import 'search_result_card.dart';
 
-/// Środek Polski i zoom obejmujący cały kraj.
+/// Środek Polski i zoom obejmujący cały kraj – start, gdy nie ma pinezek.
 final _polandViewport = CameraViewportState(
   center: Point(coordinates: Position(19.4, 52.0)),
   zoom: 5.3,
@@ -53,6 +53,13 @@ const _mapRenderDelay = Duration(milliseconds: 150);
 
 /// Czas zamykania arkusza – nowa pinezka spada dopiero na odsłoniętą mapę.
 const _sheetCloseDelay = Duration(milliseconds: 250);
+
+/// Najbliższy zoom przy dopasowaniu kamery do pinezek – jedna pinezka
+/// pokazuje się z okolicą, a nie z bliska ulicy.
+const _fitMaxZoom = 12.0;
+
+/// Margines od krawędzi ekranu przy dopasowaniu kamery do pinezek.
+const _fitPadding = 48.0;
 
 /// Zoom po przelocie do wyniku wyszukiwania lub udostępnionego miejsca.
 const _resultZoom = 15.0;
@@ -128,7 +135,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   /// Zasłona w kolorze tła do wczytania stylu – bez niej przy wejściu na mapę
   /// miga pusta klatka (v11; od v12 styl jest własny, bez nakładanej palety).
+  /// Zasłona schodzi, gdy styl jest wczytany, a kamera ustawiona na pinezkach –
+  /// inaczej na chwilę widać Polskę przed przeskokiem.
   final _styleReady = ValueNotifier(false);
+  bool _styleLoaded = false;
+  bool _cameraPlaced = false;
   Timer? _curtainFallback;
   final _searchFocus = FocusNode();
 
@@ -162,7 +173,53 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _onStyleLoaded() {
-    if (mounted) _styleReady.value = true;
+    _styleLoaded = true;
+    _updateCurtain();
+  }
+
+  void _updateCurtain() {
+    if (mounted && _styleLoaded && _cameraPlaced) _styleReady.value = true;
+  }
+
+  /// Raz, gdy są i mapa, i pinezki: kamera obejmuje wszystkie widoczne pinezki.
+  /// Bez pinezek albo z wynikiem do pokazania (udostępnienie) zostaje widok startowy.
+  Future<void> _placeCamera() async {
+    final map = _map;
+    final all = ref.read(pinsProvider).value;
+    if (_cameraPlaced || map == null || all == null || _pinImages.isEmpty) {
+      return;
+    }
+    _cameraPlaced = true;
+    final pins = _visible(all);
+    if (pins.isNotEmpty && _result == null && _pendingResult == null) {
+      try {
+        final insets = MediaQuery.paddingOf(context);
+        // Pinezka stoi czubkiem na punkcie, więc u góry trzeba miejsca na jej
+        // wysokość – ponad narzędziami pod paskiem statusu.
+        final pinHeight =
+            _pngSize(_pinImages[(PinCategory.fallback, false)]!).height /
+            pinImageScale;
+        final camera = await map.cameraForCoordinatesPadding(
+          [
+            for (final pin in pins)
+              Point(coordinates: Position(pin.lng, pin.lat)),
+          ],
+          CameraOptions(),
+          MbxEdgeInsets(
+            top: insets.top + _toolsPadding + _toolSize + pinHeight,
+            left: _fitPadding,
+            bottom: insets.bottom + _fitPadding,
+            right: _fitPadding,
+          ),
+          _fitMaxZoom,
+          null,
+        );
+        await map.setCamera(camera);
+      } catch (e) {
+        debugPrint('Dopasowanie kamery do pinezek nie powiodło się: $e');
+      }
+    }
+    _updateCurtain();
   }
 
   Future<void> _onMapCreated(MapboxMap map) async {
@@ -238,6 +295,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     );
 
     _scheduleSync(ref.read(pinsProvider).value ?? const []);
+    await _placeCamera();
 
     final pending = _pendingResult;
     _pendingResult = null;
@@ -726,6 +784,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       switch (next) {
         case AsyncData(:final value):
           _scheduleSync(value);
+          _placeCamera();
         case AsyncError(:final error):
           debugPrint('Odczyt pinezek nie powiódł się: $error');
           _showError(AppLocalizations.of(context).pinsLoadError);
