@@ -11,7 +11,6 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [x] Formularz od razu po long-tapie (v9: wybór typu, nazwa, notatka)
 - [x] Tapnięcie w pinezkę otwiera podgląd i edycję (v2 + v3)
 - [x] Usuwanie pinezek z „Cofnij” (v2)
-- [ ] Przeciąganie pinezek (`isDraggable` + `dragEvents`)
 - [x] Kategorie z różnymi ikonami (v9, [[v9 – kategorie pinezek]])
 - [x] Animacja spadania nowej pinezki z wibracją (v7)
 - [x] Pinezka z klikniętego POI mapy, z nazwą (v6, [[v6 – klikalne POI]])
@@ -48,5 +47,18 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Eksport / kopia zapasowa bazy (po niewyjaśnionej utracie pinezek testowych na telefonie 2026-10-26 – [[v3 – nazwa i notatka]])
 - [ ] Zbadać znikanie pinezek: znowu 2026-11-01 między instalacją v9 i v10 (baza po migracji pusta, migracja 4 → 5 sama działa) – [[v10 – foldery i ekran startowy]]
 - [ ] Snackbary mapy zostają widoczne po powrocie na ekran startowy
+
+## Moje uwagi
+- [ ] Dolne menu, zdecydowac czy jest tam coś do wrzucenia
+- [ ] Mapa: do usunięcia biała obwódka wokół nazw miejscowości i POI i ewentualne dopasowanie koloru tekstu
+- [ ] Przełącznik na mapie do trybu 3D w odpowiednim stylu
+- [ ] Zmiana tekstów na ekranach
+- [ ] Dodanie większej ilości pinezek (Google Stitch)
+- [ ] Dodanie wyboru koloru pinezki
+- [ ] Mruganie mapy podczas przełączania ekranu głównego do mapy
+- [ ] Więcej ikon kategorii i kolorów akcentów
+- [ ] Poprawić obrazek przy dodawaniu folderu, możeusunąć
+- [ ] Na ekranie folderów zrobić łagodne przejście między obrazkiem, a listą, jak na screenie z Google Stitch
+- [ ] Poprawić pole wyszukiwarki, obramówka jest kanciasta, a pole zaokrąglone
 
 Powiązane: [[00 Jureczek – przegląd]]
