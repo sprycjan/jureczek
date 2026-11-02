@@ -63,6 +63,10 @@ Pierwsza z trzech wersji po uwagach użytkownika z [[Backlog]] („Moje uwagi”
 - [x] P30 przez adb: mapa renderuje się w TLHC, przesuwanie działa
 - [ ] Użytkownik: płynność przejścia i brak mignięcia po zmianie TLHC
 - Huawei P30 nie ma `screenrecord` – płynności nie da się nagrać przez adb, ocenia użytkownik.
+- **Zaznaczenie pinezki „spóźnione o krok”** (użytkownik, 2026-11-02). Po otwarciu arkusza pinezka nie wyglądała na zaznaczoną. Po jego zamknięciu zostawał wygląd zaznaczonej, aż do ruszenia mapą. Przyczyna to skutek uboczny TLHC: Mapbox rysuje klatkę tylko na żądanie, a tekstura we Flutterze pokazuje poprzednią klatkę. Sama zmiana obrazka annotacji daje jedną klatkę, więc na ekranie zostaje stan sprzed zmiany. Poprawka: `_repaintMap()` w `map_screen.dart`. Gdy `_syncPins` zmieni wygląd którejś pinezki, woła `map.triggerRepaint()` dwa razy, drugi raz po `_mapRenderDelay` (150 ms).
+- [x] `flutter analyze`: 0 issues, `flutter test`: 153/153
+- [x] P30 przez adb: dwie pinezki (gastronomia, zabytek). Przy otwartym arkuszu pinezka jest zaznaczona (większa, biała obwódka), po zamknięciu wraca do zwykłej.
+- [ ] Użytkownik: zaznaczanie pinezek
 
 ## Otwarte
 > Po v11 numeracja przesunięta: v12 = [[v12 – własny styl mapy]], przełącznik stylów → v13, kolor pinezki → v14.

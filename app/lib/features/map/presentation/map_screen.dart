@@ -312,6 +312,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       await manager.delete(annotation);
     }
 
+    var lookChanged = false;
     for (final pin in pins) {
       final look = (pin.category, pin.id == _selectedPinId);
       final existing = _annotationsByPinId[pin.id];
@@ -322,6 +323,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           ..iconImage = _lookImageId(look);
         await manager.update(existing);
         _lookByPinId[pin.id] = look;
+        lookChanged = true;
         continue;
       }
       final annotation = await manager.create(
@@ -338,6 +340,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       _pinIdByAnnotationId[annotation.id] = pin.id;
       _lookByPinId[pin.id] = look;
     }
+    if (lookChanged) await _repaintMap();
+  }
+
+  /// Mapa jako TextureView (TLHC) pokazuje klatkę o jedną „spóźnioną”:
+  /// po zmianie wyglądu pinezki Mapbox rysuje jedną klatkę na żądanie,
+  /// a na ekranie zostaje poprzednia – dopóki mapy się nie poruszy.
+  /// Dodatkowe przerysowanie wypycha właściwą klatkę na ekran.
+  Future<void> _repaintMap() async {
+    final map = _map;
+    if (map == null) return;
+    await map.triggerRepaint();
+    await Future<void>.delayed(_mapRenderDelay);
+    if (mounted) await _map?.triggerRepaint();
   }
 
   Future<void> _setPinOpacity(String id, double opacity) {
