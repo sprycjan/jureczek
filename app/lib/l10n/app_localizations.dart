@@ -214,6 +214,18 @@ abstract class AppLocalizations {
   /// **'Szukaj miejsca'**
   String get searchHint;
 
+  /// No description provided for @mapZoomIn.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przybliż'**
+  String get mapZoomIn;
+
+  /// No description provided for @mapZoomOut.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oddal'**
+  String get mapZoomOut;
+
   /// No description provided for @mapStylesOpen.
   ///
   /// In pl, this message translates to:

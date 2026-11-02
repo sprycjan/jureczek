@@ -236,6 +236,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (result != null && !_adjusting) await _showResult(result, fly: false);
   }
 
+  /// Przybliża (`+1`) albo oddala (`-1`) mapę o jeden poziom zoomu.
+  Future<void> _zoomBy(double delta) async {
+    final map = _map;
+    if (map == null) return;
+    try {
+      final zoom = (await map.getCameraState()).zoom;
+      await map.easeTo(
+        CameraOptions(zoom: zoom + delta),
+        MapAnimationOptions(duration: 300),
+      );
+    } catch (e) {
+      debugPrint('Zmiana zoomu nie powiodła się: $e');
+    }
+  }
+
   void _toggleStyles() {
     if (_searchOpen) _closeSearch();
     setState(() => _stylesOpen = !_stylesOpen);
@@ -1010,6 +1025,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ],
                     ),
                   ],
+                ),
+              ),
+            ),
+            // Przybliżanie i oddalanie: prawa krawędź, na środku wysokości –
+            // z dala od narzędzi u góry, karty wyniku i skali na dole.
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: _toolsPadding),
+                child: MapZoomButtons(
+                  zoomInTooltip: l10n.mapZoomIn,
+                  zoomOutTooltip: l10n.mapZoomOut,
+                  onZoomIn: () => _zoomBy(1),
+                  onZoomOut: () => _zoomBy(-1),
                 ),
               ),
             ),

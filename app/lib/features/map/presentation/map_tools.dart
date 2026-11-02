@@ -47,3 +47,49 @@ class MapToolButton extends StatelessWidget {
     );
   }
 }
+
+/// Przyciski przybliżania i oddalania mapy w jednej pionowej „pigułce”.
+class MapZoomButtons extends StatelessWidget {
+  const MapZoomButtons({
+    super.key,
+    required this.zoomInTooltip,
+    required this.zoomOutTooltip,
+    required this.onZoomIn,
+    required this.onZoomOut,
+  });
+
+  final String zoomInTooltip;
+  final String zoomOutTooltip;
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      shape: const StadiumBorder(),
+      elevation: 3,
+      color: colors.surface,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: zoomInTooltip,
+            icon: const Icon(Icons.add),
+            onPressed: onZoomIn,
+          ),
+          SizedBox(
+            width: 24,
+            child: Divider(height: 1, color: colors.outlineVariant),
+          ),
+          IconButton(
+            tooltip: zoomOutTooltip,
+            icon: const Icon(Icons.remove),
+            onPressed: onZoomOut,
+          ),
+        ],
+      ),
+    );
+  }
+}

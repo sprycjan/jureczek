@@ -72,6 +72,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get searchHint => 'Szukaj miejsca';
 
   @override
+  String get mapZoomIn => 'Przybliż';
+
+  @override
+  String get mapZoomOut => 'Oddal';
+
+  @override
   String get mapStylesOpen => 'Style mapy';
 
   @override

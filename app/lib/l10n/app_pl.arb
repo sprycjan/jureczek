@@ -27,6 +27,8 @@
   "searchOpen": "Szukaj miejsca",
   "searchClose": "Zamknij wyszukiwanie",
   "searchHint": "Szukaj miejsca",
+  "mapZoomIn": "Przybliż",
+  "mapZoomOut": "Oddal",
   "mapStylesOpen": "Style mapy",
   "mapStylesClose": "Zamknij style mapy",
   "mapStyleVanventure": "Domyślny",

@@ -25,6 +25,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Widok satelity – usunięty w v13 na życzenie użytkownika (kafelki `mapbox.satellite` dawały 429); wrócić, jeśli konto Mapbox pozwoli
 - [ ] 3D przy małym zoomie pokazuje kosmos – mniejsze pochylenie albo przybliżenie
 - [ ] Zapamiętywanie wybranego stylu mapy (na razie świadomie bez)
+- [x] Przyciski przybliżania i oddalania (v13)
 - [x] Własna paleta mapy w stylu aplikacji (v8)
 - [x] Własny ciemny styl mapy z assetu (v12, [[v12 – własny styl mapy]])
 - [ ] Ikony POI w stylu (sprite `maki`) – v12 ma same napisy

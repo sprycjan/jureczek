@@ -58,6 +58,10 @@ Plan z [[v11 – poprawki wyglądu]] („Otwarte”), po [[v12 – własny styl 
 - **Satelita usunięty** (użytkownik, 2026-11-02) – zdjęcia i tak się nie ładowały (429). Zostają 3 style: Domyślny / Teren / 3D. Interakcje `StandardPOIs` zostają dla 3D.
 - [x] `flutter analyze`: 0 issues, `flutter test`: 157/157
 - [x] P30 przez adb: panel z 3 stylami, „Domyślny” zaznaczony
+- **Przyciski + i −** (użytkownik, 2026-11-02): pionowa „pigułka” `MapZoomButtons` (`map_tools.dart`) przy prawej krawędzi, na środku wysokości – z dala od narzędzi u góry, karty wyniku i skali na dole. Tap = `easeTo(zoom ± 1)`, 300 ms. Podpowiedzi „Przybliż” / „Oddal” (`mapZoomIn`, `mapZoomOut`).
+- [x] `flutter analyze`: 0 issues, `flutter test`: 158/158 (nowy `map_zoom_buttons_test`)
+- [x] P30 przez adb: 2× „+” – skala 500 km → 100 km; „−” – 200 km
+- [ ] Użytkownik: położenie przycisków
 
 ## Otwarte
 - 3D: mniejsze pochylenie przy małym zoomie albo przybliżenie przy włączaniu.
