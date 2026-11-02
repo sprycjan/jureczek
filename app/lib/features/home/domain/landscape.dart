@@ -17,6 +17,3 @@ enum Landscape {
     _ => night,
   };
 }
-
-/// Okładka w podglądzie folderu (ekran „Nowy folder”).
-const folderCoverAsset = 'assets/landscapes/cover.jpg';

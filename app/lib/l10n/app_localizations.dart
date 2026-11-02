@@ -448,12 +448,6 @@ abstract class AppLocalizations {
   /// **'Nowa lista'**
   String get folderPreviewName;
 
-  /// No description provided for @folderPreviewDescription.
-  ///
-  /// In pl, this message translates to:
-  /// **'Dzikie postoje, bezpłatne parcele i punkty z wodą…'**
-  String get folderPreviewDescription;
-
   /// No description provided for @folderCreate.
   ///
   /// In pl, this message translates to:
@@ -538,6 +532,54 @@ abstract class AppLocalizations {
   /// **'Kompas'**
   String get folderIconCompass;
 
+  /// No description provided for @folderIconForest.
+  ///
+  /// In pl, this message translates to:
+  /// **'Las'**
+  String get folderIconForest;
+
+  /// No description provided for @folderIconCity.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miasto'**
+  String get folderIconCity;
+
+  /// No description provided for @folderIconCastle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamek'**
+  String get folderIconCastle;
+
+  /// No description provided for @folderIconFood.
+  ///
+  /// In pl, this message translates to:
+  /// **'Jedzenie'**
+  String get folderIconFood;
+
+  /// No description provided for @folderIconWine.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wino'**
+  String get folderIconWine;
+
+  /// No description provided for @folderIconBike.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rower'**
+  String get folderIconBike;
+
+  /// No description provided for @folderIconKayak.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kajak'**
+  String get folderIconKayak;
+
+  /// No description provided for @folderIconSki.
+  ///
+  /// In pl, this message translates to:
+  /// **'Narty'**
+  String get folderIconSki;
+
   /// No description provided for @folderColorEmerald.
   ///
   /// In pl, this message translates to:
@@ -568,17 +610,35 @@ abstract class AppLocalizations {
   /// **'Malina'**
   String get folderColorRaspberry;
 
+  /// No description provided for @folderColorSapphire.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szafir'**
+  String get folderColorSapphire;
+
+  /// No description provided for @folderColorMeadow.
+  ///
+  /// In pl, this message translates to:
+  /// **'Łąka'**
+  String get folderColorMeadow;
+
+  /// No description provided for @folderColorLagoon.
+  ///
+  /// In pl, this message translates to:
+  /// **'Laguna'**
+  String get folderColorLagoon;
+
+  /// No description provided for @folderColorSlate.
+  ///
+  /// In pl, this message translates to:
+  /// **'Łupek'**
+  String get folderColorSlate;
+
   /// No description provided for @homeGreeting.
   ///
   /// In pl, this message translates to:
-  /// **'Cześć Podróżniku!'**
+  /// **'Cześć!'**
   String get homeGreeting;
-
-  /// No description provided for @homeSubtitle.
-  ///
-  /// In pl, this message translates to:
-  /// **'Dokąd ruszamy kamperem na kolejną wyprawę?'**
-  String get homeSubtitle;
 
   /// No description provided for @homeFoldersTitle.
   ///

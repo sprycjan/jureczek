@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -21,7 +21,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 ## Mapa
 - [ ] Lokalizacja użytkownika i przycisk „moja lokalizacja” (uprawnienia `ACCESS_FINE/COARSE_LOCATION`, obsługa odmowy)
 - [ ] Zapamiętywanie ostatniej pozycji kamery
-- [ ] Przełącznik stylów (Standard / Outdoors / Satellite)
+- [ ] Przełącznik stylów (Standard / Outdoors / Satelita / Faded 3D) – zaplanowany jako v12, [[v11 – poprawki wyglądu]]
 - [x] Własna paleta mapy w stylu aplikacji (v8)
 - [ ] Generator ikony aplikacji w repo (skrypt), dziś tylko opis w [[v8 – styl Nocturnal Expedition]]
 - [x] Wyszukiwanie miejsc (Mapbox Search Box, v4, [[v4 – wyszukiwarka miejsc]])
@@ -49,16 +49,18 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Snackbary mapy zostają widoczne po powrocie na ekran startowy
 
 ## Moje uwagi
-- [ ] Dolne menu, zdecydowac czy jest tam coś do wrzucenia
-- [ ] Mapa: do usunięcia biała obwódka wokół nazw miejscowości i POI i ewentualne dopasowanie koloru tekstu
-- [ ] Przełącznik na mapie do trybu 3D w odpowiednim stylu
-- [ ] Zmiana tekstów na ekranach
-- [ ] Dodanie większej ilości pinezek (Google Stitch)
-- [ ] Dodanie wyboru koloru pinezki
-- [ ] Mruganie mapy podczas przełączania ekranu głównego do mapy
-- [ ] Więcej ikon kategorii i kolorów akcentów
-- [ ] Poprawić obrazek przy dodawaniu folderu, możeusunąć
-- [ ] Na ekranie folderów zrobić łagodne przejście między obrazkiem, a listą, jak na screenie z Google Stitch
-- [ ] Poprawić pole wyszukiwarki, obramówka jest kanciasta, a pole zaokrąglone
+Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]].
+- [ ] Dolne menu – decyzja: na razie brak, wraca, gdy pojawi się treść (np. „Ostatnio zapisane”, ustawienia)
+- [ ] Mapa: biała obwódka wokół nazw miejscowości i POI – spike v11 negatywny (Standard zawsze daje jasną obwódkę). Do decyzji: `lightPreset: dusk/night` albo własny styl Studio
+- [ ] Przełącznik stylów mapy: Standard / Outdoors / Satelita / Faded 3D z nachyleniem – v12
+- [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
+- [ ] Dodanie większej ilości pinezek (Google Stitch) – czeka na grafiki od użytkownika
+- [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v13
+- [x] Mruganie mapy podczas przełączania ekranu głównego do mapy (v11: zasłona do nałożenia palety)
+- [x] Więcej ikon kategorii i kolorów akcentów folderów (v11: 15 ikon, 9 kolorów)
+- [x] Obrazek przy dodawaniu folderu usunięty (v11), później dodamy coś innego
+- [ ] Coś zamiast obrazka w formularzu folderu (pomysł użytkownika na później)
+- [x] Łagodne przejście między pejzażem a listą (v11)
+- [x] Pole wyszukiwarki z kanciastą obwódką (v11)
 
 Powiązane: [[00 Jureczek – przegląd]]

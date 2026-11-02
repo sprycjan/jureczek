@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,6 +125,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   bool _searchOpen = false;
   final _searchText = TextEditingController();
+
+  /// Zasłona w kolorze tła do czasu nałożenia palety – bez niej przy wejściu
+  /// na mapę miga domyślny, jasny Standard (v11).
+  final _styleReady = ValueNotifier(false);
+  Timer? _curtainFallback;
   final _searchFocus = FocusNode();
 
   @override
@@ -147,13 +154,25 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void dispose() {
     _tapEvents?.cancel();
     _drops.dispose();
+    _styleReady.dispose();
+    _curtainFallback?.cancel();
     _searchText.dispose();
     _searchFocus.dispose();
     super.dispose();
   }
 
+  Future<void> _onStyleLoaded() async {
+    final map = _map;
+    if (map != null) await applyMapPalette(map);
+    if (mounted) _styleReady.value = true;
+  }
+
   Future<void> _onMapCreated(MapboxMap map) async {
     _map = map;
+    // Gdyby styl się nie wczytał (np. brak sieci), zasłona nie może zostać na zawsze.
+    _curtainFallback = Timer(const Duration(milliseconds: 1500), () {
+      if (mounted) _styleReady.value = true;
+    });
     await _placeOrnaments(map);
     await _loadPinImages();
     final manager = await map.annotations.createPointAnnotationManager();
@@ -717,10 +736,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               styleUri: MapboxStyles.STANDARD,
               viewport: _polandViewport,
               onMapCreated: _onMapCreated,
-              onStyleLoadedListener: (_) {
-                final map = _map;
-                if (map != null) applyMapPalette(map);
-              },
+              onStyleLoadedListener: (_) => _onStyleLoaded(),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: ValueListenableBuilder(
+                  valueListenable: _styleReady,
+                  builder: (context, ready, _) => AnimatedOpacity(
+                    opacity: ready ? 0 : 1,
+                    duration: const Duration(milliseconds: 200),
+                    child: ColoredBox(
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                  ),
+                ),
+              ),
             ),
             Positioned.fill(
               child: IgnorePointer(

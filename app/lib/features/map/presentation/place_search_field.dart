@@ -76,7 +76,10 @@ class _PlaceSearchFieldState extends State<PlaceSearchField> {
                 onChanged: widget.onChanged,
                 decoration: InputDecoration(
                   hintText: l10n.searchHint,
-                  border: InputBorder.none,
+                  // Ramki z motywu mają promień 12 – tu muszą pasować do pola (24).
+                  border: _border(Colors.transparent),
+                  enabledBorder: _border(Colors.transparent),
+                  focusedBorder: _border(Theme.of(context).colorScheme.primary),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 14,
@@ -92,6 +95,11 @@ class _PlaceSearchFieldState extends State<PlaceSearchField> {
       ],
     );
   }
+
+  static OutlineInputBorder _border(Color color) => OutlineInputBorder(
+    borderRadius: BorderRadius.circular(24),
+    borderSide: BorderSide(color: color, width: 1.5),
+  );
 
   Widget _results(BuildContext context, AppLocalizations l10n) {
     final Widget content;

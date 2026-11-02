@@ -92,6 +92,60 @@ void main() {
     expect(find.text('Portugalia'), findsNWidgets(2));
   });
 
+  testWidgets('podgląd bez obrazka i bez zastępczego opisu', (tester) async {
+    await pumpForm(tester);
+
+    expect(find.byType(Image), findsNothing);
+    expect(find.textContaining('Dzikie postoje'), findsNothing);
+
+    await tester.enterText(find.byType(TextField).at(1), 'Klify i plaże');
+    await tester.pump();
+
+    expect(find.text('Klify i plaże'), findsNWidgets(2));
+  });
+
+  testWidgets('ikony i kolory spoza ekranu dostępne po przewinięciu rzędu', (
+    tester,
+  ) async {
+    final results = await pumpForm(tester);
+    await tester.enterText(find.byType(TextField).first, 'Alpy zimą');
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('folder-colors')),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('folder-icon-ski')),
+      100,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('folder-icons')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('folder-icon-ski')));
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('folder-color-slate')),
+      100,
+      scrollable: find.descendant(
+        of: find.byKey(const ValueKey('folder-colors')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('folder-color-slate')));
+    await tester.pump();
+
+    await saveVia(tester, find.byKey(const ValueKey('folder-save')));
+
+    final saved = await tester.runAsync(
+      () => FoldersRepository(db).findById(results.single!.folderId),
+    );
+    expect(saved?.icon, FolderIcon.ski);
+    expect(saved?.color, FolderColor.slate);
+  });
+
   testWidgets('„Utwórz” zapisuje ikonę i kolor i wraca bez mapy', (
     tester,
   ) async {

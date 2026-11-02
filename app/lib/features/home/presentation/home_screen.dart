@@ -91,20 +91,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _Header(landscape: _landscape)),
+          SliverToBoxAdapter(
+            child: _Header(
+              landscape: _landscape,
+              greeting: Text(
+                l10n.homeGreeting,
+                style: theme.textTheme.headlineMedium,
+              ),
+            ),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
             sliver: SliverList.list(
               children: [
-                Text(l10n.homeGreeting, style: theme.textTheme.headlineMedium),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.homeSubtitle,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 20),
                 Row(
                   children: [
                     Expanded(
@@ -187,22 +186,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-/// Pejzaż z płynnym przejściem między porami dnia, wtapiający się w tło.
+/// Pejzaż z płynnym przejściem między porami dnia, długo wtapiający się w tło
+/// (jak makieta Stitcha); powitanie leży na jego dolnej części.
 class _Header extends StatelessWidget {
-  const _Header({required this.landscape});
+  const _Header({required this.landscape, required this.greeting});
 
   final Landscape landscape;
+  final Widget greeting;
 
   @override
   Widget build(BuildContext context) {
     final surface = Theme.of(context).colorScheme.surface;
     return SizedBox(
-      height: 288,
+      height: 320,
       child: Stack(
         fit: StackFit.expand,
         children: [
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 1200),
+            // Domyślny układ nie rozciąga dzieci – obrazek miał swój naturalny
+            // rozmiar na środku nagłówka i twardą dolną krawędź (v11).
+            layoutBuilder: (current, previous) => Stack(
+              fit: StackFit.expand,
+              children: [...previous, ?current],
+            ),
             child: Image.asset(
               landscape.asset,
               key: ValueKey(landscape),
@@ -216,15 +223,15 @@ class _Header extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0, 0.55, 1],
+                stops: const [0, 0.35, 0.6, 0.8, 0.92, 1],
                 colors: [
-                  surface.withValues(alpha: 0),
-                  surface.withValues(alpha: 0.15),
-                  surface,
+                  for (final alpha in const [0.0, 0.08, 0.35, 0.7, 0.92, 1.0])
+                    surface.withValues(alpha: alpha),
                 ],
               ),
             ),
           ),
+          Positioned(left: 16, right: 16, bottom: 0, child: greeting),
         ],
       ),
     );

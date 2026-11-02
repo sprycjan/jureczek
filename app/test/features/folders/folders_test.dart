@@ -102,4 +102,13 @@ void main() {
     final all = await list();
     expect(all.single.name, TripFolder.defaultName);
   });
+
+  test('klucze ikon i kolorów: unikalne, nieznany → domyślny', () {
+    expect(FolderIcon.values.map((v) => v.key).toSet(), hasLength(15));
+    expect(FolderColor.values.map((v) => v.key).toSet(), hasLength(9));
+    expect(FolderIcon.fromKey('ski'), FolderIcon.ski);
+    expect(FolderColor.fromKey('slate'), FolderColor.slate);
+    expect(FolderIcon.fromKey('nope'), FolderIcon.camper);
+    expect(FolderColor.fromKey(null), FolderColor.emerald);
+  });
 }

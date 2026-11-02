@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../../home/domain/landscape.dart';
 import '../application/folders_providers.dart';
 import '../domain/trip_folder.dart';
 import 'folder_badge.dart';
@@ -178,11 +177,14 @@ class _FolderFormScreenState extends ConsumerState<FolderFormScreen> {
               color: colors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
-              children: [
-                for (final icon in FolderIcon.values)
-                  Expanded(
-                    child: Padding(
+            child: SizedBox(
+              height: 50,
+              child: ListView(
+                key: const ValueKey('folder-icons'),
+                scrollDirection: Axis.horizontal,
+                children: [
+                  for (final icon in FolderIcon.values)
+                    Padding(
                       padding: const EdgeInsets.all(3),
                       child: Tooltip(
                         message: icon.label(l10n),
@@ -196,6 +198,7 @@ class _FolderFormScreenState extends ConsumerState<FolderFormScreen> {
                             borderRadius: BorderRadius.circular(8),
                             onTap: () => setState(() => _icon = icon),
                             child: SizedBox(
+                              width: 44,
                               height: 44,
                               child: Icon(
                                 icon.icon,
@@ -210,58 +213,72 @@ class _FolderFormScreenState extends ConsumerState<FolderFormScreen> {
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
           label(Icons.palette, colors.secondary, l10n.folderColorLabel),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
               color: colors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final color in FolderColor.values)
-                  Semantics(
-                    button: true,
-                    selected: color == _color,
-                    label: color.label(l10n),
-                    child: GestureDetector(
-                      key: ValueKey('folder-color-${color.key}'),
-                      onTap: () => setState(() => _color = color),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: color.color,
-                          shape: BoxShape.circle,
-                          border: color == _color
-                              ? Border.all(
-                                  color: colors.surfaceContainerLow,
-                                  width: 2,
+            child: SizedBox(
+              height: 44,
+              child: ListView.separated(
+                key: const ValueKey('folder-colors'),
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: FolderColor.values.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 20),
+                itemBuilder: (context, i) {
+                  final color = FolderColor.values[i];
+                  final selected = color == _color;
+                  return Center(
+                    child: Semantics(
+                      button: true,
+                      selected: selected,
+                      label: color.label(l10n),
+                      child: GestureDetector(
+                        key: ValueKey('folder-color-${color.key}'),
+                        onTap: () => setState(() => _color = color),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: color.color,
+                            shape: BoxShape.circle,
+                            border: selected
+                                ? Border.all(
+                                    color: colors.surfaceContainerLow,
+                                    width: 2,
+                                  )
+                                : null,
+                            boxShadow: selected
+                                ? [
+                                    BoxShadow(
+                                      color: color.color.withValues(alpha: 0.5),
+                                      spreadRadius: 3,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: selected
+                              ? Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: color.onColor,
                                 )
                               : null,
-                          boxShadow: color == _color
-                              ? [
-                                  BoxShadow(
-                                    color: color.color.withValues(alpha: 0.5),
-                                    spreadRadius: 3,
-                                  ),
-                                ]
-                              : null,
                         ),
-                        child: color == _color
-                            ? Icon(Icons.check, size: 16, color: color.onColor)
-                            : null,
                       ),
                     ),
-                  ),
-              ],
+                  );
+                },
+              ),
             ),
           ),
           if (_saveFailed) ...[
@@ -311,7 +328,7 @@ class _FolderFormScreenState extends ConsumerState<FolderFormScreen> {
   }
 }
 
-/// Podgląd folderu na żywo: nocna okładka, kafelek ikony, nazwa i opis.
+/// Podgląd folderu na żywo: kafelek ikony, nazwa i opis (jak karta na liście).
 class _Preview extends StatelessWidget {
   const _Preview({
     required this.name,
@@ -333,76 +350,42 @@ class _Preview extends StatelessWidget {
     final title = name.text.trim().isEmpty
         ? l10n.folderPreviewName
         : name.text.trim();
-    final subtitle = description.text.trim().isEmpty
-        ? l10n.folderPreviewDescription
-        : description.text.trim();
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: ColoredBox(
+    final subtitle = description.text.trim();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
         color: colors.surfaceContainer,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 176,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    folderCoverAsset,
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                  ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [
-                          colors.surfaceContainer,
-                          colors.surfaceContainer.withValues(alpha: 0.6),
-                          colors.surfaceContainer.withValues(alpha: 0),
-                        ],
-                        stops: const [0, 0.3, 0.7],
-                      ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          FolderBadge(icon: icon, color: color),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium,
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  FolderBadge(icon: icon, color: color),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

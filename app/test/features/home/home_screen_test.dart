@@ -56,7 +56,8 @@ void main() {
   ) async {
     await pumpHome(tester);
 
-    expect(find.text('Cześć Podróżniku!'), findsOneWidget);
+    expect(find.text('Cześć!'), findsOneWidget);
+    expect(find.textContaining('Dokąd ruszamy'), findsNothing);
     expect(find.text('Nie masz jeszcze żadnego folderu'), findsOneWidget);
 
     await tester.scrollUntilVisible(

@@ -192,10 +192,6 @@ class AppLocalizationsPl extends AppLocalizations {
   String get folderPreviewName => 'Nowa lista';
 
   @override
-  String get folderPreviewDescription =>
-      'Dzikie postoje, bezpłatne parcele i punkty z wodą…';
-
-  @override
   String get folderCreate => 'Utwórz';
 
   @override
@@ -249,6 +245,30 @@ class AppLocalizationsPl extends AppLocalizations {
   String get folderIconCompass => 'Kompas';
 
   @override
+  String get folderIconForest => 'Las';
+
+  @override
+  String get folderIconCity => 'Miasto';
+
+  @override
+  String get folderIconCastle => 'Zamek';
+
+  @override
+  String get folderIconFood => 'Jedzenie';
+
+  @override
+  String get folderIconWine => 'Wino';
+
+  @override
+  String get folderIconBike => 'Rower';
+
+  @override
+  String get folderIconKayak => 'Kajak';
+
+  @override
+  String get folderIconSki => 'Narty';
+
+  @override
   String get folderColorEmerald => 'Szmaragd leśny';
 
   @override
@@ -264,10 +284,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get folderColorRaspberry => 'Malina';
 
   @override
-  String get homeGreeting => 'Cześć Podróżniku!';
+  String get folderColorSapphire => 'Szafir';
 
   @override
-  String get homeSubtitle => 'Dokąd ruszamy kamperem na kolejną wyprawę?';
+  String get folderColorMeadow => 'Łąka';
+
+  @override
+  String get folderColorLagoon => 'Laguna';
+
+  @override
+  String get folderColorSlate => 'Łupek';
+
+  @override
+  String get homeGreeting => 'Cześć!';
 
   @override
   String get homeFoldersTitle => 'Moje listy podróży';

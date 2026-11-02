@@ -107,7 +107,8 @@ await map.setStyleImportConfigProperties('basemap', {
 ```
 - Wołać w `MapWidget(onStyleLoadedListener: …)` – po każdym załadowaniu stylu.
 - `map.style.*` jest deprecated; metody są na `MapboxMap`.
-- Etykiety mają automatyczną obwódkę kontrastową: ciemny tekst dostaje jasną obwódkę.
+- Etykiety mają automatyczną obwódkę kontrastową: ciemny tekst dostaje jasną obwódkę. Jasny tekst **też** dostaje jasną obwódkę (spike v11 na P30) – Standard nie ma konfiguracji obwódki, więc jasne etykiety na ciemnej mapie są nieczytelne.
+- Paleta nakładana w `onStyleLoaded` → przez chwilę widać domyślny Standard. W v11 zasłona w kolorze tła do nałożenia palety – [[v11 – poprawki wyglądu]].
 
 ## Obrazki pinezek (v9)
 - `PointAnnotationOptions(image: pngBytes, iconImage: 'pin-gastronomy-default', iconAnchor: IconAnchor.BOTTOM, iconSize: dpr / 3)` – z `iconImage` obraz trafia do stylu raz i jest współdzielony.
