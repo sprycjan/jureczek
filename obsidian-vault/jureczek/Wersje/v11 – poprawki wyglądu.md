@@ -65,6 +65,8 @@ Pierwsza z trzech wersji po uwagach użytkownika z [[Backlog]] („Moje uwagi”
 - Huawei P30 nie ma `screenrecord` – płynności nie da się nagrać przez adb, ocenia użytkownik.
 
 ## Otwarte
+> Po v11 numeracja przesunięta: v12 = [[v12 – własny styl mapy]], przełącznik stylów → v13, kolor pinezki → v14.
+
 - **Obwódka napisów** – odłożone przez użytkownika (2026-11-02). Można spróbować `lightPreset: dusk/night` (cała mapa nocna, jasne napisy z ciemną obwódką) albo przejść na własny styl z Mapbox Studio (pełna kontrola `text-halo-color`, ale bez łatwej palety).
 - **v12 – style mapy:**
   - jeden przycisk „warstwy” rozwija 4 style: Standard z paletą, Outdoors (bez klikalnych POI), `STANDARD_SATELLITE`, Faded 3D (`theme: faded`, `show3dObjects`, nachylenie ok. 60°);

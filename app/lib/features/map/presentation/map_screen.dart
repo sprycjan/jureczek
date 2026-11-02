@@ -18,7 +18,7 @@ import '../domain/pin_category.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
-import 'map_palette.dart';
+import 'map_style.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
 import 'pin_details_sheet.dart';
@@ -126,8 +126,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   bool _searchOpen = false;
   final _searchText = TextEditingController();
 
-  /// Zasłona w kolorze tła do czasu nałożenia palety – bez niej przy wejściu
-  /// na mapę miga domyślny, jasny Standard (v11).
+  /// Zasłona w kolorze tła do wczytania stylu – bez niej przy wejściu na mapę
+  /// miga pusta klatka (v11; od v12 styl jest własny, bez nakładanej palety).
   final _styleReady = ValueNotifier(false);
   Timer? _curtainFallback;
   final _searchFocus = FocusNode();
@@ -161,9 +161,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.dispose();
   }
 
-  Future<void> _onStyleLoaded() async {
-    final map = _map;
-    if (map != null) await applyMapPalette(map);
+  void _onStyleLoaded() {
     if (mounted) _styleReady.value = true;
   }
 
@@ -189,18 +187,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
     );
 
-    // POI ze stylu Standard: tap pokazuje kartę jak wynik wyszukiwania,
+    // POI z warstwy etykiet własnego stylu: tap pokazuje kartę jak wynik wyszukiwania,
     // long-tap od razu stawia pinezkę z nazwą w punkcie POI, nie pod palcem.
     map.addInteraction(
-      TapInteraction(StandardPOIs(), (poi, _) {
+      TapInteraction(FeaturesetDescriptor(layerId: poiLabelLayerId), (poi, _) {
         _searchFocus.unfocus();
-        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        final place = placeFromPoi(
+          name: poi.properties['name'] as String?,
+          geometry: poi.geometry,
+        );
         if (place != null) _showResult(place, fly: false);
       }),
     );
     map.addInteraction(
-      LongTapInteraction(StandardPOIs(), (poi, _) {
-        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+      LongTapInteraction(FeaturesetDescriptor(layerId: poiLabelLayerId), (
+        poi,
+        _,
+      ) {
+        final place = placeFromPoi(
+          name: poi.properties['name'] as String?,
+          geometry: poi.geometry,
+        );
         if (place == null) return;
         _addResultPin(place);
       }),
@@ -733,7 +740,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         body: Stack(
           children: [
             MapWidget(
-              styleUri: MapboxStyles.STANDARD,
+              styleUri: mapStyleUri,
               // Domyślny SurfaceView (HC) nie bierze udziału w animacji trasy
               // i pokazuje pustą klatkę – mapa „wskakiwała” i migała (v11).
               // TLHC + TextureView składa mapę jak zwykły widżet Fluttera.

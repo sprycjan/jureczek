@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -21,8 +21,11 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 ## Mapa
 - [ ] Lokalizacja użytkownika i przycisk „moja lokalizacja” (uprawnienia `ACCESS_FINE/COARSE_LOCATION`, obsługa odmowy)
 - [ ] Zapamiętywanie ostatniej pozycji kamery
-- [ ] Przełącznik stylów (Standard / Outdoors / Satelita / Faded 3D) – zaplanowany jako v12, [[v11 – poprawki wyglądu]]
+- [ ] Przełącznik stylów (własny / Outdoors / Satelita / Faded 3D) – zaplanowany jako v13, [[v11 – poprawki wyglądu]]
 - [x] Własna paleta mapy w stylu aplikacji (v8)
+- [x] Własny ciemny styl mapy z assetu (v12, [[v12 – własny styl mapy]])
+- [ ] Ikony POI w stylu (sprite `maki`) – v12 ma same napisy
+- [ ] Mniej etykiet miejscowości przy małym zoomie (`symbolrank`), jeśli będzie za gęsto
 - [ ] Generator ikony aplikacji w repo (skrypt), dziś tylko opis w [[v8 – styl Nocturnal Expedition]]
 - [x] Wyszukiwanie miejsc (Mapbox Search Box, v4, [[v4 – wyszukiwarka miejsc]])
 - [ ] Lepsze trafianie w sławne miejsca w wyszukiwarce, np. `proximity` tylko przy przybliżonej mapie – [[v4 – wyszukiwarka miejsc]]. Na razie zostaje jak jest (decyzja z 2026-10-26); płatne API, np. Google Places, odpada.
@@ -49,13 +52,13 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Snackbary mapy zostają widoczne po powrocie na ekran startowy
 
 ## Moje uwagi
-Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]].
+Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].
 - [ ] Dolne menu – decyzja: na razie brak, wraca, gdy pojawi się treść (np. „Ostatnio zapisane”, ustawienia)
-- [ ] Mapa: biała obwódka wokół nazw miejscowości i POI – spike v11 negatywny (Standard zawsze daje jasną obwódkę). Odłożone (2026-11-02); opcje: `lightPreset: dusk/night` albo własny styl Studio
-- [ ] Przełącznik stylów mapy: Standard / Outdoors / Satelita / Faded 3D z nachyleniem – v12
+- [x] Mapa: biała obwódka wokół nazw miejscowości i POI – rozwiązane własnym stylem z ciemną obwódką (v12)
+- [ ] Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D z nachyleniem – v13
 - [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
 - [ ] Dodanie większej ilości pinezek (Google Stitch) – czeka na grafiki od użytkownika
-- [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v13
+- [ ] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v14
 - [ ] Mruganie mapy i płynność przejścia do mapy (v11: zasłona + TLHC/TextureView) – czeka na potwierdzenie użytkownika
 - [x] Więcej ikon kategorii i kolorów akcentów folderów (v11: 15 ikon, 9 kolorów)
 - [x] Obrazek przy dodawaniu folderu usunięty (v11), później dodamy coś innego

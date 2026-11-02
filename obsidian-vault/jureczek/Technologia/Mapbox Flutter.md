@@ -95,7 +95,19 @@ map.addInteraction(TapInteraction(StandardPOIs(), (poi, context) {
 - Interakcja na featuresecie ma pierwszeństwo przed `TapInteraction.onMap`. Tap w pinezkę stojącą na POI otwiera tylko arkusz pinezki (sprawdzone przez adb).
 - Inne pola: `group`, `category` (`class`), `maki`; stan `StandardPOIsState(hide:)` do chowania ikony.
 
-## Własna paleta Standard (v8)
+## Własny styl z assetu (v12)
+Od [[v12 – własny styl mapy]] mapa nie używa Standardu, tylko klasycznego stylu JSON z assetów:
+```dart
+const mapStyleUri = 'asset://flutter_assets/assets/map/vanventure_dark.json';
+MapWidget(styleUri: mapStyleUri, …)
+```
+- Android: `asset://` czyta z assetów APK, assety Fluttera są pod `flutter_assets/`.
+- Fonty tylko z serwera Mapbox (np. `DIN Pro Medium`, `Arial Unicode MS Regular`); nieistniejący font = brak napisów.
+- Pola Streets v8: `place_label.type` (city/town/village), `class` (country/settlement…); park narodowy w `landuse_overlay`; POI w `poi_label` (`name`, `maki`, `filterrank`).
+- Klikalne POI bez Standardu: `TapInteraction(FeaturesetDescriptor(layerId: 'poi-label'), (f, _) => f.properties['name'] …)`.
+- `StandardPOIs()` i `setStyleImportConfigProperties` nie działają w stylu klasycznym (brak importu `basemap`).
+
+## Własna paleta Standard (v8, zastąpiona w v12)
 Standard ładowany przez `styleUri: MapboxStyles.STANDARD` ma import `basemap`. Kolory zmienia się w kodzie, bez Mapbox Studio:
 ```dart
 await map.setStyleImportConfigProperties('basemap', {

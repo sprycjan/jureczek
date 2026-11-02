@@ -74,6 +74,7 @@ flutter:
   assets:
     - assets/markers/
     - assets/landscapes/
+    - assets/map/
     - assets/fonts/OFL-Epilogue.txt
     - assets/fonts/OFL-SpaceGrotesk.txt
 

@@ -14,7 +14,8 @@ tags: [jureczek, przeglad]
 - Token Mapbox przez `--dart-define-from-file` – [[ADR-003 Token Mapbox]]
 - Kod w `app/`, notatki w `obsidian-vault/` – [[ADR-004 Struktura repo (app)]]
 - Foldery pinezek (każda pinezka w jednym folderze, ekran startowy z listą) – [[ADR-007 Foldery pinezek]]
-- Styl: ciemny „Nocturnal Expedition”, czcionki Epilogue + Space Grotesk, paleta mapy Standard – [[ADR-006 Styl Nocturnal Expedition]]
+- Styl: ciemny „Nocturnal Expedition”, czcionki Epilogue + Space Grotesk – [[ADR-006 Styl Nocturnal Expedition]]
+- Mapa: własny klasyczny styl JSON w assetach (Streets v8) – [[ADR-008 Własny klasyczny styl mapy]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -30,9 +31,10 @@ tags: [jureczek, przeglad]
 | v9 | 8 typów pinezek (domyślna + 7 kategorii), wybór typu w formularzu, reset bazy (schemat 4) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v9 – kategorie pinezek]] |
 | v10 | Foldery pinezek, ekran startowy z pejzażem, tworzenie/edycja folderu | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v10 – foldery i ekran startowy]] |
 | v11 | Poprawki wyglądu: „Cześć!”, pejzaż z łagodnym przejściem, podgląd folderu bez obrazka, 15 ikon i 9 kolorów folderów, zaokrąglona wyszukiwarka, mapa bez mrugania | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v11 – poprawki wyglądu]] |
-| v12 | Przełącznik stylów mapy: Standard / Outdoors / Satelita / Faded 3D | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
-| v13 | Własny kolor pinezki (24 opcje, schemat 6) | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
-| v14+ | Patrz [[Backlog]] | — |
+| v12 | Własny ciemny styl mapy (VanVenture) z assetu zamiast Standardu z paletą; POI z warstwy `poi-label` | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v12 – własny styl mapy]] |
+| v13 | Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
+| v14 | Własny kolor pinezki (24 opcje, schemat 6) | 📋 zaplanowane – [[v11 – poprawki wyglądu]] |
+| v15+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt
