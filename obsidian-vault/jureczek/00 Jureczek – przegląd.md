@@ -18,6 +18,7 @@ tags: [jureczek, przeglad]
 - Mapa: własny klasyczny styl JSON w assetach (Streets v8) – [[ADR-008 Własny klasyczny styl mapy]]
 - Lokalizacja: `geolocator` + kropka położenia Mapbox – [[ADR-009 Lokalizacja przez geolocator]]
 - Kolor pinezki: warstwy z `render_pins.py` barwione w aplikacji – [[ADR-010 Kolor pinezki z warstw]]
+- Ikony 74 typów miejsc: SVG z `tool/place_icons.py`, `flutter_svg`, cień malowany we Flutterze – [[ADR-011 Biblioteka ikon miejsc w SVG]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -36,7 +37,8 @@ tags: [jureczek, przeglad]
 | v12 | Własny ciemny styl mapy (VanVenture) z assetu zamiast Standardu z paletą; POI z warstwy `poi-label` | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v12 – własny styl mapy]] |
 | v13 | Przełącznik stylów mapy: Domyślny / Teren / 3D; przyciski + / − | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v13 – przełącznik stylów mapy]] |
 | v14 | Moja lokalizacja, ikony POI, mniej etykiet miejscowości, snackbary znikają z mapą, własny kolor pinezki (24 kolory, schemat 6) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v14 – lokalizacja, ikony POI i kolor pinezki]] |
-| v15+ | Patrz [[Backlog]] | — |
+| v15 | Biblioteka ikon miejsc: 74 typy × (pinezka, zaznaczona, ikona 24 dp) = 222 SVG, komponenty Flutter, galeria deweloperska z mapą | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v15 – biblioteka ikon miejsc]] |
+| v16+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

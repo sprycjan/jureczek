@@ -33,6 +33,12 @@ flutter run --dart-define-from-file=env/dev.json
 ```
 Bez `--dart-define-from-file` aplikacja pokaże komunikat „Brak tokenu Mapbox”.
 
+Galeria ikon miejsc (v15, osobny punkt wejścia, podmienia aplikację na telefonie – potem wgrać zwykłą):
+```bash
+flutter run -d <telefon> -t lib/dev/place_icons_main.dart --dart-define-from-file=env/dev.json
+python3 -I tool/place_icons.py assets/place_icons [podglad.html]   # po zmianie symboli
+```
+
 ## Jakość
 ```bash
 flutter analyze   # 0 issues

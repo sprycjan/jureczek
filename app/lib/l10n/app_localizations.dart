@@ -927,6 +927,528 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Wróć do listy folderów'**
   String get mapBack;
+
+  /// No description provided for @placeCategoryGastronomy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Gastronomia'**
+  String get placeCategoryGastronomy;
+
+  /// No description provided for @placeCategoryPlaces.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsca i atrakcje'**
+  String get placeCategoryPlaces;
+
+  /// No description provided for @placeCategoryNature.
+  ///
+  /// In pl, this message translates to:
+  /// **'Natura i widoki'**
+  String get placeCategoryNature;
+
+  /// No description provided for @placeCategoryActivities.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywności i szlaki'**
+  String get placeCategoryActivities;
+
+  /// No description provided for @placeCategoryTravel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podróż i infrastruktura'**
+  String get placeCategoryTravel;
+
+  /// No description provided for @placeCategoryEntertainment.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozrywka i kultura'**
+  String get placeCategoryEntertainment;
+
+  /// No description provided for @placeCategoryPractical.
+  ///
+  /// In pl, this message translates to:
+  /// **'Punkty praktyczne'**
+  String get placeCategoryPractical;
+
+  /// No description provided for @placeTypeRestaurant.
+  ///
+  /// In pl, this message translates to:
+  /// **'Restauracja'**
+  String get placeTypeRestaurant;
+
+  /// No description provided for @placeTypeCafe.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kawiarnia'**
+  String get placeTypeCafe;
+
+  /// No description provided for @placeTypeBar.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bar'**
+  String get placeTypeBar;
+
+  /// No description provided for @placeTypePub.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pub'**
+  String get placeTypePub;
+
+  /// No description provided for @placeTypeBakery.
+  ///
+  /// In pl, this message translates to:
+  /// **'Piekarnia'**
+  String get placeTypeBakery;
+
+  /// No description provided for @placeTypePastryShop.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cukiernia'**
+  String get placeTypePastryShop;
+
+  /// No description provided for @placeTypeIceCreamShop.
+  ///
+  /// In pl, this message translates to:
+  /// **'Lodziarnia'**
+  String get placeTypeIceCreamShop;
+
+  /// No description provided for @placeTypeFoodTruck.
+  ///
+  /// In pl, this message translates to:
+  /// **'Food truck'**
+  String get placeTypeFoodTruck;
+
+  /// No description provided for @placeTypeWinery.
+  ///
+  /// In pl, this message translates to:
+  /// **'Winnica'**
+  String get placeTypeWinery;
+
+  /// No description provided for @placeTypeBrewery.
+  ///
+  /// In pl, this message translates to:
+  /// **'Browar'**
+  String get placeTypeBrewery;
+
+  /// No description provided for @placeTypeCity.
+  ///
+  /// In pl, this message translates to:
+  /// **'Duże miasto'**
+  String get placeTypeCity;
+
+  /// No description provided for @placeTypeSmallTown.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miasteczko'**
+  String get placeTypeSmallTown;
+
+  /// No description provided for @placeTypeVillage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wieś'**
+  String get placeTypeVillage;
+
+  /// No description provided for @placeTypeHistoricalMonument.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zabytek'**
+  String get placeTypeHistoricalMonument;
+
+  /// No description provided for @placeTypeMuseum.
+  ///
+  /// In pl, this message translates to:
+  /// **'Muzeum'**
+  String get placeTypeMuseum;
+
+  /// No description provided for @placeTypeCastle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamek'**
+  String get placeTypeCastle;
+
+  /// No description provided for @placeTypePalace.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pałac'**
+  String get placeTypePalace;
+
+  /// No description provided for @placeTypeChurch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kościół'**
+  String get placeTypeChurch;
+
+  /// No description provided for @placeTypeMonastery.
+  ///
+  /// In pl, this message translates to:
+  /// **'Klasztor'**
+  String get placeTypeMonastery;
+
+  /// No description provided for @placeTypeRuins.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ruiny'**
+  String get placeTypeRuins;
+
+  /// No description provided for @placeTypeMonumentStatue.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pomnik'**
+  String get placeTypeMonumentStatue;
+
+  /// No description provided for @placeTypeHistoricalSite.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsce pamięci'**
+  String get placeTypeHistoricalSite;
+
+  /// No description provided for @placeTypeViewpoint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Punkt widokowy'**
+  String get placeTypeViewpoint;
+
+  /// No description provided for @placeTypeMountainPeak.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szczyt'**
+  String get placeTypeMountainPeak;
+
+  /// No description provided for @placeTypeWaterfall.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wodospad'**
+  String get placeTypeWaterfall;
+
+  /// No description provided for @placeTypeLake.
+  ///
+  /// In pl, this message translates to:
+  /// **'Jezioro'**
+  String get placeTypeLake;
+
+  /// No description provided for @placeTypeBeach.
+  ///
+  /// In pl, this message translates to:
+  /// **'Plaża'**
+  String get placeTypeBeach;
+
+  /// No description provided for @placeTypeIsland.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyspa'**
+  String get placeTypeIsland;
+
+  /// No description provided for @placeTypeNationalPark.
+  ///
+  /// In pl, this message translates to:
+  /// **'Park narodowy'**
+  String get placeTypeNationalPark;
+
+  /// No description provided for @placeTypeNatureReserve.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rezerwat przyrody'**
+  String get placeTypeNatureReserve;
+
+  /// No description provided for @placeTypeCave.
+  ///
+  /// In pl, this message translates to:
+  /// **'Jaskinia'**
+  String get placeTypeCave;
+
+  /// No description provided for @placeTypeForest.
+  ///
+  /// In pl, this message translates to:
+  /// **'Las'**
+  String get placeTypeForest;
+
+  /// No description provided for @placeTypeGorgeCanyon.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wąwóz lub kanion'**
+  String get placeTypeGorgeCanyon;
+
+  /// No description provided for @placeTypeSpring.
+  ///
+  /// In pl, this message translates to:
+  /// **'Źródło'**
+  String get placeTypeSpring;
+
+  /// No description provided for @placeTypeRiver.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rzeka'**
+  String get placeTypeRiver;
+
+  /// No description provided for @placeTypeHikingTrail.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szlak pieszy'**
+  String get placeTypeHikingTrail;
+
+  /// No description provided for @placeTypeCyclingRoute.
+  ///
+  /// In pl, this message translates to:
+  /// **'Trasa rowerowa'**
+  String get placeTypeCyclingRoute;
+
+  /// No description provided for @placeTypeMotorcycleRoute.
+  ///
+  /// In pl, this message translates to:
+  /// **'Trasa motocyklowa'**
+  String get placeTypeMotorcycleRoute;
+
+  /// No description provided for @placeTypeScenicDrive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Malownicza trasa'**
+  String get placeTypeScenicDrive;
+
+  /// No description provided for @placeTypeCableCar.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kolejka linowa'**
+  String get placeTypeCableCar;
+
+  /// No description provided for @placeTypeSkiSlope.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stok narciarski'**
+  String get placeTypeSkiSlope;
+
+  /// No description provided for @placeTypeSwimmingSpot.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kąpielisko'**
+  String get placeTypeSwimmingSpot;
+
+  /// No description provided for @placeTypeDivingSpot.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nurkowanie'**
+  String get placeTypeDivingSpot;
+
+  /// No description provided for @placeTypeCampsite.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pole biwakowe'**
+  String get placeTypeCampsite;
+
+  /// No description provided for @placeTypePicnicArea.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsce piknikowe'**
+  String get placeTypePicnicArea;
+
+  /// No description provided for @placeTypeHotel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Hotel'**
+  String get placeTypeHotel;
+
+  /// No description provided for @placeTypeGuesthouse.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pensjonat'**
+  String get placeTypeGuesthouse;
+
+  /// No description provided for @placeTypeCampingGround.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kemping'**
+  String get placeTypeCampingGround;
+
+  /// No description provided for @placeTypeParkingLot.
+  ///
+  /// In pl, this message translates to:
+  /// **'Parking'**
+  String get placeTypeParkingLot;
+
+  /// No description provided for @placeTypeGasStation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stacja paliw'**
+  String get placeTypeGasStation;
+
+  /// No description provided for @placeTypeEvCharging.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ładowarka EV'**
+  String get placeTypeEvCharging;
+
+  /// No description provided for @placeTypeAirport.
+  ///
+  /// In pl, this message translates to:
+  /// **'Lotnisko'**
+  String get placeTypeAirport;
+
+  /// No description provided for @placeTypeRailwayStation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dworzec kolejowy'**
+  String get placeTypeRailwayStation;
+
+  /// No description provided for @placeTypeHarbour.
+  ///
+  /// In pl, this message translates to:
+  /// **'Port'**
+  String get placeTypeHarbour;
+
+  /// No description provided for @placeTypeMarina.
+  ///
+  /// In pl, this message translates to:
+  /// **'Marina'**
+  String get placeTypeMarina;
+
+  /// No description provided for @placeTypeFerryTerminal.
+  ///
+  /// In pl, this message translates to:
+  /// **'Terminal promowy'**
+  String get placeTypeFerryTerminal;
+
+  /// No description provided for @placeTypeTheatre.
+  ///
+  /// In pl, this message translates to:
+  /// **'Teatr'**
+  String get placeTypeTheatre;
+
+  /// No description provided for @placeTypeCinema.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kino'**
+  String get placeTypeCinema;
+
+  /// No description provided for @placeTypeArtGallery.
+  ///
+  /// In pl, this message translates to:
+  /// **'Galeria sztuki'**
+  String get placeTypeArtGallery;
+
+  /// No description provided for @placeTypeConcertVenue.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sala koncertowa'**
+  String get placeTypeConcertVenue;
+
+  /// No description provided for @placeTypeFestivalEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Festiwal lub wydarzenie'**
+  String get placeTypeFestivalEvent;
+
+  /// No description provided for @placeTypeAmusementPark.
+  ///
+  /// In pl, this message translates to:
+  /// **'Park rozrywki'**
+  String get placeTypeAmusementPark;
+
+  /// No description provided for @placeTypeWaterPark.
+  ///
+  /// In pl, this message translates to:
+  /// **'Park wodny'**
+  String get placeTypeWaterPark;
+
+  /// No description provided for @placeTypeZoo.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zoo'**
+  String get placeTypeZoo;
+
+  /// No description provided for @placeTypeAquarium.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akwarium'**
+  String get placeTypeAquarium;
+
+  /// No description provided for @placeTypeBotanicalGarden.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ogród botaniczny'**
+  String get placeTypeBotanicalGarden;
+
+  /// No description provided for @placeTypeGroceryStore.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sklep spożywczy'**
+  String get placeTypeGroceryStore;
+
+  /// No description provided for @placeTypePharmacy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Apteka'**
+  String get placeTypePharmacy;
+
+  /// No description provided for @placeTypeAtm.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bankomat'**
+  String get placeTypeAtm;
+
+  /// No description provided for @placeTypePublicToilet.
+  ///
+  /// In pl, this message translates to:
+  /// **'Toaleta'**
+  String get placeTypePublicToilet;
+
+  /// No description provided for @placeTypeTouristInfo.
+  ///
+  /// In pl, this message translates to:
+  /// **'Informacja turystyczna'**
+  String get placeTypeTouristInfo;
+
+  /// No description provided for @placeTypeBicycleRepair.
+  ///
+  /// In pl, this message translates to:
+  /// **'Serwis rowerowy'**
+  String get placeTypeBicycleRepair;
+
+  /// No description provided for @placeTypeCarRepair.
+  ///
+  /// In pl, this message translates to:
+  /// **'Warsztat samochodowy'**
+  String get placeTypeCarRepair;
+
+  /// No description provided for @placeTypeLaundromat.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pralnia samoobsługowa'**
+  String get placeTypeLaundromat;
+
+  /// No description provided for @placeIconsTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ikony miejsc'**
+  String get placeIconsTitle;
+
+  /// No description provided for @placeIconsLibraryTab.
+  ///
+  /// In pl, this message translates to:
+  /// **'Biblioteka'**
+  String get placeIconsLibraryTab;
+
+  /// No description provided for @placeIconsMapTab.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mapa'**
+  String get placeIconsMapTab;
+
+  /// No description provided for @placeIconsDarkBackground.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ciemne tło'**
+  String get placeIconsDarkBackground;
+
+  /// No description provided for @placeIconsSummary.
+  ///
+  /// In pl, this message translates to:
+  /// **'{types} typów · {categories} kategorii'**
+  String placeIconsSummary(int types, int categories);
+
+  /// No description provided for @placeIconsMapHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stuknij pinezkę, żeby ją zaznaczyć'**
+  String get placeIconsMapHint;
 }
 
 class _AppLocalizationsDelegate

@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -15,7 +15,9 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [x] Animacja spadania nowej pinezki z wibracją (v7)
 - [x] Pinezka z klikniętego POI mapy, z nazwą (v6, [[v6 – klikalne POI]])
 - [ ] Chowanie ikony POI pod pinezką (`StandardPOIsState(hide: true)` + `setFeatureState`)
-- [ ] Podpowiedź typu pinezki z POI (`maki`, `class`) – kategorie są od v9
+- [ ] Podpowiedź typu pinezki z POI (`maki`, `class`) – kategorie są od v9, 74 typy miejsc od v15
+- [x] Biblioteka ikon 74 typów miejsc (v15, [[v15 – biblioteka ikon miejsc]])
+- [ ] Typ miejsca w pinezce: kolumna w bazie, wybór kategoria → typ w formularzu, pinezki na mapie z `renderPlacePinPng`, własny kolor dla SVG – [[v15 – biblioteka ikon miejsc]]
 - [ ] Etykiety z nazwą na mapie (`textField`; przy edycji nazwy `manager.update`)
 
 ## Mapa

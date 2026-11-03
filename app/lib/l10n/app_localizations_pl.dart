@@ -444,4 +444,267 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get mapBack => 'Wróć do listy folderów';
+
+  @override
+  String get placeCategoryGastronomy => 'Gastronomia';
+
+  @override
+  String get placeCategoryPlaces => 'Miejsca i atrakcje';
+
+  @override
+  String get placeCategoryNature => 'Natura i widoki';
+
+  @override
+  String get placeCategoryActivities => 'Aktywności i szlaki';
+
+  @override
+  String get placeCategoryTravel => 'Podróż i infrastruktura';
+
+  @override
+  String get placeCategoryEntertainment => 'Rozrywka i kultura';
+
+  @override
+  String get placeCategoryPractical => 'Punkty praktyczne';
+
+  @override
+  String get placeTypeRestaurant => 'Restauracja';
+
+  @override
+  String get placeTypeCafe => 'Kawiarnia';
+
+  @override
+  String get placeTypeBar => 'Bar';
+
+  @override
+  String get placeTypePub => 'Pub';
+
+  @override
+  String get placeTypeBakery => 'Piekarnia';
+
+  @override
+  String get placeTypePastryShop => 'Cukiernia';
+
+  @override
+  String get placeTypeIceCreamShop => 'Lodziarnia';
+
+  @override
+  String get placeTypeFoodTruck => 'Food truck';
+
+  @override
+  String get placeTypeWinery => 'Winnica';
+
+  @override
+  String get placeTypeBrewery => 'Browar';
+
+  @override
+  String get placeTypeCity => 'Duże miasto';
+
+  @override
+  String get placeTypeSmallTown => 'Miasteczko';
+
+  @override
+  String get placeTypeVillage => 'Wieś';
+
+  @override
+  String get placeTypeHistoricalMonument => 'Zabytek';
+
+  @override
+  String get placeTypeMuseum => 'Muzeum';
+
+  @override
+  String get placeTypeCastle => 'Zamek';
+
+  @override
+  String get placeTypePalace => 'Pałac';
+
+  @override
+  String get placeTypeChurch => 'Kościół';
+
+  @override
+  String get placeTypeMonastery => 'Klasztor';
+
+  @override
+  String get placeTypeRuins => 'Ruiny';
+
+  @override
+  String get placeTypeMonumentStatue => 'Pomnik';
+
+  @override
+  String get placeTypeHistoricalSite => 'Miejsce pamięci';
+
+  @override
+  String get placeTypeViewpoint => 'Punkt widokowy';
+
+  @override
+  String get placeTypeMountainPeak => 'Szczyt';
+
+  @override
+  String get placeTypeWaterfall => 'Wodospad';
+
+  @override
+  String get placeTypeLake => 'Jezioro';
+
+  @override
+  String get placeTypeBeach => 'Plaża';
+
+  @override
+  String get placeTypeIsland => 'Wyspa';
+
+  @override
+  String get placeTypeNationalPark => 'Park narodowy';
+
+  @override
+  String get placeTypeNatureReserve => 'Rezerwat przyrody';
+
+  @override
+  String get placeTypeCave => 'Jaskinia';
+
+  @override
+  String get placeTypeForest => 'Las';
+
+  @override
+  String get placeTypeGorgeCanyon => 'Wąwóz lub kanion';
+
+  @override
+  String get placeTypeSpring => 'Źródło';
+
+  @override
+  String get placeTypeRiver => 'Rzeka';
+
+  @override
+  String get placeTypeHikingTrail => 'Szlak pieszy';
+
+  @override
+  String get placeTypeCyclingRoute => 'Trasa rowerowa';
+
+  @override
+  String get placeTypeMotorcycleRoute => 'Trasa motocyklowa';
+
+  @override
+  String get placeTypeScenicDrive => 'Malownicza trasa';
+
+  @override
+  String get placeTypeCableCar => 'Kolejka linowa';
+
+  @override
+  String get placeTypeSkiSlope => 'Stok narciarski';
+
+  @override
+  String get placeTypeSwimmingSpot => 'Kąpielisko';
+
+  @override
+  String get placeTypeDivingSpot => 'Nurkowanie';
+
+  @override
+  String get placeTypeCampsite => 'Pole biwakowe';
+
+  @override
+  String get placeTypePicnicArea => 'Miejsce piknikowe';
+
+  @override
+  String get placeTypeHotel => 'Hotel';
+
+  @override
+  String get placeTypeGuesthouse => 'Pensjonat';
+
+  @override
+  String get placeTypeCampingGround => 'Kemping';
+
+  @override
+  String get placeTypeParkingLot => 'Parking';
+
+  @override
+  String get placeTypeGasStation => 'Stacja paliw';
+
+  @override
+  String get placeTypeEvCharging => 'Ładowarka EV';
+
+  @override
+  String get placeTypeAirport => 'Lotnisko';
+
+  @override
+  String get placeTypeRailwayStation => 'Dworzec kolejowy';
+
+  @override
+  String get placeTypeHarbour => 'Port';
+
+  @override
+  String get placeTypeMarina => 'Marina';
+
+  @override
+  String get placeTypeFerryTerminal => 'Terminal promowy';
+
+  @override
+  String get placeTypeTheatre => 'Teatr';
+
+  @override
+  String get placeTypeCinema => 'Kino';
+
+  @override
+  String get placeTypeArtGallery => 'Galeria sztuki';
+
+  @override
+  String get placeTypeConcertVenue => 'Sala koncertowa';
+
+  @override
+  String get placeTypeFestivalEvent => 'Festiwal lub wydarzenie';
+
+  @override
+  String get placeTypeAmusementPark => 'Park rozrywki';
+
+  @override
+  String get placeTypeWaterPark => 'Park wodny';
+
+  @override
+  String get placeTypeZoo => 'Zoo';
+
+  @override
+  String get placeTypeAquarium => 'Akwarium';
+
+  @override
+  String get placeTypeBotanicalGarden => 'Ogród botaniczny';
+
+  @override
+  String get placeTypeGroceryStore => 'Sklep spożywczy';
+
+  @override
+  String get placeTypePharmacy => 'Apteka';
+
+  @override
+  String get placeTypeAtm => 'Bankomat';
+
+  @override
+  String get placeTypePublicToilet => 'Toaleta';
+
+  @override
+  String get placeTypeTouristInfo => 'Informacja turystyczna';
+
+  @override
+  String get placeTypeBicycleRepair => 'Serwis rowerowy';
+
+  @override
+  String get placeTypeCarRepair => 'Warsztat samochodowy';
+
+  @override
+  String get placeTypeLaundromat => 'Pralnia samoobsługowa';
+
+  @override
+  String get placeIconsTitle => 'Ikony miejsc';
+
+  @override
+  String get placeIconsLibraryTab => 'Biblioteka';
+
+  @override
+  String get placeIconsMapTab => 'Mapa';
+
+  @override
+  String get placeIconsDarkBackground => 'Ciemne tło';
+
+  @override
+  String placeIconsSummary(int types, int categories) {
+    return '$types typów · $categories kategorii';
+  }
+
+  @override
+  String get placeIconsMapHint => 'Stuknij pinezkę, żeby ją zaznaczyć';
 }

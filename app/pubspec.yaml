@@ -45,6 +45,7 @@ dependencies:
   http: ^1.6.0
   url_launcher: ^6.3.3
   geolocator: ^14.1.2
+  flutter_svg: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,13 @@ flutter:
   assets:
     - assets/markers/
     - assets/markers/tint/
+    - assets/place_icons/gastronomy/
+    - assets/place_icons/places/
+    - assets/place_icons/nature/
+    - assets/place_icons/activities/
+    - assets/place_icons/travel/
+    - assets/place_icons/entertainment/
+    - assets/place_icons/practical/
     - assets/landscapes/
     - assets/map/
     - assets/fonts/OFL-Epilogue.txt
