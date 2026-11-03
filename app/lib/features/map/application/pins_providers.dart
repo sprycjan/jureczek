@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../data/pins_repository.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
@@ -27,7 +27,7 @@ class PinsController {
     String? note,
     String? address,
     String? sourceUrl,
-    PinCategory category = PinCategory.fallback,
+    PinKind kind = PinKind.standard,
     PinColor? color,
   }) async {
     final id = _uuid.v4();
@@ -42,7 +42,7 @@ class PinsController {
         note: _normalize(note),
         address: _normalize(address),
         sourceUrl: _normalize(sourceUrl),
-        category: category,
+        kind: kind,
         color: color,
       ),
     );
@@ -66,7 +66,7 @@ class PinsController {
     String? name,
     String? note,
     String? address,
-    PinCategory? category,
+    PinKind? kind,
     PinColor? color,
     String? folderId,
   }) {
@@ -75,7 +75,7 @@ class PinsController {
       name: _normalize(name),
       note: _normalize(note),
       address: _normalize(address),
-      category: category,
+      kind: kind,
       color: color,
       folderId: folderId,
     );

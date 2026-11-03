@@ -2,76 +2,60 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
 import 'package:jureczek/features/map/domain/pin_color.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
 import 'package:jureczek/features/map/presentation/pin_image.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
+import 'package:jureczek/features/places/presentation/place_icons.dart';
 
-/// Kolor korpusu w SVG kategorii (`assets/markers/src`) – jest wśród 24 kolorów.
-const _svgColors = {
-  PinCategory.gastronomy: PinColor.orange,
-  PinCategory.places: PinColor.blue,
-  PinCategory.nature: PinColor.green,
-  PinCategory.activities: PinColor.purple,
-  PinCategory.travel: PinColor.slate,
-  PinCategory.entertainment: PinColor.raspberry,
-  PinCategory.practical: PinColor.cyan,
-};
-
-Future<(int, int, Uint8List)> _decode(Uint8List png) async {
+Future<(int, int, ByteData)> _decode(Uint8List png) async {
   final codec = await ui.instantiateImageCodec(png);
   final image = (await codec.getNextFrame()).image;
   final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  return (image.width, image.height, data!.buffer.asUint8List());
+  final result = (image.width, image.height, data!);
+  image.dispose();
+  return result;
+}
+
+/// Kolor piksela w środku główki pinezki typu (obok symbolu – lewa część główki).
+ui.Color _headColor((int, int, ByteData) png, {required bool selected}) {
+  final g = PlacePinGeometry.of(selected: selected);
+  final x = ((PlacePinGeometry.pinOffset.dx + g.pinSize.width * 0.12) * 3)
+      .round();
+  final y = ((PlacePinGeometry.pinOffset.dy + g.pinSize.width / 2) * 3).round();
+  final i = (y * png.$1 + x) * 4;
+  final d = png.$3;
+  return ui.Color.fromARGB(
+    d.getUint8(i + 3),
+    d.getUint8(i),
+    d.getUint8(i + 1),
+    d.getUint8(i + 2),
+  );
+}
+
+void _expectClose(ui.Color actual, ui.Color expected) {
+  for (final (a, e) in [
+    (actual.r, expected.r),
+    (actual.g, expected.g),
+    (actual.b, expected.b),
+  ]) {
+    expect((a - e).abs(), lessThan(3 / 255), reason: '$actual ≠ $expected');
+  }
 }
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final MapEntry(key: category, value: color) in _svgColors.entries) {
-    for (final selected in [false, true]) {
-      testWidgets('warstwy ${category.key}${selected ? ' (zaznaczona)' : ''} '
-          'w kolorze z SVG dają gotową pinezkę', (tester) async {
-        await tester.runAsync(() async {
-          final original = await _decode(
-            await renderPinPng(rootBundle, category, selected: selected),
-          );
-          final composed = await _decode(
-            await renderPinPng(
-              rootBundle,
-              category,
-              selected: selected,
-              color: color,
-            ),
-          );
-          expect((composed.$1, composed.$2), (original.$1, original.$2));
-
-          var sum = 0;
-          for (var i = 0; i < original.$3.length; i++) {
-            sum += (original.$3[i] - composed.$3[i]).abs();
-          }
-          // Średnia różnica kanału – zaokrąglenia mnożenia i krawędzie.
-          expect(sum / original.$3.length, lessThan(2));
-        });
-      });
-    }
-  }
-
-  testWidgets('pinezka domyślna w kolorze ma rozmiar oryginału', (
-    tester,
-  ) async {
+  testWidgets('zielona pinezka w kolorze ma rozmiar oryginału', (tester) async {
     await tester.runAsync(() async {
       for (final selected in [false, true]) {
         final original = await _decode(
-          await renderPinPng(
-            rootBundle,
-            PinCategory.standard,
-            selected: selected,
-          ),
+          await renderPinPng(rootBundle, PinKind.standard, selected: selected),
         );
         final composed = await _decode(
           await renderPinPng(
             rootBundle,
-            PinCategory.standard,
+            PinKind.standard,
             selected: selected,
             color: PinColor.red,
           ),
@@ -80,4 +64,40 @@ void main() {
       }
     });
   });
+
+  for (final selected in [false, true]) {
+    testWidgets(
+      'pinezka typu${selected ? ' (zaznaczona)' : ''}: kolor kategorii '
+      'albo własny',
+      (tester) async {
+        await tester.runAsync(() async {
+          const kind = PinKind(PlaceType.castle);
+          final plain = await _decode(
+            await renderPinPng(rootBundle, kind, selected: selected),
+          );
+          final g = PlacePinGeometry.of(selected: selected);
+          expect(plain.$1, (g.viewBox.width * pinImageScale).round());
+          expect(plain.$2, (g.tipY * pinImageScale).round());
+          _expectClose(
+            _headColor(plain, selected: selected),
+            PlaceType.castle.category.primary,
+          );
+
+          final gold = await _decode(
+            await renderPinPng(
+              rootBundle,
+              kind,
+              selected: selected,
+              color: PinColor.gold,
+            ),
+          );
+          expect((gold.$1, gold.$2), (plain.$1, plain.$2));
+          _expectClose(
+            _headColor(gold, selected: selected),
+            PinColor.gold.color,
+          );
+        });
+      },
+    );
+  }
 }

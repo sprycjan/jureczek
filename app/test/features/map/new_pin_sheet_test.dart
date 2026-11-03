@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_suggestion.dart';
 import 'package:jureczek/features/map/presentation/new_pin_sheet.dart';
@@ -71,7 +72,7 @@ void main() {
       expect(saved?.name, 'Metropolia');
       expect(saved?.address, 'Jana Kilińskiego 4, 80-452 Gdańsk');
       expect(saved?.note, 'Kino');
-      expect(saved?.category, PinCategory.standard);
+      expect(saved?.kind, PinKind.standard);
     });
 
     testWidgets('wybrany typ pinezki trafia do zapisu', (tester) async {
@@ -88,14 +89,51 @@ void main() {
       );
 
       expect(find.text('Pinezka'), findsOneWidget);
+      expect(find.byKey(const ValueKey('pin-type-pharmacy')), findsNothing);
       await tester.tap(find.byKey(const ValueKey('pin-category-practical')));
       await tester.pump();
-      expect(find.text('Punkty praktyczne'), findsOneWidget);
+      // Kategoria otwiera siatkę, ale typ zostaje.
+      expect(find.text('Pinezka'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('pin-type-pharmacy')));
+      await tester.pump();
+      expect(find.text('Apteka · Punkty praktyczne'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Zapisz'));
       await tester.tap(find.text('Zapisz'));
       await tester.pumpAndSettle();
 
-      expect(saved?.category, PinCategory.practical);
+      expect(saved?.kind, const PinKind(PlaceType.pharmacy));
+    });
+
+    testWidgets('podpowiedź typu z maki jest wybrana od razu', (tester) async {
+      PinDetailsInput? saved;
+      await pump(
+        tester,
+        NewPinSheet(
+          place: const PlaceResult(
+            name: 'Muzeum Narodowe',
+            lat: 50.06,
+            lng: 19.92,
+            suggestedType: PlaceType.museum,
+          ),
+          onSave: (details) async {
+            saved = details;
+            return true;
+          },
+        ),
+      );
+
+      expect(find.text('Muzeum · Miejsca i atrakcje'), findsOneWidget);
+      expect(find.byKey(const ValueKey('pin-type-castle')), findsOneWidget);
+
+      // Powrót do zielonej zamyka siatkę.
+      await tester.tap(find.byKey(const ValueKey('pin-category-standard')));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('pin-type-castle')), findsNothing);
+      await tester.ensureVisible(find.text('Zapisz'));
+      await tester.tap(find.text('Zapisz'));
+      await tester.pumpAndSettle();
+      expect(saved?.kind, PinKind.standard);
     });
 
     testWidgets('kolor: domyślnie kolor typu, wybór i powrót do domyślnego', (

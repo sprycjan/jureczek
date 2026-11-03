@@ -2,7 +2,8 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
@@ -37,17 +38,26 @@ void main() {
     expect(saved.lat, 50.06);
     expect(saved.lng, 19.94);
     expect(saved.createdAt, createdAt);
-    expect(saved.category, PinCategory.standard);
+    expect(saved.kind, PinKind.standard);
   });
 
   test('updateDetails zmienia typ; bez typu zostawia dotychczasowy', () async {
     await repository.insert(pin('a', DateTime(2026, 11, 1)));
 
-    await repository.updateDetails('a', category: PinCategory.travel);
-    expect((await repository.findById('a'))?.category, PinCategory.travel);
+    await repository.updateDetails('a', kind: const PinKind(PlaceType.hotel));
+    expect(
+      (await repository.findById('a'))?.kind,
+      const PinKind(PlaceType.hotel),
+    );
 
     await repository.updateDetails('a', name: 'Postój');
-    expect((await repository.findById('a'))?.category, PinCategory.travel);
+    expect(
+      (await repository.findById('a'))?.kind,
+      const PinKind(PlaceType.hotel),
+    );
+
+    await repository.updateDetails('a', kind: PinKind.standard);
+    expect((await repository.findById('a'))?.kind, PinKind.standard);
   });
 
   test(
@@ -71,12 +81,12 @@ void main() {
 
       await repository.updateDetails(
         'a',
-        category: PinCategory.nature,
+        kind: const PinKind(PlaceType.lake),
         color: PinColor.black,
       );
       expect((await repository.findById('a'))?.color, PinColor.black);
 
-      await repository.updateDetails('a', category: PinCategory.nature);
+      await repository.updateDetails('a', kind: const PinKind(PlaceType.lake));
       expect((await repository.findById('a'))?.color, isNull);
     },
   );
@@ -92,7 +102,7 @@ void main() {
     await repository.insert(pin('a', DateTime(2026, 11, 1)));
     await db.customStatement("UPDATE pins SET category = 'kosmos'");
 
-    expect((await repository.findById('a'))?.category, PinCategory.standard);
+    expect((await repository.findById('a'))?.kind, PinKind.standard);
   });
 
   test('watchAll zwraca pinezki od najstarszej', () async {

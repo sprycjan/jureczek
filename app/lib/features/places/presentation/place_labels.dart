@@ -90,5 +90,18 @@ extension PlaceTypeLabel on PlaceType {
     PlaceType.bicycleRepair => l10n.placeTypeBicycleRepair,
     PlaceType.carRepair => l10n.placeTypeCarRepair,
     PlaceType.laundromat => l10n.placeTypeLaundromat,
+    PlaceType.gastronomyOther ||
+    PlaceType.placesOther ||
+    PlaceType.natureOther ||
+    PlaceType.activitiesOther ||
+    PlaceType.travelOther ||
+    PlaceType.entertainmentOther ||
+    PlaceType.practicalOther => l10n.placeTypeOther,
   };
+}
+
+extension PlaceTypeFullLabel on PlaceType {
+  /// „Kawiarnia · Gastronomia” – nagłówek arkusza i wybór typu (v16).
+  String fullLabel(AppLocalizations l10n) =>
+      '${label(l10n)} · ${category.label(l10n)}';
 }

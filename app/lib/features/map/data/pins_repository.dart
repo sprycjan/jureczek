@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
@@ -40,7 +40,7 @@ class PinsRepository {
               note: Value(pin.note),
               address: Value(pin.address),
               sourceUrl: Value(pin.sourceUrl),
-              category: Value(pin.category.key),
+              category: Value(pin.kind.key),
               color: Value(pin.color?.key),
               folderId: pin.folderId,
             ),
@@ -49,8 +49,8 @@ class PinsRepository {
     });
   }
 
-  /// Zapisuje dane pinezki; [category] i [folderId] tylko gdy podane.
-  /// Kolor idzie razem z typem (wygląd pinezki): przy podanym [category]
+  /// Zapisuje dane pinezki; [kind] i [folderId] tylko gdy podane.
+  /// Kolor idzie razem z typem (wygląd pinezki): przy podanym [kind]
   /// zapisywany jest też [color], a `null` przywraca kolor kategorii.
   /// Folder przed i po zmianie idzie na górę listy, docelowy najwyżej.
   Future<void> updateDetails(
@@ -58,7 +58,7 @@ class PinsRepository {
     String? name,
     String? note,
     String? address,
-    PinCategory? category,
+    PinKind? kind,
     PinColor? color,
     String? folderId,
   }) {
@@ -70,10 +70,8 @@ class PinsRepository {
           name: Value(name),
           note: Value(note),
           address: Value(address),
-          category: category == null
-              ? const Value.absent()
-              : Value(category.key),
-          color: category == null ? const Value.absent() : Value(color?.key),
+          category: kind == null ? const Value.absent() : Value(kind.key),
+          color: kind == null ? const Value.absent() : Value(color?.key),
           folderId: folderId == null ? const Value.absent() : Value(folderId),
         ),
       );
@@ -105,7 +103,7 @@ class PinsRepository {
     note: row.note,
     address: row.address,
     sourceUrl: row.sourceUrl,
-    category: PinCategory.fromKey(row.category),
+    kind: PinKind.fromKey(row.category),
     color: PinColor.fromKey(row.color),
   );
 }

@@ -15,7 +15,7 @@ import '../../share/application/shared_place_controller.dart';
 import '../application/place_search_controller.dart';
 import '../application/pins_providers.dart';
 import '../domain/duplicate_pin.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
@@ -40,7 +40,7 @@ final _polandViewport = CameraViewportState(
 
 /// Wygląd pinezki na mapie: typ, to, czy jest zaznaczona (otwarty arkusz),
 /// i własny kolor (v14; `null` – kolor typu).
-typedef _PinLook = (PinCategory, bool, PinColor?);
+typedef _PinLook = (PinKind, bool, PinColor?);
 
 /// Id obrazka w stylu mapy – jeden bitmap na wygląd, wspólny dla wszystkich pinezek.
 String _lookImageId(_PinLook look) =>
@@ -101,7 +101,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final _pinImages = <_PinLook, Uint8List>{};
 
   /// Obrazki spadających pinezek, zdekodowane zawczasu (`precacheImage`).
-  final _dropImages = <(PinCategory, PinColor?), MemoryImage>{};
+  final _dropImages = <(PinKind, PinColor?), MemoryImage>{};
 
   /// Mapbox rysuje obrazek w pikselach fizycznych: PNG 3x × ta skala = rozmiar w dp.
   double _pinIconSize = 1;
@@ -354,7 +354,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Pinezka stoi czubkiem na punkcie, więc u góry trzeba miejsca na jej
         // wysokość – ponad narzędziami pod paskiem statusu.
         final pinHeight =
-            _pngSize(_pinImages[(PinCategory.fallback, false, null)]!).height /
+            _pngSize(_pinImages[(PinKind.standard, false, null)]!).height /
             pinImageScale;
         final camera = await map.cameraForCoordinatesPadding(
           [
@@ -413,6 +413,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         final place = placeFromPoi(
           name: poi.properties['name'] as String?,
           geometry: poi.geometry,
+          maki: poi.properties['maki'],
         );
         if (place != null) _showResult(place, fly: false);
       }),
@@ -425,6 +426,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         final place = placeFromPoi(
           name: poi.properties['name'] as String?,
           geometry: poi.geometry,
+          maki: poi.properties['maki'],
         );
         if (place == null) return;
         _addResultPin(place);
@@ -435,13 +437,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     map.addInteraction(
       TapInteraction(StandardPOIs(), (poi, _) {
         _searchFocus.unfocus();
-        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        final place = placeFromPoi(
+          name: poi.name,
+          geometry: poi.geometry,
+          maki: poi.maki,
+        );
         if (place != null) _showResult(place, fly: false);
       }),
     );
     map.addInteraction(
       LongTapInteraction(StandardPOIs(), (poi, _) {
-        final place = placeFromPoi(name: poi.name, geometry: poi.geometry);
+        final place = placeFromPoi(
+          name: poi.name,
+          geometry: poi.geometry,
+          maki: poi.maki,
+        );
         if (place != null) _addResultPin(place);
       }),
     );
@@ -480,12 +490,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> _loadPinImages() async {
     _pinIconSize = MediaQuery.devicePixelRatioOf(context) / pinImageScale;
-    for (final category in PinCategory.values) {
-      for (final selected in [false, true]) {
-        await _pinImage((category, selected, null));
-      }
-      await _dropImage(category, null);
+    // Zielona od razu (kamera liczy z niej wysokość pinezki); typy miejsc (v16)
+    // składane na żądanie przy pierwszej pinezce danego wyglądu.
+    for (final selected in [false, true]) {
+      await _pinImage((PinKind.standard, selected, null));
     }
+    await _dropImage(PinKind.standard, null);
   }
 
   /// PNG wyglądu z pamięci albo wczytany/złożony teraz.
@@ -501,12 +511,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     return _pinImages[look] = bytes;
   }
 
-  Future<MemoryImage> _dropImage(PinCategory category, PinColor? color) async {
-    final cached = _dropImages[(category, color)];
+  Future<MemoryImage> _dropImage(PinKind kind, PinColor? color) async {
+    final cached = _dropImages[(kind, color)];
     if (cached != null) return cached;
-    final image = MemoryImage(await _pinImage((category, false, color)));
+    final image = MemoryImage(await _pinImage((kind, false, color)));
     if (mounted) await precacheImage(image, context);
-    return _dropImages[(category, color)] = image;
+    return _dropImages[(kind, color)] = image;
   }
 
   /// Mapa leży pod paskiem statusu, więc kompas schodzi pod narzędzia (lupa, style),
@@ -567,7 +577,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
 
     for (final pin in pins) {
-      final look = (pin.category, pin.id == _selectedPinId, pin.color);
+      final look = (pin.kind, pin.id == _selectedPinId, pin.color);
       final existing = _annotationsByPinId[pin.id];
       if (existing != null) {
         if (_lookByPinId[pin.id] == look) continue;
@@ -636,13 +646,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     String id, {
     required double lat,
     required double lng,
-    required PinCategory category,
+    required PinKind kind,
     required PinColor? color,
   }) async {
     final map = _map;
     if (map == null || _dropImages.isEmpty || !mounted) return _landPin(id);
     try {
-      final image = await _dropImage(category, color);
+      final image = await _dropImage(kind, color);
       final pixel = await map.pixelForCoordinate(
         Point(coordinates: Position(lng, lat)),
       );
@@ -720,7 +730,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             name: details.name,
             note: details.note,
             address: details.address,
-            category: details.category,
+            kind: details.kind,
             color: details.color,
             folderId: details.folderId,
           );
@@ -890,7 +900,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     String? addedId;
-    var category = PinCategory.fallback;
+    var kind = PinKind.standard;
     PinColor? color;
 
     await showModalBottomSheet<void>(
@@ -901,7 +911,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         place: result,
         chooseFolder: widget.folderId == null,
         onSave: (details) async {
-          category = details.category;
+          kind = details.kind;
           color = details.color;
           try {
             final folderId =
@@ -918,7 +928,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   address: details.address,
                   note: details.note,
                   sourceUrl: result.sourceUrl,
-                  category: details.category,
+                  kind: details.kind,
                   color: details.color,
                 );
           } catch (e) {
@@ -943,7 +953,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       id,
       lat: result.lat,
       lng: result.lng,
-      category: category,
+      kind: kind,
       color: color,
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 
@@ -10,7 +10,7 @@ typedef PinDetailsInput = ({
   String name,
   String address,
   String note,
-  PinCategory category,
+  PinKind kind,
 
   /// Własny kolor (v14); `null` – kolor typu.
   PinColor? color,

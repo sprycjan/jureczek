@@ -4,10 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../folders/presentation/folder_picker.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
-import 'pin_category_picker.dart';
+import 'pin_type_picker.dart';
 import 'pin_color_picker.dart';
 import 'pin_image.dart';
 import 'pin_form_fields.dart';
@@ -41,8 +41,8 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late String? _name = widget.pin.name;
   late String? _note = widget.pin.note;
   late String? _address = widget.pin.address;
-  late PinCategory _category = widget.pin.category;
-  late PinCategory _editedCategory = _category;
+  late PinKind _kind = widget.pin.kind;
+  late PinKind _editedKind = _kind;
   late PinColor? _color = widget.pin.color;
   late PinColor? _editedColor = _color;
   late String _folderId = widget.pin.folderId;
@@ -67,7 +67,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     _nameController.text = _name ?? '';
     _noteController.text = _note ?? '';
     _addressController.text = _address ?? '';
-    _editedCategory = _category;
+    _editedKind = _kind;
     _editedColor = _color;
     _editedFolderId = _folderId;
     setState(() {
@@ -82,7 +82,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       name: _nameController.text,
       address: _addressController.text,
       note: _noteController.text,
-      category: _editedCategory,
+      kind: _editedKind,
       color: _editedColor,
       folderId: widget.canMoveFolder ? _editedFolderId : null,
     ));
@@ -94,7 +94,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         _name = _nonEmpty(_nameController.text);
         _note = _nonEmpty(_noteController.text);
         _address = _nonEmpty(_addressController.text);
-        _category = _editedCategory;
+        _kind = _editedKind;
         _color = _editedColor;
         _folderId = _editedFolderId;
         _editing = false;
@@ -154,12 +154,15 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         ],
         Row(
           children: [
-            PinImage(_category, color: _color, height: 20),
+            PinImage(_kind, color: _color, height: 20),
             const SizedBox(width: 6),
-            Text(
-              _category.label(l10n),
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            Expanded(
+              child: Text(
+                _kind.label(l10n),
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -228,10 +231,10 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       children: [
         Text(l10n.pinSheetTitle, style: theme.textTheme.labelLarge),
         const SizedBox(height: 12),
-        PinCategoryPicker(
-          value: _editedCategory,
+        PinTypePicker(
+          value: _editedKind,
           color: _editedColor,
-          onChanged: (category) => setState(() => _editedCategory = category),
+          onChanged: (kind) => setState(() => _editedKind = kind),
         ),
         const SizedBox(height: 12),
         PinColorPicker(

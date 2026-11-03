@@ -1,4 +1,6 @@
-"""SVG pinezek → PNG 3x przez Chrome headless; PNG przycięty tak, że czubek leży na dolnej krawędzi.
+"""Zielona „Pinezka” bez typu (SVG → PNG 3x przez Chrome headless); PNG przycięty tak,
+że czubek leży na dolnej krawędzi. Od v16 tylko `standard_*` – pinezki typów miejsc
+to SVG z `tool/place_icons.py` rysowane w aplikacji.
 
 Oprócz gotowych pinezek (`<out>/<nazwa>.png`) zapisuje warstwy do barwienia
 w aplikacji (v14, własny kolor pinezki) w `<out>/tint/`:
@@ -23,8 +25,6 @@ NEUTRAL = {None, 'none', '#FFFFFF', '#ffffff', '#000000'}
 
 # (szerokość viewBox, wysokość, y czubka, skala do dp): korpus default = 36 dp, selected = 42 dp.
 geo = {
-    'default': (48, 56, 48, 1.0),
-    'selected': (54, 64, 56, 1.0),
     'standard_default': (72, 88, 74.5, 0.75),
     'standard_selected': (72, 88, 74.5, 0.875),
 }
@@ -99,8 +99,7 @@ def render(svg_path, png, w, h, cut):
 
 for svg in sorted(src.glob('*.svg')):
     name = svg.stem
-    key = name if name.startswith('standard') else name.split('_')[-1]
-    vw, vh, tip, k = geo[key]
+    vw, vh, tip, k = geo[name]
     w, h, cut = vw * k, vh * k, round(tip * k)
     render(svg.resolve(), out / f'{name}.png', w, h, cut)
     for layer, text in zip(('body', 'overlay', 'accent'), layers(svg.read_text())):

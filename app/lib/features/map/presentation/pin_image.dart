@@ -3,12 +3,21 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../domain/pin_category.dart';
+import '../../places/presentation/place_icons.dart';
 import '../domain/pin_color.dart';
+import '../domain/pin_kind.dart';
 
-/// Warstwy pinezki do barwienia (v14), z `tool/render_pins.py`:
+/// Gęstość pikseli, w jakiej powstają PNG pinezek (gotowe i składane).
+const pinImageScale = 3.0;
+
+/// Zielona „Pinezka” bez typu (v9): PNG 3x przycięty tak, że czubek leży na
+/// dolnej krawędzi (źródło i generator: `assets/markers/src/`, `tool/render_pins.py`).
+const standardPinAsset = 'assets/markers/standard_default.png';
+const standardSelectedPinAsset = 'assets/markers/standard_selected.png';
+
+/// Warstwy zielonej pinezki do barwienia (v14), z `tool/render_pins.py`:
 /// korpus na biało (mnożony przez kolor), nakładka bez zmian (biały symbol,
-/// obwódka) i – tylko w pinezce domyślnej – kolorowa kropka nad tarczą.
+/// obwódka, tarcza) i kolorowa kropka nad tarczą.
 enum PinLayer {
   body(tinted: true),
   overlay(tinted: false),
@@ -18,34 +27,49 @@ enum PinLayer {
 
   final bool tinted;
 
-  static List<PinLayer> of(PinCategory category) => [
-    body,
-    overlay,
-    if (category == PinCategory.standard) accent,
-  ];
-
-  String asset(PinCategory category, {required bool selected}) =>
-      'assets/markers/tint/${category.key}_${selected ? 'selected' : 'default'}_$name.png';
+  String asset({required bool selected}) =>
+      'assets/markers/tint/standard_${selected ? 'selected' : 'default'}_$name.png';
 }
 
-/// PNG 3x pinezki: bez [color] gotowy obrazek kategorii, z kolorem złożony
-/// z warstw – ten sam rozmiar i czubek na dolnej krawędzi.
+/// PNG 3x pinezki danego typu (v16) – dla Mapbox i animacji spadania.
+/// Zielona z gotowego PNG albo z warstw w [color]; typ miejsca z SVG (z cieniem).
+/// Czubek zawsze na dolnej krawędzi (kotwica `BOTTOM`).
 Future<Uint8List> renderPinPng(
   AssetBundle bundle,
-  PinCategory category, {
+  PinKind kind, {
   bool selected = false,
+  PinColor? color,
+}) {
+  final type = kind.type;
+  if (type != null) {
+    return renderPlacePinPng(
+      type,
+      selected: selected,
+      pixelRatio: pinImageScale,
+      color: color?.color,
+      bundle: bundle,
+    );
+  }
+  return _renderStandardPng(bundle, selected: selected, color: color);
+}
+
+Future<Uint8List> _renderStandardPng(
+  AssetBundle bundle, {
+  required bool selected,
   PinColor? color,
 }) async {
   if (color == null) {
-    final data = await bundle.load(category.asset(selected: selected));
+    final data = await bundle.load(
+      selected ? standardSelectedPinAsset : standardPinAsset,
+    );
     return data.buffer.asUint8List();
   }
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   var width = 0;
   var height = 0;
-  for (final layer in PinLayer.of(category)) {
-    final data = await bundle.load(layer.asset(category, selected: selected));
+  for (final layer in PinLayer.values) {
+    final data = await bundle.load(layer.asset(selected: selected));
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final image = (await codec.getNextFrame()).image;
     width = image.width;
@@ -68,20 +92,41 @@ Future<Uint8List> renderPinPng(
   return png!.buffer.asUint8List();
 }
 
-/// Pinezka danego typu i koloru w interfejsie (formularz, arkusz).
-class PinImage extends StatelessWidget {
-  const PinImage(this.category, {super.key, this.color, this.height = 32});
+/// Proporcje PNG zielonej pinezki (54 × 56 dp, korpus 36 dp) – `render_pins.py`.
+const _standardFrameAspect = 54 / 56;
+const _standardBodyPerHeight = 36 / 56;
 
-  final PinCategory category;
+/// Pinezka danego typu i koloru w interfejsie (formularz, arkusz) o wysokości [height].
+class PinImage extends StatelessWidget {
+  const PinImage(this.kind, {super.key, this.color, this.height = 32});
+
+  final PinKind kind;
   final PinColor? color;
   final double height;
 
   @override
   Widget build(BuildContext context) {
+    final type = kind.type;
     final color = this.color;
+    if (type != null) {
+      // Korpus tej samej szerokości co zielona przy tej samej wysokości:
+      // PNG zielonej ma 36 dp korpusu w ramce 56 dp (do czubka).
+      return SizedBox(
+        height: height,
+        width: height * _standardFrameAspect,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: PlacePin(
+            type,
+            width: height * _standardBodyPerHeight,
+            color: color?.color,
+          ),
+        ),
+      );
+    }
     if (color == null) {
       return Image.asset(
-        category.asset(),
+        standardPinAsset,
         height: height,
         fit: BoxFit.contain,
         excludeFromSemantics: true,
@@ -90,9 +135,9 @@ class PinImage extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        for (final layer in PinLayer.of(category))
+        for (final layer in PinLayer.values)
           Image.asset(
-            layer.asset(category, selected: false),
+            layer.asset(selected: false),
             height: height,
             fit: BoxFit.contain,
             excludeFromSemantics: true,

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/map/application/pins_providers.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 
 void main() {
@@ -51,12 +52,12 @@ void main() {
       folderId: 'f',
       lat: 50.07,
       lng: 19.95,
-      category: PinCategory.gastronomy,
+      kind: const PinKind(PlaceType.cafe),
     );
 
-    final byId = {for (final p in await pins()) p.id: p.category};
-    expect(byId[plain], PinCategory.standard);
-    expect(byId[food], PinCategory.gastronomy);
+    final byId = {for (final p in await pins()) p.id: p.kind};
+    expect(byId[plain], PinKind.standard);
+    expect(byId[food], const PinKind(PlaceType.cafe));
   });
 
   test('add zwraca id zapisanej pinezki', () async {

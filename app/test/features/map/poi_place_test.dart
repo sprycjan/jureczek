@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/features/map/domain/poi_place.dart';
+import 'package:jureczek/features/places/domain/maki_place_type.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 
 void main() {
   test('czyta nazwę i współrzędne [lng, lat] z GeoJSON-a', () {
@@ -50,5 +52,29 @@ void main() {
       ),
       isNull,
     );
+  });
+
+  test('maki POI podpowiada typ pinezki (v16)', () {
+    PlaceType? typeOf(Object? maki) => placeFromPoi(
+      name: 'x',
+      geometry: {
+        'coordinates': [19, 52],
+      },
+      maki: maki,
+    )?.suggestedType;
+
+    expect(typeOf('restaurant'), PlaceType.restaurant);
+    expect(typeOf('religious-christian'), PlaceType.church);
+    expect(typeOf('park'), PlaceType.natureOther);
+    expect(typeOf('marker'), isNull);
+    expect(typeOf(null), isNull);
+    expect(typeOf(7), isNull);
+  });
+
+  test('mapowanie maki nie gubi typów, ich kategoria się zgadza', () {
+    expect(placeTypeFromMaki('cafe')?.key, 'cafe');
+    expect(placeTypeFromMaki('ice-cream'), PlaceType.iceCreamShop);
+    expect(placeTypeFromMaki('charging-station'), PlaceType.evCharging);
+    expect(placeTypeFromMaki('stadium'), PlaceType.entertainmentOther);
   });
 }

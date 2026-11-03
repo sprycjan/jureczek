@@ -19,6 +19,7 @@ tags: [jureczek, przeglad]
 - Lokalizacja: `geolocator` + kropka położenia Mapbox – [[ADR-009 Lokalizacja przez geolocator]]
 - Kolor pinezki: warstwy z `render_pins.py` barwione w aplikacji – [[ADR-010 Kolor pinezki z warstw]]
 - Ikony 74 typów miejsc: SVG z `tool/place_icons.py`, `flutter_svg`, cień malowany we Flutterze – [[ADR-011 Biblioteka ikon miejsc w SVG]]
+- Typ pinezki = typ miejsca (81 z „inne”) albo zielona bez typu, w kolumnie `category` – [[ADR-012 Typ miejsca jako typ pinezki]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -38,7 +39,8 @@ tags: [jureczek, przeglad]
 | v13 | Przełącznik stylów mapy: Domyślny / Teren / 3D; przyciski + / − | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v13 – przełącznik stylów mapy]] |
 | v14 | Moja lokalizacja, ikony POI, mniej etykiet miejscowości, snackbary znikają z mapą, własny kolor pinezki (24 kolory, schemat 6) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v14 – lokalizacja, ikony POI i kolor pinezki]] |
 | v15 | Biblioteka ikon miejsc: 74 typy × (pinezka, zaznaczona, ikona 24 dp) = 222 SVG, komponenty Flutter, galeria deweloperska z mapą | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v15 – biblioteka ikon miejsc]] |
-| v16+ | Patrz [[Backlog]] | — |
+| v16 | Typy miejsc w pinezkach: wybór kategoria → typ, pinezki SVG na mapie, podpowiedź typu z `maki`, migracja v9 → „inne” (schemat 7) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v16 – typy miejsc w pinezkach]] |
+| v17+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

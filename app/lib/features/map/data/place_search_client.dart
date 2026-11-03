@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/config/app_config.dart';
+import '../../places/domain/maki_place_type.dart';
 import '../domain/place_suggestion.dart';
 
 class PlaceSearchException implements Exception {
@@ -50,6 +51,7 @@ class PlaceSearchClient {
           name: s['name'] as String,
           address: _address(s),
           featureType: s['feature_type'] as String?,
+          suggestedType: placeTypeFromMaki(s['maki']),
         ),
     ];
   }
@@ -72,6 +74,9 @@ class PlaceSearchClient {
       address: suggestion.address,
       lng: (coordinates[0] as num).toDouble(),
       lat: (coordinates[1] as num).toDouble(),
+      suggestedType:
+          placeTypeFromMaki((feature['properties'] as Map?)?['maki']) ??
+          suggestion.suggestedType,
     );
   }
 

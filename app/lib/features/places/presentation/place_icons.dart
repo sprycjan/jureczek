@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../domain/place_category.dart';
 import '../domain/place_type.dart';
 
 /// Wymiary pinezki w SVG z `tool/place_icons.py` (jednostki viewBox = dp przy skali 1).
@@ -53,6 +54,34 @@ class PlacePinGeometry {
 
   ColorFilter get shadowFilter =>
       ColorFilter.mode(Color.fromRGBO(0, 0, 0, shadowOpacity), BlendMode.srcIn);
+}
+
+/// Podmienia kolor kategorii w SVG pinezki na własny kolor (v16, kolory z v14).
+/// Biały symbol, obwódka i czarny cień zostają. Równość jest potrzebna, bo
+/// mapper wchodzi do klucza cache `flutter_svg`.
+@immutable
+class PinColorMapper extends ColorMapper {
+  const PinColorMapper(this.category, this.color);
+
+  final PlaceCategory category;
+  final Color color;
+
+  @override
+  Color substitute(
+    String? id,
+    String elementName,
+    String attributeName,
+    Color color,
+  ) => color.toARGB32() == category.primary.toARGB32() ? this.color : color;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PinColorMapper &&
+      other.category == category &&
+      other.color == color;
+
+  @override
+  int get hashCode => Object.hash(category, color);
 }
 
 /// Samodzielna ikona typu miejsca (24×24 dp) w kolorze kategorii – do filtrów,
@@ -117,10 +146,19 @@ class PlaceIconBadge extends StatelessWidget {
 /// (36×44 dp, zaznaczona 42×52 dp, albo [width] w proporcji); cień wychodzi poza niego.
 /// Czubek leży na dolnej krawędzi – do pozycjonowania jak kotwicą `BOTTOM`.
 class PlacePin extends StatelessWidget {
-  const PlacePin(this.type, {super.key, this.selected = false, this.width});
+  const PlacePin(
+    this.type, {
+    super.key,
+    this.selected = false,
+    this.width,
+    this.color,
+  });
 
   final PlaceType type;
   final bool selected;
+
+  /// Własny kolor korpusu (v16); `null` – kolor kategorii.
+  final Color? color;
 
   /// Szerokość korpusu w dp; `null` = rozmiar ze specyfikacji.
   final double? width;
@@ -130,8 +168,10 @@ class PlacePin extends StatelessWidget {
     final geometry = PlacePinGeometry.of(selected: selected);
     final k = (width ?? geometry.pinSize.width) / geometry.pinSize.width;
     final view = geometry.viewBox * k;
+    final color = this.color;
     final svg = SvgPicture.asset(
       type.pinAsset(selected: selected),
+      colorMapper: color == null ? null : PinColorMapper(type.category, color),
       width: view.width,
       height: view.height,
       excludeFromSemantics: true,
@@ -178,11 +218,16 @@ Future<Uint8List> renderPlacePinPng(
   PlaceType type, {
   bool selected = false,
   double pixelRatio = 3,
+  Color? color,
   AssetBundle? bundle,
 }) async {
   final geometry = PlacePinGeometry.of(selected: selected);
   final info = await vg.loadPicture(
-    SvgAssetLoader(type.pinAsset(selected: selected), assetBundle: bundle),
+    SvgAssetLoader(
+      type.pinAsset(selected: selected),
+      assetBundle: bundle,
+      colorMapper: color == null ? null : PinColorMapper(type.category, color),
+    ),
     null,
   );
   final width = (geometry.viewBox.width * pixelRatio).round();

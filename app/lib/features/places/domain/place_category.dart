@@ -5,7 +5,7 @@ import 'dart:ui';
 ///
 /// Jedyne miejsce z tokenami kolorów kategorii w aplikacji. [primary] musi być
 /// równy kolorowi w `tool/place_icons.py` (pilnuje `place_icons_test.dart`).
-/// [key] to nazwa katalogu w `assets/place_icons/` i klucz zgodny z `PinCategory`.
+/// [key] to nazwa katalogu w `assets/place_icons/` i klucz kategorii v9 (migracja v16).
 enum PlaceCategory {
   gastronomy(
     'gastronomy',

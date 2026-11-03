@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 import 'package:jureczek/features/map/presentation/pin_details_sheet.dart';
@@ -14,7 +15,7 @@ void main() {
     String? note,
     String? address,
     String? sourceUrl,
-    PinCategory category = PinCategory.standard,
+    PinKind kind = PinKind.standard,
     PinColor? color,
   }) => PlacePin(
     folderId: 'f',
@@ -26,7 +27,7 @@ void main() {
     note: note,
     address: address,
     sourceUrl: sourceUrl,
-    category: category,
+    kind: kind,
     color: color,
   );
 
@@ -199,17 +200,17 @@ void main() {
     expect(find.text('Ta pinezka już jest'), findsOneWidget);
   });
 
-  testWidgets('pokazuje typ pinezki', (tester) async {
-    await pumpSheet(tester, pin: pin(category: PinCategory.nature));
+  testWidgets('pokazuje typ pinezki z kategorią', (tester) async {
+    await pumpSheet(tester, pin: pin(kind: const PinKind(PlaceType.lake)));
 
-    expect(find.text('Natura i widoki'), findsOneWidget);
+    expect(find.text('Jezioro · Natura i widoki'), findsOneWidget);
   });
 
   testWidgets('w edycji zmienia typ i przekazuje go do zapisu', (tester) async {
     PinDetailsInput? saved;
     await pumpSheet(
       tester,
-      pin: pin(category: PinCategory.nature),
+      pin: pin(kind: const PinKind(PlaceType.lake)),
       onSave: (details) async {
         saved = details;
         return true;
@@ -218,13 +219,21 @@ void main() {
 
     await tester.tap(find.text('Edytuj'));
     await tester.pumpAndSettle();
+    // Siatka od razu na kategorii zapisanego typu.
+    expect(find.byKey(const ValueKey('pin-type-waterfall')), findsOneWidget);
+
     await tester.tap(find.byKey(const ValueKey('pin-category-gastronomy')));
     await tester.pump();
+    // Sama kategoria nie zmienia typu.
+    expect(find.text('Jezioro · Natura i widoki'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pin-type-cafe')));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
 
-    expect(saved?.category, PinCategory.gastronomy);
-    expect(find.text('Gastronomia'), findsOneWidget);
+    expect(saved?.kind, const PinKind(PlaceType.cafe));
+    expect(find.text('Kawiarnia · Gastronomia'), findsOneWidget);
   });
 
   testWidgets('w edycji pokazuje zapisany kolor i przywraca domyślny', (
@@ -233,7 +242,7 @@ void main() {
     PinDetailsInput? saved;
     await pumpSheet(
       tester,
-      pin: pin(category: PinCategory.nature, color: PinColor.coral),
+      pin: pin(kind: const PinKind(PlaceType.lake), color: PinColor.coral),
       onSave: (details) async {
         saved = details;
         return true;
@@ -250,7 +259,7 @@ void main() {
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
 
-    expect(saved?.category, PinCategory.nature);
+    expect(saved?.kind, const PinKind(PlaceType.lake));
     expect(saved?.color, isNull);
   });
 

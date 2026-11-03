@@ -707,4 +707,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get placeIconsMapHint => 'Stuknij pinezkę, żeby ją zaznaczyć';
+
+  @override
+  String get placeTypeOther => 'Inne';
 }

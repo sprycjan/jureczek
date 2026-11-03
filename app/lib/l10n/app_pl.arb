@@ -249,5 +249,6 @@
       }
     }
   },
-  "placeIconsMapHint": "Stuknij pinezkę, żeby ją zaznaczyć"
+  "placeIconsMapHint": "Stuknij pinezkę, żeby ją zaznaczyć",
+  "placeTypeOther": "Inne"
 }

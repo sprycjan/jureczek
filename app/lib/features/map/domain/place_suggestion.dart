@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../places/domain/place_type.dart';
+
 /// Punkt na mapie w stopniach.
 typedef LatLng = ({double lat, double lng});
 
@@ -11,6 +13,7 @@ class PlaceSuggestion {
     required this.name,
     this.address,
     this.featureType,
+    this.suggestedType,
   });
 
   final String mapboxId;
@@ -21,6 +24,9 @@ class PlaceSuggestion {
 
   /// Typ obiektu z Mapboxa, np. `poi`, `address`, `street`.
   final String? featureType;
+
+  /// Typ z `maki` podpowiedzi (v16) – zapas, gdy retrieve go nie poda.
+  final PlaceType? suggestedType;
 }
 
 /// Wybrane miejsce ze współrzędnymi, gotowe do postawienia pinezki
@@ -34,6 +40,7 @@ class PlaceResult {
     this.address,
     this.sourceUrl,
     this.approximate = false,
+    this.suggestedType,
   });
 
   /// `null`, gdy miejsce nie ma nazwy.
@@ -48,6 +55,9 @@ class PlaceResult {
   /// Położenie wyznaczone geokodowaniem nazwy lub adresu – może być obok.
   final bool approximate;
 
+  /// Podpowiedź typu pinezki z `maki` (v16); `null` – zielona „Pinezka”.
+  final PlaceType? suggestedType;
+
   /// Ten sam wynik w poprawionym miejscu.
   PlaceResult movedTo(LatLng point) => PlaceResult(
     name: name,
@@ -55,5 +65,6 @@ class PlaceResult {
     lng: point.lng,
     address: address,
     sourceUrl: sourceUrl,
+    suggestedType: suggestedType,
   );
 }

@@ -16,7 +16,8 @@ class Pins extends Table {
   TextColumn get address => text().nullable()();
   TextColumn get sourceUrl => text().nullable()();
 
-  /// Dodane w schemacie 4 (v9): klucz [PinCategory].
+  /// Dodane w schemacie 4 (v9). Od schematu 7 (v16) klucz `PinKind`:
+  /// `standard` albo klucz `PlaceType` (np. `cafe`, `gastronomy_other`).
   TextColumn get category => text().withDefault(const Constant('standard'))();
 
   /// Dodane w schemacie 5 (v10): folder, do którego należy pinezka (obowiązkowy).

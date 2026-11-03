@@ -14,15 +14,15 @@ import 'package:jureczek/l10n/app_localizations.dart';
 String _hex(Color c) =>
     '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
 
-/// Liczby typów z zadania (v15) – nic nie może zniknąć po cichu.
+/// Liczby typów z zadania (v15) + „inne” (v16) – nic nie może zniknąć po cichu.
 const _expectedCounts = {
-  PlaceCategory.gastronomy: 10,
-  PlaceCategory.places: 12,
-  PlaceCategory.nature: 13,
-  PlaceCategory.activities: 10,
-  PlaceCategory.travel: 11,
-  PlaceCategory.entertainment: 10,
-  PlaceCategory.practical: 8,
+  PlaceCategory.gastronomy: 11,
+  PlaceCategory.places: 13,
+  PlaceCategory.nature: 14,
+  PlaceCategory.activities: 11,
+  PlaceCategory.travel: 12,
+  PlaceCategory.entertainment: 11,
+  PlaceCategory.practical: 9,
 };
 
 Future<void> _settleSvgs(WidgetTester tester) async {
@@ -49,13 +49,13 @@ Widget _app(Widget child) => MaterialApp(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('74 typy w 7 kategoriach, liczby jak w zadaniu, unikalne klucze', () {
-    expect(PlaceType.values, hasLength(74));
+  test('81 typów w 7 kategoriach, liczby jak w zadaniu, unikalne klucze', () {
+    expect(PlaceType.values, hasLength(81));
     for (final MapEntry(key: category, value: count)
         in _expectedCounts.entries) {
       expect(PlaceType.of(category), hasLength(count), reason: category.key);
     }
-    expect(PlaceType.values.map((t) => t.key).toSet(), hasLength(74));
+    expect(PlaceType.values.map((t) => t.key).toSet(), hasLength(81));
     for (final type in PlaceType.values) {
       expect(
         RegExp(r'^[a-z]+(_[a-z]+)*$').hasMatch(type.key),
@@ -65,6 +65,11 @@ void main() {
       expect(PlaceType.fromKey(type.key), type);
     }
     expect(PlaceType.fromKey('nieznany'), isNull);
+    for (final category in PlaceCategory.values) {
+      expect(category.otherType.category, category);
+      expect(category.otherType.isOther, isTrue);
+      expect(PlaceType.of(category).last, category.otherType);
+    }
   });
 
   test('każdy typ ma trzy SVG, a w katalogu nie ma sierot', () {
@@ -82,7 +87,7 @@ void main() {
         .map((f) => f.path)
         .toSet();
     expect(onDisk, expected);
-    expect(onDisk, hasLength(222));
+    expect(onDisk, hasLength(243));
   });
 
   test('kolory w SVG to tokeny kategorii', () {

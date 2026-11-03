@@ -4,9 +4,10 @@ import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/folders/data/folders_repository.dart';
 import 'package:jureczek/features/folders/domain/trip_folder.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
-import 'package:jureczek/features/map/domain/pin_category.dart';
+import 'package:jureczek/features/map/domain/pin_kind.dart';
 import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 
 void main() {
   test(
@@ -49,10 +50,13 @@ void main() {
           lat: 50.06,
           lng: 19.94,
           createdAt: DateTime(2026, 11, 1),
-          category: PinCategory.nature,
+          kind: const PinKind(PlaceType.lake),
         ),
       );
-      expect((await repository.findById('nowa'))?.category, PinCategory.nature);
+      expect(
+        (await repository.findById('nowa'))?.kind,
+        const PinKind(PlaceType.lake),
+      );
     },
   );
 
@@ -94,7 +98,8 @@ void main() {
 
     final pin = await PinsRepository(db).findById('p1');
     expect(pin?.name, 'Wawel');
-    expect(pin?.category, PinCategory.places);
+    // Przez wszystkie migracje do 7: kategoria v9 → typ „inne”.
+    expect(pin?.kind, const PinKind(PlaceType.placesOther));
     expect(pin?.folderId, folders.single.id);
   });
 
@@ -152,15 +157,87 @@ void main() {
 
     final old = await repository.findById('p1');
     expect(old?.name, 'Wawel');
-    expect(old?.category, PinCategory.places);
+    expect(old?.kind, const PinKind(PlaceType.placesOther));
     expect(old?.color, isNull);
 
     await repository.updateDetails(
       'p1',
       name: 'Wawel',
-      category: PinCategory.places,
+      kind: const PinKind(PlaceType.castle),
       color: PinColor.gold,
     );
     expect((await repository.findById('p1'))?.color, PinColor.gold);
+  });
+
+  test('migracja 6 → 7 zamienia kategorie v9 na typy „inne” (v16)', () async {
+    // Baza w stanie z v14–v15 (schemat 6): kategorie v9 i kolor.
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute('''
+            CREATE TABLE folders (
+              id TEXT NOT NULL,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              icon TEXT NOT NULL,
+              color TEXT NOT NULL,
+              created_at INTEGER NOT NULL,
+              updated_at_ms INTEGER NOT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO folders VALUES ('f1', 'Kraków', NULL, 'camper', 'emerald', 1792886400, 1792886400000)",
+          );
+          raw.execute('''
+            CREATE TABLE pins (
+              id TEXT NOT NULL,
+              lat REAL NOT NULL,
+              lng REAL NOT NULL,
+              created_at INTEGER NOT NULL,
+              name TEXT NULL,
+              note TEXT NULL,
+              address TEXT NULL,
+              source_url TEXT NULL,
+              category TEXT NOT NULL DEFAULT 'standard',
+              folder_id TEXT NOT NULL,
+              color TEXT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          for (final (id, category, color) in [
+            ('g', 'gastronomy', 'gold'),
+            ('p', 'places', null),
+            ('n', 'nature', null),
+            ('a', 'activities', null),
+            ('t', 'travel', null),
+            ('e', 'entertainment', null),
+            ('r', 'practical', null),
+            ('s', 'standard', 'red'),
+          ]) {
+            raw.execute(
+              "INSERT INTO pins VALUES ('$id', 50.06, 19.94, 1792886400, NULL, NULL, NULL, NULL, "
+              "'$category', 'f1', ${color == null ? 'NULL' : "'$color'"})",
+            );
+          }
+          raw.execute('PRAGMA user_version = 6');
+        },
+      ),
+    );
+    addTearDown(db.close);
+    final pins = {
+      for (final pin in await PinsRepository(db).watchAll().first) pin.id: pin,
+    };
+    expect(pins, hasLength(8));
+    expect(pins['g']?.kind, const PinKind(PlaceType.gastronomyOther));
+    expect(pins['g']?.color, PinColor.gold);
+    expect(pins['p']?.kind, const PinKind(PlaceType.placesOther));
+    expect(pins['n']?.kind, const PinKind(PlaceType.natureOther));
+    expect(pins['a']?.kind, const PinKind(PlaceType.activitiesOther));
+    expect(pins['t']?.kind, const PinKind(PlaceType.travelOther));
+    expect(pins['e']?.kind, const PinKind(PlaceType.entertainmentOther));
+    expect(pins['r']?.kind, const PinKind(PlaceType.practicalOther));
+    expect(pins['s']?.kind, PinKind.standard);
+    expect(pins['s']?.color, PinColor.red);
   });
 }

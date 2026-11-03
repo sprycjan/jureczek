@@ -1,3 +1,4 @@
+import '../../places/domain/maki_place_type.dart';
 import 'place_suggestion.dart';
 
 /// Miejsce z klikniętego POI stylu Standard.
@@ -7,10 +8,16 @@ import 'place_suggestion.dart';
 PlaceResult? placeFromPoi({
   required String? name,
   required Map<String?, Object?> geometry,
+  Object? maki,
 }) {
   final coordinates = geometry['coordinates'];
   if (coordinates is! List || coordinates.length < 2) return null;
   final [lng, lat, ...] = coordinates;
   if (lng is! num || lat is! num) return null;
-  return PlaceResult(name: name, lat: lat.toDouble(), lng: lng.toDouble());
+  return PlaceResult(
+    name: name,
+    lat: lat.toDouble(),
+    lng: lng.toDouble(),
+    suggestedType: placeTypeFromMaki(maki),
+  );
 }

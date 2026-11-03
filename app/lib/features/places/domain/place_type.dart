@@ -1,11 +1,12 @@
 import 'place_category.dart';
 
-/// Typ miejsca (v15) – 74 typy w 7 kategoriach, każdy z własnym symbolem.
+/// Typ miejsca (v15) – 74 typy w 7 kategoriach, każdy z własnym symbolem,
+/// plus „inne” w każdej kategorii (v16; ogólny znak kategorii) – razem 81.
 ///
 /// [key] to nazwa plików w `assets/place_icons/<kategoria>/`
 /// (`<key>_icon.svg`, `<key>_default.svg`, `<key>_selected.svg`), generowanych
 /// przez `tool/place_icons.py`. Kolejność = kolejność w generatorze i w galerii.
-/// Gdy typ trafi do bazy, [key] staje się trwały – nie zmieniać istniejących wartości.
+/// [key] trafia do bazy (`pins.category`, v16) – nie zmieniać istniejących wartości.
 enum PlaceType {
   // Gastronomia
   restaurant(PlaceCategory.gastronomy, 'restaurant'),
@@ -18,6 +19,7 @@ enum PlaceType {
   foodTruck(PlaceCategory.gastronomy, 'food_truck'),
   winery(PlaceCategory.gastronomy, 'winery'),
   brewery(PlaceCategory.gastronomy, 'brewery'),
+  gastronomyOther(PlaceCategory.gastronomy, 'gastronomy_other'),
 
   // Miejsca i atrakcje
   city(PlaceCategory.places, 'city'),
@@ -32,6 +34,7 @@ enum PlaceType {
   ruins(PlaceCategory.places, 'ruins'),
   monumentStatue(PlaceCategory.places, 'monument_statue'),
   historicalSite(PlaceCategory.places, 'historical_site'),
+  placesOther(PlaceCategory.places, 'places_other'),
 
   // Natura i widoki
   viewpoint(PlaceCategory.nature, 'viewpoint'),
@@ -47,6 +50,7 @@ enum PlaceType {
   gorgeCanyon(PlaceCategory.nature, 'gorge_canyon'),
   spring(PlaceCategory.nature, 'spring'),
   river(PlaceCategory.nature, 'river'),
+  natureOther(PlaceCategory.nature, 'nature_other'),
 
   // Aktywności i szlaki
   hikingTrail(PlaceCategory.activities, 'hiking_trail'),
@@ -59,6 +63,7 @@ enum PlaceType {
   divingSpot(PlaceCategory.activities, 'diving_spot'),
   campsite(PlaceCategory.activities, 'campsite'),
   picnicArea(PlaceCategory.activities, 'picnic_area'),
+  activitiesOther(PlaceCategory.activities, 'activities_other'),
 
   // Podróż i infrastruktura
   hotel(PlaceCategory.travel, 'hotel'),
@@ -72,6 +77,7 @@ enum PlaceType {
   harbour(PlaceCategory.travel, 'harbour'),
   marina(PlaceCategory.travel, 'marina'),
   ferryTerminal(PlaceCategory.travel, 'ferry_terminal'),
+  travelOther(PlaceCategory.travel, 'travel_other'),
 
   // Rozrywka i kultura
   theatre(PlaceCategory.entertainment, 'theatre'),
@@ -84,6 +90,7 @@ enum PlaceType {
   zoo(PlaceCategory.entertainment, 'zoo'),
   aquarium(PlaceCategory.entertainment, 'aquarium'),
   botanicalGarden(PlaceCategory.entertainment, 'botanical_garden'),
+  entertainmentOther(PlaceCategory.entertainment, 'entertainment_other'),
 
   // Punkty praktyczne
   groceryStore(PlaceCategory.practical, 'grocery_store'),
@@ -93,12 +100,15 @@ enum PlaceType {
   touristInfo(PlaceCategory.practical, 'tourist_info'),
   bicycleRepair(PlaceCategory.practical, 'bicycle_repair'),
   carRepair(PlaceCategory.practical, 'car_repair'),
-  laundromat(PlaceCategory.practical, 'laundromat');
+  laundromat(PlaceCategory.practical, 'laundromat'),
+  practicalOther(PlaceCategory.practical, 'practical_other');
 
   const PlaceType(this.category, this.key);
 
   final PlaceCategory category;
   final String key;
+
+  bool get isOther => this == category.otherType;
 
   static const _dir = 'assets/place_icons';
 
@@ -122,4 +132,17 @@ enum PlaceType {
     }
     return null;
   }
+}
+
+extension PlaceCategoryOther on PlaceCategory {
+  /// Typ „inne” kategorii (v16) – jej ogólny znak w wyborze typu i cel migracji v9.
+  PlaceType get otherType => switch (this) {
+    PlaceCategory.gastronomy => PlaceType.gastronomyOther,
+    PlaceCategory.places => PlaceType.placesOther,
+    PlaceCategory.nature => PlaceType.natureOther,
+    PlaceCategory.activities => PlaceType.activitiesOther,
+    PlaceCategory.travel => PlaceType.travelOther,
+    PlaceCategory.entertainment => PlaceType.entertainmentOther,
+    PlaceCategory.practical => PlaceType.practicalOther,
+  };
 }

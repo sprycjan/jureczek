@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jureczek/features/places/domain/place_type.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:jureczek/features/map/data/place_search_client.dart';
@@ -136,6 +137,57 @@ void main() {
       expect(result.address, wawel.address);
       expect(result.lat, 50.0541);
       expect(result.lng, 19.9354);
+    });
+
+    test(
+      'maki z retrieve podpowiada typ, inaczej maki z podpowiedzi (v16)',
+      () async {
+        Map<String, dynamic> feature(Map<String, dynamic> properties) => {
+          'features': [
+            {
+              'geometry': {
+                'coordinates': [19.9354, 50.0541],
+              },
+              'properties': properties,
+            },
+          ],
+        };
+        final castle = await client(
+          200,
+          feature({'maki': 'castle'}),
+        ).retrieve(wawel, sessionToken: 's');
+        expect(castle.suggestedType, PlaceType.castle);
+
+        const suggested = PlaceSuggestion(
+          mapboxId: 'x',
+          name: 'Kawiarnia',
+          suggestedType: PlaceType.cafe,
+        );
+        final fallback = await client(
+          200,
+          feature({}),
+        ).retrieve(suggested, sessionToken: 's');
+        expect(fallback.suggestedType, PlaceType.cafe);
+
+        final unknown = await client(
+          200,
+          feature({'maki': 'nieznane'}),
+        ).retrieve(wawel, sessionToken: 's');
+        expect(unknown.suggestedType, isNull);
+      },
+    );
+
+    test('suggest czyta maki podpowiedzi', () async {
+      final suggestions = await client(200, {
+        'suggestions': [
+          {'mapbox_id': 'a', 'name': 'Apteka', 'maki': 'pharmacy'},
+          {'mapbox_id': 'b', 'name': 'Ulica'},
+        ],
+      }).suggest('apt', sessionToken: 's');
+      expect(suggestions.map((s) => s.suggestedType), [
+        PlaceType.pharmacy,
+        null,
+      ]);
     });
 
     test('pusta odpowiedź to PlaceSearchException', () {

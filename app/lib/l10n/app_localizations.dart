@@ -1449,6 +1449,12 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Stuknij pinezkę, żeby ją zaznaczyć'**
   String get placeIconsMapHint;
+
+  /// No description provided for @placeTypeOther.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inne'**
+  String get placeTypeOther;
 }
 
 class _AppLocalizationsDelegate

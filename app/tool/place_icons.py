@@ -368,6 +368,25 @@ SYMBOLS = {
         <rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M4 7h16"/>
         <circle cx="12" cy="14.2" r="4.5"/><path d="M9 14.6c1-.8 2-.8 3 0s2 .8 3 0"/>
         <circle cx="7" cy="4.8" r=".7" ''' + F + '''/><circle cx="9.8" cy="4.8" r=".7" ''' + F + '''/>'''),
+
+    # ── „Inne” w każdej kategorii (v16) – ogólny znak kategorii ─────────────
+    'gastronomy_other': ('gastronomy', '''
+        <path d="M4 16.5a8 8 0 0 1 16 0z"/><path d="M2.5 16.5h19"/><path d="M5 19.5h14"/>
+        <circle cx="12" cy="6.5" r="1.3"/>'''),
+    'places_other': ('places', '''
+        <path d="M6 21.5V3"/><path d="M6 4h12l-2.8 3.8L18 11.5H6"/><path d="M3.5 21.5h5"/>'''),
+    'nature_other': ('nature', '''
+        <path d="M4.5 19.5c0-8.5 5.5-15 15-15 0 9.5-6.5 15-15 15z"/><path d="M4.5 19.5l9.5-9.5"/>'''),
+    'activities_other': ('activities', '''
+        <path d="M2 20.5L10 9l4 5.5 2.2-3 5.8 9z"/><path d="M10 9V2.5l4.5 1.6L10 5.8"/>'''),
+    'travel_other': ('travel', '''
+        <rect x="3" y="7" width="18" height="13" rx="2"/>
+        <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M7.5 7v13M16.5 7v13"/>'''),
+    'entertainment_other': ('entertainment', '''
+        <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'''),
+    'practical_other': ('practical', '''
+        ''' + wrench(4.5, 19.5, 17, 7, 2.6) + '''
+        <path d="M4.5 4.5l2.5 1 5.5 5.5-1.5 1.5L5.5 7z"/><path d="M13 13.5l1.5-1.5 5.5 5.5a1.06 1.06 0 0 1-1.5 1.5z"/>'''),
 }
 
 

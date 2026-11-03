@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'jureczek'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -39,8 +39,21 @@ class AppDatabase extends _$AppDatabase {
       } else if (from < 6) {
         await m.addColumn(pins, pins.color);
       }
+      if (from < 7) {
+        // v16: typy miejsc zamiast kategorii v9 – pinezka kategorii dostaje
+        // typ „inne” tej kategorii (np. `gastronomy` → `gastronomy_other`).
+        await customStatement(
+          "UPDATE pins SET category = category || '_other' "
+          'WHERE category IN ($_v9Categories)',
+        );
+      }
     },
   );
+
+  /// Klucze 7 kategorii v9 (bez `standard`) jako lista SQL.
+  static const _v9Categories =
+      "'gastronomy', 'places', 'nature', 'activities', 'travel', "
+      "'entertainment', 'practical'";
 
   /// v10: tabela folderów i obowiązkowe `folder_id` w pinezkach. Istniejące
   /// pinezki trafiają do folderu „Pinezki”, tworzonego tylko wtedy, gdy jakieś są.

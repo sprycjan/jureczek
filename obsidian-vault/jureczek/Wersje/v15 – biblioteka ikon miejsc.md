@@ -66,7 +66,7 @@ Zadanie z 2026-11-03: komplet pinezek i ikon dla wszystkich typów miejsc wg spe
 - Podpowiedź na mapie zasłaniała skalę Mapbox – przesunięta niżej (`top: 44`). Start mapy na zoomie 14.2 zamiast 13.2 (pinezki w centrum nachodziły na siebie). Sprawdzone przez adb.
 
 ## Otwarte
-- Podpięcie typów do pinezek: kolumna typu w bazie (migracja), wybór typu w formularzu (74 pozycje → wyszukiwarka albo wybór kategoria → typ), mapa na `renderPlacePinPng`, własny kolor ([[ADR-010 Kolor pinezki z warstw]] nie obejmuje SVG).
+- ✅ Zrobione w [[v16 – typy miejsc w pinezkach]]. Pierwotnie: podpięcie typów do pinezek: kolumna typu w bazie (migracja), wybór typu w formularzu (74 pozycje → wyszukiwarka albo wybór kategoria → typ), mapa na `renderPlacePinPng`, własny kolor ([[ADR-010 Kolor pinezki z warstw]] nie obejmuje SVG).
 - Podpowiedź typu z POI Mapbox (`maki`) – teraz jest dla czego.
 - Symbole do oceny: wąwóz/kanion, motocykl, festiwal, warsztat samochodowy – najtrudniejsze do narysowania w 20 dp.
 

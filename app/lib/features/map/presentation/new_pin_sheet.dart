@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../folders/presentation/folder_picker.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../domain/pin_category.dart';
+import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_suggestion.dart';
-import 'pin_category_picker.dart';
+import 'pin_type_picker.dart';
 import 'pin_color_picker.dart';
 import 'pin_form_fields.dart';
 
@@ -34,7 +34,9 @@ class _NewPinSheetState extends State<NewPinSheet> {
   late final _name = TextEditingController(text: widget.place.name);
   late final _address = TextEditingController(text: widget.place.address);
   final _note = TextEditingController();
-  var _category = PinCategory.fallback;
+
+  /// Podpowiedź z `maki` POI lub wyniku wyszukiwania (v16), inaczej zielona.
+  late var _kind = PinKind(widget.place.suggestedType);
   PinColor? _color;
   String? _folderId;
   bool _saving = false;
@@ -54,7 +56,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
       name: _name.text,
       address: _address.text,
       note: _note.text,
-      category: _category,
+      kind: _kind,
       color: _color,
       folderId: _folderId,
     ));
@@ -84,10 +86,10 @@ class _NewPinSheetState extends State<NewPinSheet> {
             children: [
               Text(l10n.pinNewTitle, style: theme.textTheme.labelLarge),
               const SizedBox(height: 12),
-              PinCategoryPicker(
-                value: _category,
+              PinTypePicker(
+                value: _kind,
                 color: _color,
-                onChanged: (category) => setState(() => _category = category),
+                onChanged: (kind) => setState(() => _kind = kind),
               ),
               const SizedBox(height: 12),
               PinColorPicker(
