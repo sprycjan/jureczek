@@ -34,6 +34,9 @@ class Pins extends Table {
   /// `null` – nieodwiedzona.
   IntColumn get visitedAtMs => integer().nullable()();
 
+  /// Dodane w schemacie 10 (v22): główny punkt wycieczki, wyższy priorytet.
+  BoolColumn get starred => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }

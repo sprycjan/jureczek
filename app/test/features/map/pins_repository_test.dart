@@ -131,6 +131,81 @@ void main() {
     });
   });
 
+  group('gwiazdka (v22)', () {
+    test('nowa pinezka domyślnie jej nie ma, a insert ją zapisuje', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await repository.insert(
+        PlacePin(
+          folderId: 'f',
+          id: 'b',
+          lat: 50.06,
+          lng: 19.94,
+          createdAt: DateTime(2026, 11, 2),
+          starred: true,
+        ),
+      );
+
+      expect((await repository.findById('a'))?.starred, isFalse);
+      expect((await repository.findById('b'))?.starred, isTrue);
+    });
+
+    test('setStarred ustawia i zdejmuje gwiazdkę bez zmiany reszty', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await repository.updateDetails('a', name: 'Wawel', note: 'Bilety');
+      final visitedAt = DateTime(2026, 11, 3, 12, 30);
+      await repository.setVisitedAt('a', visitedAt);
+
+      await repository.setStarred('a', starred: true);
+      final starred = await repository.findById('a');
+      expect(starred?.starred, isTrue);
+      expect(starred?.name, 'Wawel');
+      expect(starred?.note, 'Bilety');
+      expect(starred?.visitedAt, visitedAt);
+
+      await repository.setStarred('a', starred: false);
+      expect((await repository.findById('a'))?.starred, isFalse);
+    });
+
+    test('updateDetails zachowuje gwiazdkę', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await repository.setStarred('a', starred: true);
+
+      await repository.updateDetails('a', name: 'Wawel');
+
+      expect((await repository.findById('a'))?.starred, isTrue);
+    });
+
+    test('podnosi folder pinezki na górę listy', () async {
+      final folders = FoldersRepository(db);
+      for (final (id, updatedAtMs) in [('f', 1), ('g', 2)]) {
+        await db
+            .into(db.folders)
+            .insert(
+              FoldersCompanion.insert(
+                id: id,
+                name: id,
+                icon: FolderIcon.camper.key,
+                color: FolderColor.emerald.key,
+                createdAt: DateTime(2026, 1, 1),
+                updatedAtMs: updatedAtMs,
+              ),
+            );
+      }
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await db
+          .update(db.folders)
+          .write(const FoldersCompanion(updatedAtMs: Value(1)));
+      await (db.update(db.folders)..where((t) => t.id.equals('g'))).write(
+        const FoldersCompanion(updatedAtMs: Value(2)),
+      );
+      expect((await folders.watchAll().first).first.id, 'g');
+
+      await repository.setStarred('a', starred: true);
+
+      expect((await folders.watchAll().first).first.id, 'f');
+    });
+  });
+
   test('updateDetails zmienia typ; bez typu zostawia dotychczasowy', () async {
     await repository.insert(pin('a', DateTime(2026, 11, 1)));
 

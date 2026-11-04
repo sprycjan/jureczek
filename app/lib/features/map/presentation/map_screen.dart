@@ -20,6 +20,7 @@ import '../domain/duplicate_pin.dart';
 import '../domain/pin_category_filter.dart';
 import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
+import '../domain/pin_sort_key.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
@@ -43,14 +44,34 @@ final _polandViewport = CameraViewportState(
   zoom: 5.3,
 );
 
-/// Wygląd pinezki na mapie: typ, to, czy jest zaznaczona (otwarty arkusz),
-/// własny kolor (v14; `null` – kolor typu) i to, czy jest odwiedzona (v21).
-typedef _PinLook = (PinKind, bool, PinColor?, bool);
+/// Wygląd pinezki na mapie: [selected] to otwarty arkusz, `color == null` – kolor typu.
+typedef _PinLook = ({
+  PinKind kind,
+  bool selected,
+  PinColor? color,
+  bool visited,
+  bool starred,
+});
 
 /// Id obrazka w stylu mapy – jeden bitmap na wygląd, wspólny dla wszystkich pinezek.
 String _lookImageId(_PinLook look) =>
-    'pin-${look.$1.key}-${look.$2 ? 'selected' : 'default'}'
-    '-${look.$3?.key ?? 'auto'}${look.$4 ? '-visited' : ''}';
+    'pin-${look.kind.key}-${look.selected ? 'selected' : 'default'}'
+    '-${look.color?.key ?? 'auto'}${look.visited ? '-visited' : ''}'
+    '${look.starred ? '-starred' : ''}';
+
+/// Najzwyklejszy wygląd danej pinezki, także ten spadający (bez kciuka).
+_PinLook _basicLook(
+  PinKind kind, {
+  bool selected = false,
+  PinColor? color,
+  bool starred = false,
+}) => (
+  kind: kind,
+  selected: selected,
+  color: color,
+  visited: false,
+  starred: starred,
+);
 
 /// Rozmiar PNG (szerokość, wysokość) z nagłówka IHDR.
 Size _pngSize(Uint8List bytes) {
@@ -106,7 +127,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final _pinImages = <_PinLook, Uint8List>{};
 
   /// Obrazki spadających pinezek, zdekodowane zawczasu (`precacheImage`).
-  final _dropImages = <(PinKind, PinColor?), MemoryImage>{};
+  final _dropImages = <_PinLook, MemoryImage>{};
 
   /// Mapbox rysuje obrazek w pikselach fizycznych: PNG 3x × ta skala = rozmiar w dp.
   double _pinIconSize = 1;
@@ -415,9 +436,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Pinezka stoi czubkiem na punkcie, więc u góry trzeba miejsca na jej
         // wysokość – ponad narzędziami pod paskiem statusu.
         final pinHeight =
-            _pngSize(
-              _pinImages[(PinKind.standard, false, null, false)]!,
-            ).height /
+            _pngSize(_pinImages[_basicLook(PinKind.standard)]!).height /
             pinImageScale;
         final camera = await map.cameraForCoordinatesPadding(
           [
@@ -455,6 +474,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     }
     await _loadPinImages();
     final manager = await map.annotations.createPointAnnotationManager();
+    // Pinezki się nie chowają, a wyższy `symbolSortKey` rysuje się na wierzchu.
+    await manager.setIconAllowOverlap(true);
+    await manager.setIconIgnorePlacement(true);
     _pinManager = manager;
     _tapEvents = manager.tapEvents(onTap: _onPinTapped);
 
@@ -558,9 +580,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Zielona od razu (kamera liczy z niej wysokość pinezki); typy miejsc (v16)
     // składane na żądanie przy pierwszej pinezce danego wyglądu.
     for (final selected in [false, true]) {
-      await _pinImage((PinKind.standard, selected, null, false));
+      await _pinImage(_basicLook(PinKind.standard, selected: selected));
     }
-    await _dropImage(PinKind.standard, null);
+    await _dropImage(_basicLook(PinKind.standard));
   }
 
   /// PNG wyglądu z pamięci albo wczytany/złożony teraz.
@@ -569,21 +591,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (cached != null) return cached;
     final bytes = await renderPinPng(
       rootBundle,
-      look.$1,
-      selected: look.$2,
-      color: look.$3,
-      visited: look.$4,
+      look.kind,
+      selected: look.selected,
+      color: look.color,
+      visited: look.visited,
+      starred: look.starred,
     );
     return _pinImages[look] = bytes;
   }
 
-  Future<MemoryImage> _dropImage(PinKind kind, PinColor? color) async {
-    final cached = _dropImages[(kind, color)];
+  /// Spada tylko nowa pinezka: nigdy zaznaczona ani odwiedzona, ale może mieć gwiazdkę.
+  Future<MemoryImage> _dropImage(_PinLook look) async {
+    final cached = _dropImages[look];
     if (cached != null) return cached;
-    // Spada tylko nowa pinezka, a nowa jest zawsze nieodwiedzona.
-    final image = MemoryImage(await _pinImage((kind, false, color, false)));
+    final image = MemoryImage(await _pinImage(look));
     if (mounted) await precacheImage(image, context);
-    return _dropImages[(kind, color)] = image;
+    return _dropImages[look] = image;
   }
 
   /// Mapa leży pod paskiem statusu, więc kompas schodzi pod narzędzia (lupa, style),
@@ -654,13 +677,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final missing = <(PlacePin, _PinLook)>[];
     final options = <PointAnnotationOptions>[];
     for (final pin in pins) {
-      final look = (pin.kind, pin.id == _selectedPinId, pin.color, pin.visited);
+      final selected = pin.id == _selectedPinId;
+      final look = (
+        kind: pin.kind,
+        selected: selected,
+        color: pin.color,
+        visited: pin.visited,
+        starred: pin.starred,
+      );
+      final sortKey = pinSortKey(
+        lat: pin.lat,
+        selected: selected,
+        starred: pin.starred,
+      );
       final existing = _annotationsByPinId[pin.id];
       if (existing != null) {
         if (_lookByPinId[pin.id] == look) continue;
         existing
           ..image = await _pinImage(look)
-          ..iconImage = _lookImageId(look);
+          ..iconImage = _lookImageId(look)
+          ..symbolSortKey = sortKey;
         await manager.update(existing);
         _lookByPinId[pin.id] = look;
         changed = true;
@@ -675,6 +711,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           iconAnchor: IconAnchor.BOTTOM,
           iconSize: _pinIconSize,
           iconOpacity: _droppingIds.contains(pin.id) ? 0 : 1,
+          symbolSortKey: sortKey,
         ),
       );
     }
@@ -733,11 +770,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     required double lng,
     required PinKind kind,
     required PinColor? color,
+    required bool starred,
   }) async {
     final map = _map;
     if (map == null || _dropImages.isEmpty || !mounted) return _landPin(id);
     try {
-      final image = await _dropImage(kind, color);
+      final image = await _dropImage(
+        _basicLook(kind, color: color, starred: starred),
+      );
       final pixel = await map.pixelForCoordinate(
         Point(coordinates: Position(lng, lat)),
       );
@@ -796,6 +836,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         },
         onSave: (details) => _savePinDetails(pin.id, details),
         onSetVisited: (visited) => _setPinVisited(pin.id, visited),
+        onSetStarred: (starred) => _setPinStarred(pin.id, starred),
         canMoveFolder: true,
       ),
     );
@@ -836,6 +877,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return true;
     } catch (e) {
       debugPrint('Zapis oznaczenia „odwiedzona” nie powiódł się: $e');
+      return false;
+    }
+  }
+
+  /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
+  Future<bool> _setPinStarred(String id, bool starred) async {
+    try {
+      await ref.read(pinsControllerProvider).setStarred(id, starred: starred);
+      return true;
+    } catch (e) {
+      debugPrint('Zapis gwiazdki nie powiódł się: $e');
       return false;
     }
   }
@@ -1023,6 +1075,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     String? addedId;
     var kind = PinKind.standard;
     PinColor? color;
+    var starred = false;
     // Tylko POI z mapy nie ma adresu; zapisany z pinezką nie jest pobierany ponownie.
     final addressLookup = result.poiName != null && result.address == null
         ? _lookupAddress((lat: result.lat, lng: result.lng))
@@ -1039,6 +1092,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         onSave: (details) async {
           kind = details.kind;
           color = details.color;
+          starred = details.starred;
           try {
             final folderId =
                 widget.folderId ??
@@ -1057,6 +1111,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   poiName: result.poiName,
                   kind: details.kind,
                   color: details.color,
+                  starred: details.starred,
                 );
           } catch (e) {
             debugPrint('Zapis pinezki nie powiódł się: $e');
@@ -1083,6 +1138,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       lng: result.lng,
       kind: kind,
       color: color,
+      starred: starred,
     );
   }
 

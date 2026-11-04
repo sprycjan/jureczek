@@ -140,6 +140,21 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _starredMeta = const VerificationMeta(
+    'starred',
+  );
+  @override
+  late final GeneratedColumn<bool> starred = GeneratedColumn<bool>(
+    'starred',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("starred" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -155,6 +170,7 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
     color,
     poiName,
     visitedAtMs,
+    starred,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -256,6 +272,12 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
         ),
       );
     }
+    if (data.containsKey('starred')) {
+      context.handle(
+        _starredMeta,
+        starred.isAcceptableOrUnknown(data['starred']!, _starredMeta),
+      );
+    }
     return context;
   }
 
@@ -317,6 +339,10 @@ class $PinsTable extends Pins with TableInfo<$PinsTable, PinRow> {
         DriftSqlType.int,
         data['${effectivePrefix}visited_at_ms'],
       ),
+      starred: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}starred'],
+      )!,
     );
   }
 
@@ -357,6 +383,9 @@ class PinRow extends DataClass implements Insertable<PinRow> {
   /// Dodane w schemacie 9 (v21): kiedy oznaczono pinezkę jako odwiedzoną;
   /// `null` – nieodwiedzona.
   final int? visitedAtMs;
+
+  /// Dodane w schemacie 10 (v22): główny punkt wycieczki, wyższy priorytet.
+  final bool starred;
   const PinRow({
     required this.id,
     required this.lat,
@@ -371,6 +400,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     this.color,
     this.poiName,
     this.visitedAtMs,
+    required this.starred,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -402,6 +432,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     if (!nullToAbsent || visitedAtMs != null) {
       map['visited_at_ms'] = Variable<int>(visitedAtMs);
     }
+    map['starred'] = Variable<bool>(starred);
     return map;
   }
 
@@ -430,6 +461,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       visitedAtMs: visitedAtMs == null && nullToAbsent
           ? const Value.absent()
           : Value(visitedAtMs),
+      starred: Value(starred),
     );
   }
 
@@ -452,6 +484,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       color: serializer.fromJson<String?>(json['color']),
       poiName: serializer.fromJson<String?>(json['poiName']),
       visitedAtMs: serializer.fromJson<int?>(json['visitedAtMs']),
+      starred: serializer.fromJson<bool>(json['starred']),
     );
   }
   @override
@@ -471,6 +504,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       'color': serializer.toJson<String?>(color),
       'poiName': serializer.toJson<String?>(poiName),
       'visitedAtMs': serializer.toJson<int?>(visitedAtMs),
+      'starred': serializer.toJson<bool>(starred),
     };
   }
 
@@ -488,6 +522,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     Value<String?> color = const Value.absent(),
     Value<String?> poiName = const Value.absent(),
     Value<int?> visitedAtMs = const Value.absent(),
+    bool? starred,
   }) => PinRow(
     id: id ?? this.id,
     lat: lat ?? this.lat,
@@ -502,6 +537,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     color: color.present ? color.value : this.color,
     poiName: poiName.present ? poiName.value : this.poiName,
     visitedAtMs: visitedAtMs.present ? visitedAtMs.value : this.visitedAtMs,
+    starred: starred ?? this.starred,
   );
   PinRow copyWithCompanion(PinsCompanion data) {
     return PinRow(
@@ -520,6 +556,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
       visitedAtMs: data.visitedAtMs.present
           ? data.visitedAtMs.value
           : this.visitedAtMs,
+      starred: data.starred.present ? data.starred.value : this.starred,
     );
   }
 
@@ -538,7 +575,8 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           ..write('folderId: $folderId, ')
           ..write('color: $color, ')
           ..write('poiName: $poiName, ')
-          ..write('visitedAtMs: $visitedAtMs')
+          ..write('visitedAtMs: $visitedAtMs, ')
+          ..write('starred: $starred')
           ..write(')'))
         .toString();
   }
@@ -558,6 +596,7 @@ class PinRow extends DataClass implements Insertable<PinRow> {
     color,
     poiName,
     visitedAtMs,
+    starred,
   );
   @override
   bool operator ==(Object other) =>
@@ -575,7 +614,8 @@ class PinRow extends DataClass implements Insertable<PinRow> {
           other.folderId == this.folderId &&
           other.color == this.color &&
           other.poiName == this.poiName &&
-          other.visitedAtMs == this.visitedAtMs);
+          other.visitedAtMs == this.visitedAtMs &&
+          other.starred == this.starred);
 }
 
 class PinsCompanion extends UpdateCompanion<PinRow> {
@@ -592,6 +632,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
   final Value<String?> color;
   final Value<String?> poiName;
   final Value<int?> visitedAtMs;
+  final Value<bool> starred;
   final Value<int> rowid;
   const PinsCompanion({
     this.id = const Value.absent(),
@@ -607,6 +648,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.color = const Value.absent(),
     this.poiName = const Value.absent(),
     this.visitedAtMs = const Value.absent(),
+    this.starred = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PinsCompanion.insert({
@@ -623,6 +665,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     this.color = const Value.absent(),
     this.poiName = const Value.absent(),
     this.visitedAtMs = const Value.absent(),
+    this.starred = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        lat = Value(lat),
@@ -643,6 +686,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Expression<String>? color,
     Expression<String>? poiName,
     Expression<int>? visitedAtMs,
+    Expression<bool>? starred,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -659,6 +703,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       if (color != null) 'color': color,
       if (poiName != null) 'poi_name': poiName,
       if (visitedAtMs != null) 'visited_at_ms': visitedAtMs,
+      if (starred != null) 'starred': starred,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -677,6 +722,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     Value<String?>? color,
     Value<String?>? poiName,
     Value<int?>? visitedAtMs,
+    Value<bool>? starred,
     Value<int>? rowid,
   }) {
     return PinsCompanion(
@@ -693,6 +739,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
       color: color ?? this.color,
       poiName: poiName ?? this.poiName,
       visitedAtMs: visitedAtMs ?? this.visitedAtMs,
+      starred: starred ?? this.starred,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -739,6 +786,9 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
     if (visitedAtMs.present) {
       map['visited_at_ms'] = Variable<int>(visitedAtMs.value);
     }
+    if (starred.present) {
+      map['starred'] = Variable<bool>(starred.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -761,6 +811,7 @@ class PinsCompanion extends UpdateCompanion<PinRow> {
           ..write('color: $color, ')
           ..write('poiName: $poiName, ')
           ..write('visitedAtMs: $visitedAtMs, ')
+          ..write('starred: $starred, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1261,6 +1312,7 @@ typedef $$PinsTableCreateCompanionBuilder =
       Value<String?> color,
       Value<String?> poiName,
       Value<int?> visitedAtMs,
+      Value<bool> starred,
       Value<int> rowid,
     });
 typedef $$PinsTableUpdateCompanionBuilder =
@@ -1278,6 +1330,7 @@ typedef $$PinsTableUpdateCompanionBuilder =
       Value<String?> color,
       Value<String?> poiName,
       Value<int?> visitedAtMs,
+      Value<bool> starred,
       Value<int> rowid,
     });
 
@@ -1351,6 +1404,11 @@ class $$PinsTableFilterComposer extends Composer<_$AppDatabase, $PinsTable> {
 
   ColumnFilters<int> get visitedAtMs => $composableBuilder(
     column: $table.visitedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get starred => $composableBuilder(
+    column: $table.starred,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1427,6 +1485,11 @@ class $$PinsTableOrderingComposer extends Composer<_$AppDatabase, $PinsTable> {
     column: $table.visitedAtMs,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get starred => $composableBuilder(
+    column: $table.starred,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PinsTableAnnotationComposer
@@ -1478,6 +1541,9 @@ class $$PinsTableAnnotationComposer
     column: $table.visitedAtMs,
     builder: (column) => column,
   );
+
+  GeneratedColumn<bool> get starred =>
+      $composableBuilder(column: $table.starred, builder: (column) => column);
 }
 
 class $$PinsTableTableManager
@@ -1521,6 +1587,7 @@ class $$PinsTableTableManager
                 Value<String?> color = const Value.absent(),
                 Value<String?> poiName = const Value.absent(),
                 Value<int?> visitedAtMs = const Value.absent(),
+                Value<bool> starred = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion(
                 id: id,
@@ -1536,6 +1603,7 @@ class $$PinsTableTableManager
                 color: color,
                 poiName: poiName,
                 visitedAtMs: visitedAtMs,
+                starred: starred,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1553,6 +1621,7 @@ class $$PinsTableTableManager
                 Value<String?> color = const Value.absent(),
                 Value<String?> poiName = const Value.absent(),
                 Value<int?> visitedAtMs = const Value.absent(),
+                Value<bool> starred = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PinsCompanion.insert(
                 id: id,
@@ -1568,6 +1637,7 @@ class $$PinsTableTableManager
                 color: color,
                 poiName: poiName,
                 visitedAtMs: visitedAtMs,
+                starred: starred,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

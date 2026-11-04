@@ -174,3 +174,10 @@ Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], 
 - Warstwy stylu klasycznego zmienia się po `getStyleJSON` przez `setStyleLayerProperties(id, json)`, także `filter`. Warstw z importu Standard nie da się zmieniać, a tuż po przełączeniu na Standard `getStyleJSON` zwrócił warstwy poprzedniego stylu.
 - `["slice", tekst, i, i + 1]` działa na znakach i w `filter`, i w `text-field`. Poza końcem daje `""`, a `""` jest mniejszy od każdego znaku, także U+0000.
 - Zob. [[ADR-014 Polskie nazwy na mapie]].
+
+## Kolejność i nakładanie pinezek (v22)
+- `symbolSortKey` działa na pojedynczą adnotację: jest w `PointAnnotationOptions` i `PointAnnotation`, a zmienia się go przez `manager.update(annotation)`.
+- Przy `iconAllowOverlap: true` wyższy klucz rysuje się na wierzchu. Przy `false` niższy klucz wygrywa miejsce, a druga pinezka może zniknąć. Dlatego ustawiamy jawnie `setIconAllowOverlap(true)` i `setIconIgnorePlacement(true)`.
+- Ustawiony klucz wyłącza układanie według pozycji na ekranie, więc `pinSortKey` zawiera `-lat`.
+- Tap trafia tylko w górną adnotację, a obszar tapnięcia obejmuje całą ramkę obrazka z przezroczystym marginesem.
+- Zob. [[v22 – pinezka z gwiazdką]].

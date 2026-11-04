@@ -81,6 +81,40 @@ void main() {
       expect(saved?.address, 'Jana Kilińskiego 4, 80-452 Gdańsk');
       expect(saved?.note, 'Kino');
       expect(saved?.kind, PinKind.standard);
+      expect(saved?.starred, isFalse);
+    });
+
+    testWidgets('gwiazdka trafia do zapisu dopiero po „Zapisz” (v22)', (
+      tester,
+    ) async {
+      final saved = <PinDetailsInput>[];
+      await pump(
+        tester,
+        NewPinSheet(
+          place: mall,
+          onSave: (details) async {
+            saved.add(details);
+            return true;
+          },
+        ),
+      );
+      final star = find.byKey(const ValueKey('pin-starred-button'));
+      expect(find.byIcon(Icons.star_border), findsOneWidget);
+
+      await tester.tap(star);
+      await tester.pump();
+      expect(find.byIcon(Icons.star), findsOneWidget);
+      expect(saved, isEmpty);
+
+      await tester.tap(find.text('Zapisz'));
+      await tester.pumpAndSettle();
+      expect(saved.single.starred, isTrue);
+    });
+
+    testWidgets('w formularzu nie ma kciuka odwiedzenia (v22)', (tester) async {
+      await pump(tester, NewPinSheet(place: mall, onSave: (_) async => true));
+
+      expect(find.byKey(const ValueKey('pin-visited-button')), findsNothing);
     });
 
     group('adres POI pobierany w tle (v19)', () {

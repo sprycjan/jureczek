@@ -82,6 +82,8 @@
   "pinOpenInMapsError": "Nie udało się otworzyć Google Maps",
   "pinMarkVisited": "Oznacz jako odwiedzone",
   "pinUnmarkVisited": "Cofnij oznaczenie odwiedzenia",
+  "pinMarkStarred": "Oznacz jako główny punkt",
+  "pinUnmarkStarred": "Cofnij oznaczenie głównego punktu",
   "pinNewTitle": "Nowa pinezka",
   "pinDuplicate": "Ta pinezka już jest",
   "shareLoading": "Odczytuję miejsce…",

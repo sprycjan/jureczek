@@ -239,6 +239,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get pinUnmarkVisited => 'Cofnij oznaczenie odwiedzenia';
 
   @override
+  String get pinMarkStarred => 'Oznacz jako główny punkt';
+
+  @override
+  String get pinUnmarkStarred => 'Cofnij oznaczenie głównego punktu';
+
+  @override
   String get pinNewTitle => 'Nowa pinezka';
 
   @override

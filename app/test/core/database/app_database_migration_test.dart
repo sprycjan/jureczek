@@ -102,6 +102,7 @@ void main() {
     expect(pin?.kind, const PinKind(PlaceType.placesOther));
     expect(pin?.folderId, folders.single.id);
     expect(pin?.visitedAt, isNull);
+    expect(pin?.starred, isFalse);
   });
 
   test('migracja 4 → 5 bez pinezek nie tworzy folderu', () async {
@@ -355,4 +356,61 @@ void main() {
       expect((await repository.findById('a'))?.visitedAt, at);
     },
   );
+
+  test('aktualizacja ze schematu 9 dodaje pinezki bez gwiazdki (v22)', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute('''
+            CREATE TABLE folders (
+              id TEXT NOT NULL,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              icon TEXT NOT NULL,
+              color TEXT NOT NULL,
+              created_at INTEGER NOT NULL,
+              updated_at_ms INTEGER NOT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO folders VALUES ('f1', 'Kraków', NULL, 'camper', 'emerald', 1792886400, 1792886400000)",
+          );
+          raw.execute('''
+            CREATE TABLE pins (
+              id TEXT NOT NULL,
+              lat REAL NOT NULL,
+              lng REAL NOT NULL,
+              created_at INTEGER NOT NULL,
+              name TEXT NULL,
+              note TEXT NULL,
+              address TEXT NULL,
+              source_url TEXT NULL,
+              category TEXT NOT NULL DEFAULT 'standard',
+              folder_id TEXT NOT NULL,
+              color TEXT NULL,
+              poi_name TEXT NULL,
+              visited_at_ms INTEGER NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO pins VALUES ('a', 50.06, 19.94, 1792886400, 'Wawel', NULL, NULL, "
+            "NULL, 'castle', 'f1', 'red', 'Wawel Royal Castle', 1792886400000)",
+          );
+          raw.execute('PRAGMA user_version = 9');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final repository = PinsRepository(db);
+    final pin = await repository.findById('a');
+    expect(pin?.name, 'Wawel');
+    expect(pin?.visited, isTrue);
+    expect(pin?.starred, isFalse);
+
+    await repository.setStarred('a', starred: true);
+    expect((await repository.findById('a'))?.starred, isTrue);
+  });
 }

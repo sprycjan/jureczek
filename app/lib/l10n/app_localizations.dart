@@ -544,6 +544,18 @@ abstract class AppLocalizations {
   /// **'Cofnij oznaczenie odwiedzenia'**
   String get pinUnmarkVisited;
 
+  /// No description provided for @pinMarkStarred.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oznacz jako główny punkt'**
+  String get pinMarkStarred;
+
+  /// No description provided for @pinUnmarkStarred.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cofnij oznaczenie głównego punktu'**
+  String get pinUnmarkStarred;
+
   /// No description provided for @pinNewTitle.
   ///
   /// In pl, this message translates to:

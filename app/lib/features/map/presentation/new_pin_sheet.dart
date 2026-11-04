@@ -44,6 +44,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
   late var _kind = PinKind(widget.place.suggestedType);
   PinColor? _color;
   String? _folderId;
+  bool _starred = false;
   bool _saving = false;
   bool _saveFailed = false;
 
@@ -76,6 +77,7 @@ class _NewPinSheetState extends State<NewPinSheet> {
       kind: _kind,
       color: _color,
       folderId: _folderId,
+      starred: _starred,
     ));
     if (!mounted || ok) return;
     setState(() {
@@ -101,7 +103,22 @@ class _NewPinSheetState extends State<NewPinSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(l10n.pinNewTitle, style: theme.textTheme.labelLarge),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.pinNewTitle,
+                      style: theme.textTheme.labelLarge,
+                    ),
+                  ),
+                  PinStarButton(
+                    starred: _starred,
+                    onPressed: _saving
+                        ? null
+                        : () => setState(() => _starred = !_starred),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
               PinTypePicker(
                 value: _kind,

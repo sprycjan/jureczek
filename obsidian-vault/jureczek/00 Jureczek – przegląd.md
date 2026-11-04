@@ -47,7 +47,8 @@ tags: [jureczek, przeglad]
 | v19 | Odnośnik do Google Maps przy każdej pinezce: link Google, POI po nazwie z adresem albo współrzędne; adres POI z mapy zapisany przy dodaniu (schemat 8) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v19 – odnośnik do Google Maps]] |
 | v20 | Polskie nazwy na mapie: bez cyrylicy i pisma arabskiego w stylach Domyślny i Teren; w 3D tylko język kafelków | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v20 – polskie nazwy na mapie]] |
 | v21 | Pinezka odwiedzona: kciuk w arkuszu zapisuje od razu, znaczek w rogu pinezki na mapie, data oznaczenia w bazie (schemat 9) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v21 – pinezka odwiedzona]] |
-| v22+ | Patrz [[Backlog]] | — |
+| v22 | Pinezka z gwiazdką: przełącznik w arkuszu i formularzu nowej pinezki, kolumna znaczków przy główce, pinezki z gwiazdką rysowane nad zwykłymi, włączone nakładanie (schemat 10) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v22 – pinezka z gwiazdką]] |
+| v23+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

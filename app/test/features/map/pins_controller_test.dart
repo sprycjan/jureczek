@@ -92,6 +92,42 @@ void main() {
     },
   );
 
+  test('add zapisuje gwiazdkę, a setStarred ją zmienia (v22)', () async {
+    final plain = await controller().add(folderId: 'f', lat: 50, lng: 19);
+    final starred = await controller().add(
+      folderId: 'f',
+      lat: 51,
+      lng: 20,
+      starred: true,
+    );
+    bool of(List<PlacePin> all, String id) =>
+        all.firstWhere((p) => p.id == id).starred;
+
+    var all = await pins();
+    expect(of(all, plain), isFalse);
+    expect(of(all, starred), isTrue);
+
+    await controller().setStarred(plain, starred: true);
+    await controller().setStarred(starred, starred: false);
+    all = await pins();
+    expect(of(all, plain), isTrue);
+    expect(of(all, starred), isFalse);
+  });
+
+  test('„Cofnij” po usunięciu przywraca gwiazdkę (v22)', () async {
+    final id = await controller().add(
+      folderId: 'f',
+      lat: 50.06,
+      lng: 19.94,
+      starred: true,
+    );
+
+    final removed = await controller().remove(id);
+    await controller().restore(removed!);
+
+    expect((await pins()).single.starred, isTrue);
+  });
+
   test('add zwraca id zapisanej pinezki', () async {
     final id = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
 

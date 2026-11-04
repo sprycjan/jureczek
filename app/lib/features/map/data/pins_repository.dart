@@ -45,6 +45,7 @@ class PinsRepository {
               color: Value(pin.color?.key),
               folderId: pin.folderId,
               visitedAtMs: Value(pin.visitedAt?.millisecondsSinceEpoch),
+              starred: Value(pin.starred),
             ),
           );
       await _touchFolder(pin.folderId, DateTime.now());
@@ -98,6 +99,18 @@ class PinsRepository {
     });
   }
 
+  /// Ustawia albo zdejmuje gwiazdkę. Folder pinezki idzie na górę listy.
+  Future<void> setStarred(String id, {required bool starred}) {
+    return _db.transaction(() async {
+      final pin = await findById(id);
+      if (pin == null) return;
+      await (_db.update(_db.pins)..where((t) => t.id.equals(id))).write(
+        PinsCompanion(starred: Value(starred)),
+      );
+      await _touchFolder(pin.folderId, DateTime.now());
+    });
+  }
+
   Future<void> _touchFolder(String id, DateTime at) {
     return (_db.update(_db.folders)..where((t) => t.id.equals(id))).write(
       FoldersCompanion(updatedAtMs: Value(at.millisecondsSinceEpoch)),
@@ -124,6 +137,7 @@ class PinsRepository {
     visitedAt: row.visitedAtMs == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(row.visitedAtMs!),
+    starred: row.starred,
   );
 }
 

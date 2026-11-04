@@ -30,6 +30,7 @@ class PinsController {
     String? poiName,
     PinKind kind = PinKind.standard,
     PinColor? color,
+    bool starred = false,
   }) async {
     final id = _uuid.v4();
     await _repository.insert(
@@ -46,6 +47,7 @@ class PinsController {
         poiName: _normalize(poiName),
         kind: kind,
         color: color,
+        starred: starred,
       ),
     );
     return id;
@@ -86,6 +88,11 @@ class PinsController {
   /// Oznacza pinezkę jako odwiedzoną teraz albo zdejmuje oznaczenie razem z datą.
   Future<void> setVisited(String id, {required bool visited}) {
     return _repository.setVisitedAt(id, visited ? DateTime.now() : null);
+  }
+
+  /// Ustawia albo zdejmuje gwiazdkę (v22).
+  Future<void> setStarred(String id, {required bool starred}) {
+    return _repository.setStarred(id, starred: starred);
   }
 
   static String? _normalize(String? text) {

@@ -21,6 +21,7 @@ class PlacePin {
     this.kind = PinKind.standard,
     this.color,
     this.visitedAt,
+    this.starred = false,
   });
 
   final String id;
@@ -53,6 +54,9 @@ class PlacePin {
   final DateTime? visitedAt;
 
   bool get visited => visitedAt != null;
+
+  /// Główny punkt wycieczki, wyższy priorytet (v22).
+  final bool starred;
 
   static const maxNameLength = 80;
   static const maxNoteLength = 1000;

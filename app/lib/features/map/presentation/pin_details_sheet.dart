@@ -22,6 +22,7 @@ class PinDetailsSheet extends StatefulWidget {
     required this.onDelete,
     required this.onSave,
     required this.onSetVisited,
+    required this.onSetStarred,
     this.notice,
     this.canMoveFolder = false,
   });
@@ -32,6 +33,9 @@ class PinDetailsSheet extends StatefulWidget {
 
   /// Zapisuje oznaczenie „odwiedzona” (v21); zwraca `false`, gdy się nie udało.
   final Future<bool> Function(bool visited) onSetVisited;
+
+  /// Zapisuje gwiazdkę (v22); zwraca `false`, gdy się nie udało.
+  final Future<bool> Function(bool starred) onSetStarred;
 
   /// Komunikat nad nazwą, np. „Ta pinezka już jest” po udostępnieniu duplikatu.
   final String? notice;
@@ -56,6 +60,9 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late bool _visited = widget.pin.visited;
   bool _savingVisited = false;
   bool _visitedFailed = false;
+  late bool _starred = widget.pin.starred;
+  bool _savingStarred = false;
+  bool _starredFailed = false;
   bool _editing = false;
   bool _saving = false;
   bool _saveFailed = false;
@@ -95,6 +102,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       kind: _editedKind,
       color: _editedColor,
       folderId: widget.canMoveFolder ? _editedFolderId : null,
+      starred: _starred,
     ));
     if (!mounted) return;
     setState(() {
@@ -126,6 +134,23 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
       _savingVisited = false;
       _visitedFailed = !ok;
       if (!ok) _visited = !visited;
+    });
+  }
+
+  /// Ikonka zmienia się od razu, a po nieudanym zapisie wraca do poprzedniego stanu.
+  Future<void> _toggleStarred() async {
+    final starred = !_starred;
+    setState(() {
+      _starred = starred;
+      _savingStarred = true;
+      _starredFailed = false;
+    });
+    final ok = await widget.onSetStarred(starred);
+    if (!mounted) return;
+    setState(() {
+      _savingStarred = false;
+      _starredFailed = !ok;
+      if (!ok) _starred = !starred;
     });
   }
 
@@ -198,6 +223,10 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
                 ),
               ),
             ),
+            PinStarButton(
+              starred: _starred,
+              onPressed: _savingStarred ? null : _toggleStarred,
+            ),
             IconButton(
               key: const ValueKey('pin-visited-button'),
               visualDensity: VisualDensity.compact,
@@ -213,7 +242,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
             ),
           ],
         ),
-        if (_visitedFailed)
+        if (_visitedFailed || _starredFailed)
           Text(
             l10n.pinsSaveError,
             style: TextStyle(color: theme.colorScheme.error),

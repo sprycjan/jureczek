@@ -3,10 +3,12 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]], [[v22 – pinezka z gwiazdką]].
 
 ## Miejsca / pinezki
 - [x] Oznaczenie pinezki jako odwiedzonej – v21, [[v21 – pinezka odwiedzona]]
+- [x] Oznaczenie pinezki gwiazdką jako głównego punktu wycieczki, rysowanie nad zwykłymi – v22, [[v22 – pinezka z gwiazdką]]
+- [ ] Filtr „tylko z gwiazdką” w panelu z lejkiem – [[v22 – pinezka z gwiazdką]]
 - [ ] Filtr „odwiedzone / nieodwiedzone” w panelu z lejkiem – [[v21 – pinezka odwiedzona]]
 - [ ] Przygaszanie odwiedzonych pinezek na mapie – [[v21 – pinezka odwiedzona]]
 - [ ] Pokazanie daty odwiedzenia w arkuszu, np. „Odwiedzono 3 lis 2026” (data jest już w bazie od v21)
@@ -64,6 +66,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Synchronizacja z chmurą / backend
 
 - [ ] Licznik „odwiedzone X z Y” na folderze (dane są od v21) – [[v21 – pinezka odwiedzona]]
+- [ ] Wyróżnienie pinezek z gwiazdką na liście lub liczniku folderu – [[v22 – pinezka z gwiazdką]]
 
 ## Infrastruktura
 - [x] Repozytorium git na GitHubie (sprycjan/jureczek) – [[ADR-004 Struktura repo (app)]]

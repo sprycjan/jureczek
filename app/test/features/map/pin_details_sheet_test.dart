@@ -10,6 +10,7 @@ import 'package:jureczek/features/map/domain/pin_color.dart';
 import 'package:jureczek/features/map/domain/place_pin.dart';
 import 'package:jureczek/features/map/presentation/pin_details_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
+import 'package:jureczek/features/map/presentation/pin_image.dart';
 import 'package:jureczek/l10n/app_localizations.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -42,6 +43,7 @@ void main() {
     PinKind kind = PinKind.standard,
     PinColor? color,
     DateTime? visitedAt,
+    bool starred = false,
   }) => PlacePin(
     folderId: 'f',
     id: 'a',
@@ -55,6 +57,7 @@ void main() {
     kind: kind,
     color: color,
     visitedAt: visitedAt,
+    starred: starred,
   );
 
   Future<void> pumpSheet(
@@ -63,6 +66,7 @@ void main() {
     VoidCallback? onDelete,
     SavePinDetails? onSave,
     Future<bool> Function(bool visited)? onSetVisited,
+    Future<bool> Function(bool starred)? onSetStarred,
     String? notice,
   }) {
     // Wysoki ekran (jak P30, 360×780 dp, z zapasem) – arkusz z wyborem koloru (v14)
@@ -85,6 +89,7 @@ void main() {
             notice: notice,
             onSave: onSave ?? (_) async => true,
             onSetVisited: onSetVisited ?? (_) async => true,
+            onSetStarred: onSetStarred ?? (_) async => true,
           ),
         ),
       ),
@@ -350,6 +355,107 @@ void main() {
 
     testWidgets('w trybie edycji nie ma ikonki', (tester) async {
       await pumpSheet(tester, pin: pin());
+
+      await tester.tap(find.text('Edytuj'));
+      await tester.pumpAndSettle();
+
+      expect(button, findsNothing);
+    });
+  });
+
+  group('gwiazdka (v22)', () {
+    final button = find.byKey(const ValueKey('pin-starred-button'));
+
+    testWidgets('stoi przed kciukiem; kontur przed oznaczeniem, potem złota', (
+      tester,
+    ) async {
+      final calls = <bool>[];
+      await pumpSheet(
+        tester,
+        pin: pin(),
+        onSetStarred: (starred) async {
+          calls.add(starred);
+          return true;
+        },
+      );
+      expect(find.byIcon(Icons.star_border), findsOneWidget);
+      expect(find.byTooltip('Oznacz jako główny punkt'), findsOneWidget);
+      expect(
+        tester.getCenter(button).dx,
+        lessThan(
+          tester.getCenter(find.byKey(const ValueKey('pin-visited-button'))).dx,
+        ),
+      );
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(calls, [true]);
+      expect(tester.widget<Icon>(find.byIcon(Icons.star)).color, pinStarColor);
+      expect(
+        find.byTooltip('Cofnij oznaczenie głównego punktu'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('z gwiazdką startuje wypełniona i można ją zdjąć', (
+      tester,
+    ) async {
+      final calls = <bool>[];
+      await pumpSheet(
+        tester,
+        pin: pin(starred: true),
+        onSetStarred: (starred) async {
+          calls.add(starred);
+          return true;
+        },
+      );
+      expect(find.byIcon(Icons.star), findsOneWidget);
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(calls, [false]);
+      expect(find.byIcon(Icons.star_border), findsOneWidget);
+    });
+
+    testWidgets('błąd zapisu cofa ikonkę i pokazuje komunikat', (tester) async {
+      await pumpSheet(tester, pin: pin(), onSetStarred: (_) async => false);
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.star_border), findsOneWidget);
+      expect(find.text('Nie udało się zapisać pinezki'), findsOneWidget);
+    });
+
+    testWidgets('w trakcie zapisu kolejne tapnięcie nic nie wysyła', (
+      tester,
+    ) async {
+      final pending = Completer<bool>();
+      var calls = 0;
+      await pumpSheet(
+        tester,
+        pin: pin(),
+        onSetStarred: (_) {
+          calls++;
+          return pending.future;
+        },
+      );
+
+      await tester.tap(button);
+      await tester.pump();
+      await tester.tap(button, warnIfMissed: false);
+      await tester.pump();
+      expect(calls, 1);
+
+      pending.complete(true);
+      await tester.pump();
+      expect(tester.widget<IconButton>(button).onPressed, isNotNull);
+    });
+
+    testWidgets('w trybie edycji nie ma ikonki', (tester) async {
+      await pumpSheet(tester, pin: pin(starred: true));
 
       await tester.tap(find.text('Edytuj'));
       await tester.pumpAndSettle();

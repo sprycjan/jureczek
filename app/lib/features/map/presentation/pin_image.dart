@@ -32,16 +32,31 @@ enum PinLayer {
       'assets/markers/tint/standard_${selected ? 'selected' : 'default'}_$name.png';
 }
 
+/// Znaczek przy pinezce; kolejność wartości to kolejność w kolumnie, od góry.
+enum PinMark {
+  star(Icons.star, pinStarColor),
+  visited(Icons.thumb_up, Colors.white);
+
+  const PinMark(this.icon, this.color);
+
+  final IconData icon;
+  final Color color;
+}
+
+/// Kolor gwiazdki (v22): znaczek na mapie i wypełniona ikonka w arkuszach.
+const pinStarColor = Color(0xFFFFC107);
+
 /// PNG 3x pinezki danego typu (v16) – dla Mapbox i animacji spadania.
 /// Zielona z gotowego PNG albo z warstw w [color]; typ miejsca z SVG (z cieniem).
-/// Czubek zawsze na dolnej krawędzi (kotwica `BOTTOM`). Odwiedzona (v21) ma
-/// w prawym górnym rogu znaczek kciuka; rozmiar obrazka się nie zmienia.
+/// Czubek zawsze na dolnej krawędzi (kotwica `BOTTOM`). Gwiazdka (v22) i kciuk
+/// odwiedzenia (v21) stoją w kolumnie przy główce – patrz [pinBadgeFramePadding].
 Future<Uint8List> renderPinPng(
   AssetBundle bundle,
   PinKind kind, {
   bool selected = false,
   PinColor? color,
   bool visited = false,
+  bool starred = false,
 }) async {
   final png = await _renderBasePng(
     bundle,
@@ -49,40 +64,86 @@ Future<Uint8List> renderPinPng(
     selected: selected,
     color: color,
   );
-  if (!visited) return png;
-  return _addVisitedBadge(png, visitedBadge(kind, selected: selected));
+  final marks = [if (starred) PinMark.star, if (visited) PinMark.visited];
+  if (marks.isEmpty) return png;
+  return _addBadges(
+    png,
+    marks,
+    pinBadges(kind, selected: selected, count: marks.length),
+    framePadding: pinBadgeFramePadding(kind, selected: selected),
+  );
 }
 
-/// Znaczek odwiedzonej pinezki w dp obrazka: środek i promień z obwódką.
-/// Leży na prawym górnym skraju główki i mieści się w ramce PNG (typy miejsc:
-/// [PlacePinGeometry]; zielona: 54 × 56 i 63 × 65 dp, główka od y = 2).
-({Offset center, double radius}) visitedBadge(
+/// O tyle dp z każdej strony rośnie ramka obrazka ze znaczkami: zaznaczona pinezka
+/// typu ma symbol tak blisko skraju, że kolumna musi stać o 1 dp dalej, niż pozwala
+/// ramka. Poszerzenie jest symetryczne, bo kotwica `BOTTOM` to środek dolnej krawędzi.
+double pinBadgeFramePadding(PinKind kind, {required bool selected}) =>
+    kind.type != null && selected ? 1 : 0;
+
+/// Kolumna znaczków w dp obrazka (z [pinBadgeFramePadding]): środki i promienie
+/// z obwódką, od góry. Styka się z prawym skrajem główki i nie zasłania symbolu
+/// (typy miejsc: [PlacePinGeometry]; zielona: 54 × 56 i 63 × 65 dp).
+List<({Offset center, double radius})> pinBadges(
   PinKind kind, {
   required bool selected,
-}) => switch ((kind.type != null, selected)) {
-  (true, false) => (center: const Offset(41, 7), radius: 7),
-  (true, true) => (center: const Offset(46, 8), radius: 8),
-  (false, false) => (center: const Offset(44, 7), radius: 7),
-  (false, true) => (center: const Offset(51, 8), radius: 8),
-};
+  required int count,
+}) {
+  final (x, radius) = switch ((kind.type != null, selected)) {
+    (true, false) => (41.0, 7.0),
+    (true, true) => (48.0, 8.0),
+    (false, false) => (44.0, 7.0),
+    (false, true) => (51.0, 8.0),
+  };
+  return [
+    for (var i = 0; i < count; i++)
+      (
+        center: Offset(x, radius + i * (2 * radius + _badgeGap)),
+        radius: radius,
+      ),
+  ];
+}
 
-/// Obwódka znaczka i wielkość kciuka względem promienia.
+/// Odstęp między znaczkami w kolumnie, w dp.
+const _badgeGap = 1.0;
+
+/// Obwódka znaczka i wielkość symbolu względem promienia.
 const _badgeBorderPerRadius = 0.14;
 const _badgeIconPerRadius = 1.2;
 
-Future<Uint8List> _addVisitedBadge(
+Future<Uint8List> _addBadges(
   Uint8List png,
-  ({Offset center, double radius}) badge,
-) async {
+  List<PinMark> marks,
+  List<({Offset center, double radius})> badges, {
+  required double framePadding,
+}) async {
   final codec = await ui.instantiateImageCodec(png);
   final base = (await codec.getNextFrame()).image;
   codec.dispose();
   final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder)..drawImage(base, Offset.zero, Paint());
-  final width = base.width;
+  final padding = (framePadding * pinImageScale).round();
+  final canvas = Canvas(recorder)
+    ..drawImage(base, Offset(padding.toDouble(), 0), Paint());
+  final width = base.width + 2 * padding;
   final height = base.height;
   base.dispose();
 
+  for (final (index, mark) in marks.indexed) {
+    _paintBadge(canvas, mark, badges[index]);
+  }
+
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(width, height);
+  picture.dispose();
+  final result = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return result!.buffer.asUint8List();
+}
+
+void _paintBadge(
+  Canvas canvas,
+  PinMark mark,
+  ({Offset center, double radius}) badge,
+) {
   final center = badge.center * pinImageScale;
   final radius = badge.radius * pinImageScale;
   final border = radius * _badgeBorderPerRadius;
@@ -96,10 +157,10 @@ Future<Uint8List> _addVisitedBadge(
   final icon = TextPainter(
     textDirection: TextDirection.ltr,
     text: TextSpan(
-      text: String.fromCharCode(Icons.thumb_up.codePoint),
+      text: String.fromCharCode(mark.icon.codePoint),
       style: TextStyle(
-        color: Colors.white,
-        fontFamily: Icons.thumb_up.fontFamily,
+        color: mark.color,
+        fontFamily: mark.icon.fontFamily,
         fontSize: radius * _badgeIconPerRadius,
         height: 1,
       ),
@@ -107,13 +168,6 @@ Future<Uint8List> _addVisitedBadge(
   )..layout();
   icon.paint(canvas, center - Offset(icon.width / 2, icon.height / 2));
   icon.dispose();
-
-  final picture = recorder.endRecording();
-  final image = await picture.toImage(width, height);
-  picture.dispose();
-  final result = await image.toByteData(format: ui.ImageByteFormat.png);
-  image.dispose();
-  return result!.buffer.asUint8List();
 }
 
 Future<Uint8List> _renderBasePng(
