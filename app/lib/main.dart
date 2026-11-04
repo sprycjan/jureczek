@@ -6,10 +6,12 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'features/map/presentation/map_labels.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   MapboxOptions.setAccessToken(mapboxAccessToken);
+  MapboxMapsOptions.setLanguage(mapLabelLanguage);
   _registerFontLicenses();
   runApp(const ProviderScope(child: JureczekApp()));
 }

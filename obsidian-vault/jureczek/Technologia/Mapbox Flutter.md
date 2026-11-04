@@ -167,3 +167,10 @@ Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], 
 - Inne sprite'y: `streets-v12` / `outdoors-v12` – kolorowe kółka z ikonami (ponad 400 obrazków).
 - `symbolrank` w `place_label` (mniejszy = ważniejszy) da się sprawdzić Tilequery API: `/v4/mapbox.mapbox-streets-v8/tilequery/<lng>,<lat>.json?layers=place_label&radius=20000`. W filtrze jedno `["step", ["zoom"], …]` zwracające warunki logiczne, może być wewnątrz `all`.
 
+
+## Język etykiet (v20)
+- `MapboxMapsOptions.setLanguage('pl,en')` przed pierwszą mapą: SDK przyjmuje łańcuch języków (sprawdzone na telefonie) i działa w stylach klasycznych, własnym i Standard.
+- Streets v8 nie ma `name_pl`. Kafelki z `?language=pl,en` mają inny schemat: tylko `name` (przetłumaczone) i `name_local` (oryginał), bez `name_en` i `name_script`. Klasyczne `coalesce(name_en, name)` dalej działa.
+- Warstwy stylu klasycznego zmienia się po `getStyleJSON` przez `setStyleLayerProperties(id, json)`, także `filter`. Warstw z importu Standard nie da się zmieniać, a tuż po przełączeniu na Standard `getStyleJSON` zwrócił warstwy poprzedniego stylu.
+- `["slice", tekst, i, i + 1]` działa na znakach i w `filter`, i w `text-field`. Poza końcem daje `""`, a `""` jest mniejszy od każdego znaku, także U+0000.
+- Zob. [[ADR-014 Polskie nazwy na mapie]].

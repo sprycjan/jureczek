@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +23,7 @@ import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
 import '../domain/place_suggestion.dart';
 import '../domain/poi_place.dart';
+import 'map_labels.dart';
 import 'map_style.dart';
 import 'map_style_picker.dart';
 import 'map_tools.dart';
@@ -199,13 +201,32 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     super.dispose();
   }
 
-  void _onStyleLoaded() {
+  Future<void> _onStyleLoaded() async {
+    await _applyLabelPatches();
+    if (!mounted) return;
     if (_styleLoaded) {
       _onStyleSwitched();
       return;
     }
     _styleLoaded = true;
     _updateCurtain();
+  }
+
+  /// Etykiety tylko łacińskie – każdy styl trzeba poprawić po wczytaniu.
+  Future<void> _applyLabelPatches() async {
+    final map = _map;
+    if (map == null || !_style.hasEditableLabels) return;
+    try {
+      final patches = mapLabelPatches(await map.getStyleJSON());
+      for (final patch in patches) {
+        await map.setStyleLayerProperties(
+          patch.layerId,
+          jsonEncode(patch.properties),
+        );
+      }
+    } catch (e) {
+      debugPrint('Poprawa etykiet mapy nie powiodła się: $e');
+    }
   }
 
   /// Zmiana stylu: lista się zamyka, kamera pochyla się do 3D albo prostuje.
@@ -452,7 +473,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _searchFocus.unfocus();
         _closePanels();
         final place = placeFromPoi(
-          name: poi.properties['name'] as String?,
+          name: poiLabelName(poi.properties),
           geometry: poi.geometry,
           maki: poi.properties['maki'],
         );
@@ -465,7 +486,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _,
       ) {
         final place = placeFromPoi(
-          name: poi.properties['name'] as String?,
+          name: poiLabelName(poi.properties),
           geometry: poi.geometry,
           maki: poi.properties['maki'],
         );

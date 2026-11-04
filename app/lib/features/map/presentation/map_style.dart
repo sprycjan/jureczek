@@ -33,6 +33,10 @@ enum MapStyleOption {
   /// Nachylenie kamery po włączeniu stylu – 3D widać dopiero pod kątem.
   double get pitch => this == faded3d ? 60 : 0;
 
+  /// Standard trzyma warstwy w imporcie, więc etykiet nie da się w nim zmienić:
+  /// zostaje sam język kafelków, z cyrylicą tam, gdzie nie ma tłumaczenia.
+  bool get hasEditableLabels => this != faded3d;
+
   /// Konfiguracja importu `basemap` nakładana po wczytaniu stylu.
   Map<String, Object> get basemapConfig => switch (this) {
     faded3d => const {'theme': 'faded', 'show3dObjects': true},

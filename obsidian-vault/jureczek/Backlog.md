@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -26,6 +26,11 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Etykiety z nazwą na mapie (`textField`; przy edycji nazwy `manager.update`)
 
 ## Mapa
+- [x] Polskie nazwy bez cyrylicy i pisma arabskiego w stylach Domyślny i Teren – v20, [[ADR-014 Polskie nazwy na mapie]]
+- [ ] Cyrylica w stylu 3D: warstw Standard nie da się zmienić. Pomysł: wyłączyć etykiety Standard (`show*Labels`) i dodać własne warstwy – [[v20 – polskie nazwy na mapie]]
+- [ ] Transliteracja cyrylicy zamiast ukrywania nazw („Маслов переулок” → „Masłow pierieułok”) – [[ADR-014 Polskie nazwy na mapie]]
+- [ ] Adresy z Search Box bywają częściowo po arabsku – [[v20 – polskie nazwy na mapie]]
+- [ ] Sprawdzić odnośnik Google Maps dla POI z przetłumaczoną nazwą – [[v19 – odnośnik do Google Maps]]
 - [x] Lokalizacja użytkownika i przycisk „moja lokalizacja” z obsługą odmowy (v14, [[ADR-009 Lokalizacja przez geolocator]])
 - [ ] Śledzenie kamery za kropką położenia (follow puck)
 - [ ] Zapamiętywanie ostatniej pozycji kamery

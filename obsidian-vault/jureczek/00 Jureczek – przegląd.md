@@ -21,6 +21,7 @@ tags: [jureczek, przeglad]
 - Ikony 74 typów miejsc: SVG z `tool/place_icons.py`, `flutter_svg`, cień malowany we Flutterze – [[ADR-011 Biblioteka ikon miejsc w SVG]]
 - Typ pinezki = typ miejsca (81 z „inne”) albo zielona bez typu, w kolumnie `category` – [[ADR-012 Typ miejsca jako typ pinezki]]
 - Odnośnik do Google Maps: link Google → nazwa POI z adresem → współrzędne, bez płatnego `place_id` – [[ADR-013 Odnośnik do Google Maps bez place_id]]
+- Nazwy na mapie: kafelki `pl,en`, łaciński oryginał na POI i drogach, etykiety bez łacinki ukryte – [[ADR-014 Polskie nazwy na mapie]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -44,7 +45,8 @@ tags: [jureczek, przeglad]
 | v17 | Krótszy formularz pinezki: select boxy kategorii, typu i folderu, kolory w jednej linii ze strzałkami, gęstsze pola, edycja bez autofocusu | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v17 – krótszy formularz pinezki]] |
 | v18 | Filtr kategorii pinezek na mapie: przycisk z lejkiem, panel z liczbami, działa od razu; grupowa synchronizacja pinezek | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v18 – filtr kategorii pinezek]] |
 | v19 | Odnośnik do Google Maps przy każdej pinezce: link Google, POI po nazwie z adresem albo współrzędne; adres POI z mapy zapisany przy dodaniu (schemat 8) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v19 – odnośnik do Google Maps]] |
-| v20+ | Patrz [[Backlog]] | — |
+| v20 | Polskie nazwy na mapie: bez cyrylicy i pisma arabskiego w stylach Domyślny i Teren; w 3D tylko język kafelków | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v20 – polskie nazwy na mapie]] |
+| v21+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt
