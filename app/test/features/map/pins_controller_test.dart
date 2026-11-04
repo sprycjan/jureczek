@@ -60,6 +60,38 @@ void main() {
     expect(byId[food], const PinKind(PlaceType.cafe));
   });
 
+  test(
+    'setVisited zapisuje bieżącą datę, a odznaczenie ją kasuje (v21)',
+    () async {
+      final id = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
+      expect((await pins()).single.visited, isFalse);
+
+      final before = DateTime.now();
+      await controller().setVisited(id, visited: true);
+      final visited = (await pins()).single;
+      expect(visited.visited, isTrue);
+      expect(visited.visitedAt!.difference(before).inSeconds, lessThan(5));
+
+      await controller().setVisited(id, visited: false);
+      expect((await pins()).single.visitedAt, isNull);
+    },
+  );
+
+  test(
+    '„Cofnij” po usunięciu przywraca oznaczenie odwiedzenia (v21)',
+    () async {
+      final id = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
+      await controller().setVisited(id, visited: true);
+      final visitedAt = (await pins()).single.visitedAt;
+
+      final removed = await controller().remove(id);
+      expect(await pins(), isEmpty);
+      await controller().restore(removed!);
+
+      expect((await pins()).single.visitedAt, visitedAt);
+    },
+  );
+
   test('add zwraca id zapisanej pinezki', () async {
     final id = await controller().add(folderId: 'f', lat: 50.06, lng: 19.94);
 

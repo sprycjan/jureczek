@@ -20,6 +20,7 @@ class PlacePin {
     this.poiName,
     this.kind = PinKind.standard,
     this.color,
+    this.visitedAt,
   });
 
   final String id;
@@ -47,6 +48,11 @@ class PlacePin {
 
   /// Własny kolor (v14); `null` – kolor typu.
   final PinColor? color;
+
+  /// Kiedy oznaczono pinezkę jako odwiedzoną (v21); `null` – nieodwiedzona.
+  final DateTime? visitedAt;
+
+  bool get visited => visitedAt != null;
 
   static const maxNameLength = 80;
   static const maxNoteLength = 1000;

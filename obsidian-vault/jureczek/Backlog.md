@@ -3,9 +3,13 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]].
 
 ## Miejsca / pinezki
+- [x] Oznaczenie pinezki jako odwiedzonej – v21, [[v21 – pinezka odwiedzona]]
+- [ ] Filtr „odwiedzone / nieodwiedzone” w panelu z lejkiem – [[v21 – pinezka odwiedzona]]
+- [ ] Przygaszanie odwiedzonych pinezek na mapie – [[v21 – pinezka odwiedzona]]
+- [ ] Pokazanie daty odwiedzenia w arkuszu, np. „Odwiedzono 3 lis 2026” (data jest już w bazie od v21)
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
 - [x] Nazwa i notatka miejsca (v3, [[v3 – nazwa i notatka]])
 - [x] Formularz od razu po long-tapie (v9: wybór typu, nazwa, notatka)
@@ -55,9 +59,11 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Daty wyjazdu w folderze
 - [ ] Usuwanie folderu (świadomie pominięte w v10 – trzeba zdecydować, co z pinezkami)
 - [x] Mapa folderu: kamera dopasowana do jego pinezek zamiast widoku Polski ([[v10 – foldery i ekran startowy]], poprawki po teście)
-- [ ] Elementy makiety startowej pominięte w v10: pogoda, dzwonek, wyszukiwarka list, chipy filtrów (kraje), tagi, licznik „odwiedzonych”, „Ostatnio zapisane miejsca”, dolna nawigacja
+- [ ] Elementy makiety startowej pominięte w v10: pogoda, dzwonek, wyszukiwarka list, chipy filtrów (kraje), tagi, „Ostatnio zapisane miejsca”, dolna nawigacja
 - [ ] Wybór okładki folderu (dziś stała nocna)
 - [ ] Synchronizacja z chmurą / backend
+
+- [ ] Licznik „odwiedzone X z Y” na folderze (dane są od v21) – [[v21 – pinezka odwiedzona]]
 
 ## Infrastruktura
 - [x] Repozytorium git na GitHubie (sprycjan/jureczek) – [[ADR-004 Struktura repo (app)]]

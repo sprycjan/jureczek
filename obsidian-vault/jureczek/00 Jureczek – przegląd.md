@@ -46,7 +46,8 @@ tags: [jureczek, przeglad]
 | v18 | Filtr kategorii pinezek na mapie: przycisk z lejkiem, panel z liczbami, działa od razu; grupowa synchronizacja pinezek | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v18 – filtr kategorii pinezek]] |
 | v19 | Odnośnik do Google Maps przy każdej pinezce: link Google, POI po nazwie z adresem albo współrzędne; adres POI z mapy zapisany przy dodaniu (schemat 8) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v19 – odnośnik do Google Maps]] |
 | v20 | Polskie nazwy na mapie: bez cyrylicy i pisma arabskiego w stylach Domyślny i Teren; w 3D tylko język kafelków | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v20 – polskie nazwy na mapie]] |
-| v21+ | Patrz [[Backlog]] | — |
+| v21 | Pinezka odwiedzona: kciuk w arkuszu zapisuje od razu, znaczek w rogu pinezki na mapie, data oznaczenia w bazie (schemat 9) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v21 – pinezka odwiedzona]] |
+| v22+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

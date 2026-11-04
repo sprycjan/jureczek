@@ -44,6 +44,7 @@ class PinsRepository {
               category: Value(pin.kind.key),
               color: Value(pin.color?.key),
               folderId: pin.folderId,
+              visitedAtMs: Value(pin.visitedAt?.millisecondsSinceEpoch),
             ),
           );
       await _touchFolder(pin.folderId, DateTime.now());
@@ -84,6 +85,19 @@ class PinsRepository {
     });
   }
 
+  /// Oznacza pinezkę jako odwiedzoną w chwili [at]; `null` zdejmuje oznaczenie.
+  /// Folder pinezki idzie na górę listy.
+  Future<void> setVisitedAt(String id, DateTime? at) {
+    return _db.transaction(() async {
+      final pin = await findById(id);
+      if (pin == null) return;
+      await (_db.update(_db.pins)..where((t) => t.id.equals(id))).write(
+        PinsCompanion(visitedAtMs: Value(at?.millisecondsSinceEpoch)),
+      );
+      await _touchFolder(pin.folderId, DateTime.now());
+    });
+  }
+
   Future<void> _touchFolder(String id, DateTime at) {
     return (_db.update(_db.folders)..where((t) => t.id.equals(id))).write(
       FoldersCompanion(updatedAtMs: Value(at.millisecondsSinceEpoch)),
@@ -107,6 +121,9 @@ class PinsRepository {
     poiName: row.poiName,
     kind: PinKind.fromKey(row.category),
     color: PinColor.fromKey(row.color),
+    visitedAt: row.visitedAtMs == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(row.visitedAtMs!),
   );
 }
 

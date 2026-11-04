@@ -233,6 +233,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get pinOpenInMapsError => 'Nie udało się otworzyć Google Maps';
 
   @override
+  String get pinMarkVisited => 'Oznacz jako odwiedzone';
+
+  @override
+  String get pinUnmarkVisited => 'Cofnij oznaczenie odwiedzenia';
+
+  @override
   String get pinNewTitle => 'Nowa pinezka';
 
   @override

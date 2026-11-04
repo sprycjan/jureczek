@@ -44,13 +44,13 @@ final _polandViewport = CameraViewportState(
 );
 
 /// Wygląd pinezki na mapie: typ, to, czy jest zaznaczona (otwarty arkusz),
-/// i własny kolor (v14; `null` – kolor typu).
-typedef _PinLook = (PinKind, bool, PinColor?);
+/// własny kolor (v14; `null` – kolor typu) i to, czy jest odwiedzona (v21).
+typedef _PinLook = (PinKind, bool, PinColor?, bool);
 
 /// Id obrazka w stylu mapy – jeden bitmap na wygląd, wspólny dla wszystkich pinezek.
 String _lookImageId(_PinLook look) =>
     'pin-${look.$1.key}-${look.$2 ? 'selected' : 'default'}'
-    '-${look.$3?.key ?? 'auto'}';
+    '-${look.$3?.key ?? 'auto'}${look.$4 ? '-visited' : ''}';
 
 /// Rozmiar PNG (szerokość, wysokość) z nagłówka IHDR.
 Size _pngSize(Uint8List bytes) {
@@ -415,7 +415,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Pinezka stoi czubkiem na punkcie, więc u góry trzeba miejsca na jej
         // wysokość – ponad narzędziami pod paskiem statusu.
         final pinHeight =
-            _pngSize(_pinImages[(PinKind.standard, false, null)]!).height /
+            _pngSize(
+              _pinImages[(PinKind.standard, false, null, false)]!,
+            ).height /
             pinImageScale;
         final camera = await map.cameraForCoordinatesPadding(
           [
@@ -556,7 +558,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     // Zielona od razu (kamera liczy z niej wysokość pinezki); typy miejsc (v16)
     // składane na żądanie przy pierwszej pinezce danego wyglądu.
     for (final selected in [false, true]) {
-      await _pinImage((PinKind.standard, selected, null));
+      await _pinImage((PinKind.standard, selected, null, false));
     }
     await _dropImage(PinKind.standard, null);
   }
@@ -570,6 +572,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       look.$1,
       selected: look.$2,
       color: look.$3,
+      visited: look.$4,
     );
     return _pinImages[look] = bytes;
   }
@@ -577,7 +580,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Future<MemoryImage> _dropImage(PinKind kind, PinColor? color) async {
     final cached = _dropImages[(kind, color)];
     if (cached != null) return cached;
-    final image = MemoryImage(await _pinImage((kind, false, color)));
+    // Spada tylko nowa pinezka, a nowa jest zawsze nieodwiedzona.
+    final image = MemoryImage(await _pinImage((kind, false, color, false)));
     if (mounted) await precacheImage(image, context);
     return _dropImages[(kind, color)] = image;
   }
@@ -650,7 +654,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final missing = <(PlacePin, _PinLook)>[];
     final options = <PointAnnotationOptions>[];
     for (final pin in pins) {
-      final look = (pin.kind, pin.id == _selectedPinId, pin.color);
+      final look = (pin.kind, pin.id == _selectedPinId, pin.color, pin.visited);
       final existing = _annotationsByPinId[pin.id];
       if (existing != null) {
         if (_lookByPinId[pin.id] == look) continue;
@@ -791,6 +795,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           _deletePin(pin.id);
         },
         onSave: (details) => _savePinDetails(pin.id, details),
+        onSetVisited: (visited) => _setPinVisited(pin.id, visited),
         canMoveFolder: true,
       ),
     );
@@ -820,6 +825,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return true;
     } catch (e) {
       debugPrint('Zapis nazwy/notatki nie powiódł się: $e');
+      return false;
+    }
+  }
+
+  /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
+  Future<bool> _setPinVisited(String id, bool visited) async {
+    try {
+      await ref.read(pinsControllerProvider).setVisited(id, visited: visited);
+      return true;
+    } catch (e) {
+      debugPrint('Zapis oznaczenia „odwiedzona” nie powiódł się: $e');
       return false;
     }
   }

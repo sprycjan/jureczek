@@ -21,6 +21,7 @@ class PinDetailsSheet extends StatefulWidget {
     required this.pin,
     required this.onDelete,
     required this.onSave,
+    required this.onSetVisited,
     this.notice,
     this.canMoveFolder = false,
   });
@@ -28,6 +29,9 @@ class PinDetailsSheet extends StatefulWidget {
   final PlacePin pin;
   final VoidCallback onDelete;
   final SavePinDetails onSave;
+
+  /// Zapisuje oznaczenie „odwiedzona” (v21); zwraca `false`, gdy się nie udało.
+  final Future<bool> Function(bool visited) onSetVisited;
 
   /// Komunikat nad nazwą, np. „Ta pinezka już jest” po udostępnieniu duplikatu.
   final String? notice;
@@ -49,6 +53,9 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   late PinColor? _editedColor = _color;
   late String _folderId = widget.pin.folderId;
   late String _editedFolderId = _folderId;
+  late bool _visited = widget.pin.visited;
+  bool _savingVisited = false;
+  bool _visitedFailed = false;
   bool _editing = false;
   bool _saving = false;
   bool _saveFailed = false;
@@ -102,6 +109,23 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         _folderId = _editedFolderId;
         _editing = false;
       }
+    });
+  }
+
+  /// Ikonka zmienia się od razu, a po nieudanym zapisie wraca do poprzedniego stanu.
+  Future<void> _toggleVisited() async {
+    final visited = !_visited;
+    setState(() {
+      _visited = visited;
+      _savingVisited = true;
+      _visitedFailed = false;
+    });
+    final ok = await widget.onSetVisited(visited);
+    if (!mounted) return;
+    setState(() {
+      _savingVisited = false;
+      _visitedFailed = !ok;
+      if (!ok) _visited = !visited;
     });
   }
 
@@ -174,8 +198,26 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
                 ),
               ),
             ),
+            IconButton(
+              key: const ValueKey('pin-visited-button'),
+              visualDensity: VisualDensity.compact,
+              tooltip: _visited ? l10n.pinUnmarkVisited : l10n.pinMarkVisited,
+              onPressed: _savingVisited ? null : _toggleVisited,
+              icon: Icon(
+                _visited ? Icons.thumb_up : Icons.thumb_up_outlined,
+                size: 20,
+                color: _visited
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
+        if (_visitedFailed)
+          Text(
+            l10n.pinsSaveError,
+            style: TextStyle(color: theme.colorScheme.error),
+          ),
         const SizedBox(height: 4),
         Text(_name ?? l10n.pinUnnamed, style: theme.textTheme.titleLarge),
         if (_address != null) ...[

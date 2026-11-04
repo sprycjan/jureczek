@@ -80,6 +80,8 @@
   "pinAddressLabel": "Adres",
   "pinOpenInGoogleMaps": "Otwórz w Google Maps",
   "pinOpenInMapsError": "Nie udało się otworzyć Google Maps",
+  "pinMarkVisited": "Oznacz jako odwiedzone",
+  "pinUnmarkVisited": "Cofnij oznaczenie odwiedzenia",
   "pinNewTitle": "Nowa pinezka",
   "pinDuplicate": "Ta pinezka już jest",
   "shareLoading": "Odczytuję miejsce…",

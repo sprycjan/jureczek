@@ -17,12 +17,7 @@ Future<(int, int, ByteData)> _decode(Uint8List png) async {
   return result;
 }
 
-/// Kolor piksela w środku główki pinezki typu (obok symbolu – lewa część główki).
-ui.Color _headColor((int, int, ByteData) png, {required bool selected}) {
-  final g = PlacePinGeometry.of(selected: selected);
-  final x = ((PlacePinGeometry.pinOffset.dx + g.pinSize.width * 0.12) * 3)
-      .round();
-  final y = ((PlacePinGeometry.pinOffset.dy + g.pinSize.width / 2) * 3).round();
+ui.Color _pixel((int, int, ByteData) png, int x, int y) {
   final i = (y * png.$1 + x) * 4;
   final d = png.$3;
   return ui.Color.fromARGB(
@@ -31,6 +26,15 @@ ui.Color _headColor((int, int, ByteData) png, {required bool selected}) {
     d.getUint8(i + 1),
     d.getUint8(i + 2),
   );
+}
+
+/// Kolor piksela w środku główki pinezki typu (obok symbolu – lewa część główki).
+ui.Color _headColor((int, int, ByteData) png, {required bool selected}) {
+  final g = PlacePinGeometry.of(selected: selected);
+  final x = ((PlacePinGeometry.pinOffset.dx + g.pinSize.width * 0.12) * 3)
+      .round();
+  final y = ((PlacePinGeometry.pinOffset.dy + g.pinSize.width / 2) * 3).round();
+  return _pixel(png, x, y);
 }
 
 void _expectClose(ui.Color actual, ui.Color expected) {
@@ -64,6 +68,57 @@ void main() {
       }
     });
   });
+
+  for (final kind in [PinKind.standard, const PinKind(PlaceType.castle)]) {
+    for (final selected in [false, true]) {
+      testWidgets(
+        'odwiedzona ${kind.key}${selected ? ' (zaznaczona)' : ''}: znaczek '
+        'w ramce, reszta obrazka bez zmian',
+        (tester) async {
+          await tester.runAsync(() async {
+            final plain = await _decode(
+              await renderPinPng(rootBundle, kind, selected: selected),
+            );
+            final visited = await _decode(
+              await renderPinPng(
+                rootBundle,
+                kind,
+                selected: selected,
+                visited: true,
+              ),
+            );
+            expect((visited.$1, visited.$2), (plain.$1, plain.$2));
+
+            final badge = visitedBadge(kind, selected: selected);
+            final center = badge.center * pinImageScale;
+            final radius = badge.radius * pinImageScale;
+            expect(center.dx + radius, lessThanOrEqualTo(plain.$1));
+            expect(center.dy - radius, greaterThanOrEqualTo(0));
+
+            // Skraj znaczka to biała obwódka, a jego wnętrze jest ciemne.
+            final ring = _pixel(
+              visited,
+              center.dx.round(),
+              (center.dy - radius + 2).round(),
+            );
+            expect((ring.r, ring.g, ring.b, ring.a), (1, 1, 1, 1));
+            final inner = _pixel(
+              visited,
+              center.dx.round(),
+              (center.dy - radius * 0.75).round(),
+            );
+            expect(inner.computeLuminance(), lessThan(0.1));
+            // Poza znaczkiem (dolna część z czubkiem) piksele są identyczne.
+            for (var y = (center.dy + radius).ceil() + 1; y < plain.$2; y++) {
+              for (var x = 0; x < plain.$1; x += 3) {
+                expect(_pixel(visited, x, y), _pixel(plain, x, y));
+              }
+            }
+          });
+        },
+      );
+    }
+  }
 
   for (final selected in [false, true]) {
     testWidgets(

@@ -532,6 +532,18 @@ abstract class AppLocalizations {
   /// **'Nie udało się otworzyć Google Maps'**
   String get pinOpenInMapsError;
 
+  /// No description provided for @pinMarkVisited.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oznacz jako odwiedzone'**
+  String get pinMarkVisited;
+
+  /// No description provided for @pinUnmarkVisited.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cofnij oznaczenie odwiedzenia'**
+  String get pinUnmarkVisited;
+
   /// No description provided for @pinNewTitle.
   ///
   /// In pl, this message translates to:

@@ -1,6 +1,9 @@
+import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
+import 'package:jureczek/features/folders/data/folders_repository.dart';
+import 'package:jureczek/features/folders/domain/trip_folder.dart';
 import 'package:jureczek/features/map/data/pins_repository.dart';
 import 'package:jureczek/features/map/domain/pin_kind.dart';
 import 'package:jureczek/features/places/domain/place_type.dart';
@@ -39,6 +42,93 @@ void main() {
     expect(saved.lng, 19.94);
     expect(saved.createdAt, createdAt);
     expect(saved.kind, PinKind.standard);
+  });
+
+  group('odwiedzona (v21)', () {
+    final at = DateTime(2026, 11, 4, 12, 30, 15, 250);
+
+    test('nowa pinezka jest nieodwiedzona', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+
+      final saved = await repository.findById('a');
+      expect(saved?.visitedAt, isNull);
+      expect(saved?.visited, isFalse);
+    });
+
+    test(
+      'oznaczenie zapisuje datę co do ms, a odznaczenie ją kasuje',
+      () async {
+        await repository.insert(pin('a', DateTime(2026, 11, 1)));
+
+        await repository.setVisitedAt('a', at);
+        final visited = await repository.findById('a');
+        expect(visited?.visitedAt, at);
+        expect(visited?.visited, isTrue);
+
+        await repository.setVisitedAt('a', null);
+        expect((await repository.findById('a'))?.visitedAt, isNull);
+      },
+    );
+
+    test('oznaczenie nie zmienia pozostałych danych pinezki', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await repository.updateDetails('a', name: 'Wawel', note: 'Bilety');
+
+      await repository.setVisitedAt('a', at);
+
+      final saved = await repository.findById('a');
+      expect(saved?.name, 'Wawel');
+      expect(saved?.note, 'Bilety');
+    });
+
+    test('updateDetails zachowuje oznaczenie', () async {
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await repository.setVisitedAt('a', at);
+
+      await repository.updateDetails('a', name: 'Wawel');
+
+      expect((await repository.findById('a'))?.visitedAt, at);
+    });
+
+    test('oznaczenie podnosi folder pinezki na górę listy', () async {
+      final folders = FoldersRepository(db);
+      await db
+          .into(db.folders)
+          .insert(
+            FoldersCompanion.insert(
+              id: 'f',
+              name: 'Kraków',
+              icon: FolderIcon.camper.key,
+              color: FolderColor.emerald.key,
+              createdAt: DateTime(2026, 1, 1),
+              updatedAtMs: 1,
+            ),
+          );
+      await db
+          .into(db.folders)
+          .insert(
+            FoldersCompanion.insert(
+              id: 'g',
+              name: 'Gdańsk',
+              icon: FolderIcon.camper.key,
+              color: FolderColor.emerald.key,
+              createdAt: DateTime(2026, 1, 1),
+              updatedAtMs: 2,
+            ),
+          );
+      await repository.insert(pin('a', DateTime(2026, 11, 1)));
+      await db
+          .update(db.folders)
+          .write(const FoldersCompanion(updatedAtMs: Value(1)));
+      await (db.update(db.folders)..where((t) => t.id.equals('g'))).write(
+        const FoldersCompanion(updatedAtMs: Value(2)),
+      );
+      expect((await folders.watchAll().first).first.id, 'g');
+
+      await repository.setVisitedAt('a', at);
+
+      expect((await folders.watchAll().first).first.id, 'f');
+    });
   });
 
   test('updateDetails zmienia typ; bez typu zostawia dotychczasowy', () async {

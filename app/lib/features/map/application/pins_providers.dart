@@ -83,6 +83,11 @@ class PinsController {
     );
   }
 
+  /// Oznacza pinezkę jako odwiedzoną teraz albo zdejmuje oznaczenie razem z datą.
+  Future<void> setVisited(String id, {required bool visited}) {
+    return _repository.setVisitedAt(id, visited ? DateTime.now() : null);
+  }
+
   static String? _normalize(String? text) {
     final trimmed = text?.trim();
     return (trimmed == null || trimmed.isEmpty) ? null : trimmed;

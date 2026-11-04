@@ -30,6 +30,10 @@ class Pins extends Table {
   /// Maps, niezależna od [name]; `null` – pinezka nie pochodzi z POI.
   TextColumn get poiName => text().nullable()();
 
+  /// Dodane w schemacie 9 (v21): kiedy oznaczono pinezkę jako odwiedzoną;
+  /// `null` – nieodwiedzona.
+  IntColumn get visitedAtMs => integer().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

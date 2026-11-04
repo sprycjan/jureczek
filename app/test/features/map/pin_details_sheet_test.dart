@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -39,6 +41,7 @@ void main() {
     String? sourceUrl,
     PinKind kind = PinKind.standard,
     PinColor? color,
+    DateTime? visitedAt,
   }) => PlacePin(
     folderId: 'f',
     id: 'a',
@@ -51,6 +54,7 @@ void main() {
     sourceUrl: sourceUrl,
     kind: kind,
     color: color,
+    visitedAt: visitedAt,
   );
 
   Future<void> pumpSheet(
@@ -58,6 +62,7 @@ void main() {
     required PlacePin pin,
     VoidCallback? onDelete,
     SavePinDetails? onSave,
+    Future<bool> Function(bool visited)? onSetVisited,
     String? notice,
   }) {
     // Wysoki ekran (jak P30, 360×780 dp, z zapasem) – arkusz z wyborem koloru (v14)
@@ -79,6 +84,7 @@ void main() {
             onDelete: onDelete ?? () {},
             notice: notice,
             onSave: onSave ?? (_) async => true,
+            onSetVisited: onSetVisited ?? (_) async => true,
           ),
         ),
       ),
@@ -260,6 +266,96 @@ void main() {
       find.widgetWithText(TextField, 'Klonowa 01, 80-264 Gdańsk'),
       findsOneWidget,
     );
+  });
+
+  group('odwiedzona (v21)', () {
+    final button = find.byKey(const ValueKey('pin-visited-button'));
+
+    testWidgets('kontur przed oznaczeniem, wypełnienie po nim', (tester) async {
+      final calls = <bool>[];
+      await pumpSheet(
+        tester,
+        pin: pin(),
+        onSetVisited: (visited) async {
+          calls.add(visited);
+          return true;
+        },
+      );
+      expect(find.byIcon(Icons.thumb_up_outlined), findsOneWidget);
+      expect(find.byTooltip('Oznacz jako odwiedzone'), findsOneWidget);
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(calls, [true]);
+      expect(find.byIcon(Icons.thumb_up), findsOneWidget);
+      expect(find.byTooltip('Cofnij oznaczenie odwiedzenia'), findsOneWidget);
+    });
+
+    testWidgets('odwiedzona startuje z wypełnieniem i można ją odznaczyć', (
+      tester,
+    ) async {
+      final calls = <bool>[];
+      await pumpSheet(
+        tester,
+        pin: pin(visitedAt: DateTime(2026, 11, 3)),
+        onSetVisited: (visited) async {
+          calls.add(visited);
+          return true;
+        },
+      );
+      expect(find.byIcon(Icons.thumb_up), findsOneWidget);
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(calls, [false]);
+      expect(find.byIcon(Icons.thumb_up_outlined), findsOneWidget);
+    });
+
+    testWidgets('nieudany zapis cofa ikonkę i pokazuje błąd', (tester) async {
+      await pumpSheet(tester, pin: pin(), onSetVisited: (_) async => false);
+
+      await tester.tap(button);
+      await tester.pump();
+
+      expect(find.byIcon(Icons.thumb_up_outlined), findsOneWidget);
+      expect(find.text('Nie udało się zapisać pinezki'), findsOneWidget);
+    });
+
+    testWidgets('w trakcie zapisu kolejne tapnięcie nic nie wysyła', (
+      tester,
+    ) async {
+      final pending = Completer<bool>();
+      var calls = 0;
+      await pumpSheet(
+        tester,
+        pin: pin(),
+        onSetVisited: (_) {
+          calls++;
+          return pending.future;
+        },
+      );
+
+      await tester.tap(button);
+      await tester.pump();
+      await tester.tap(button, warnIfMissed: false);
+      await tester.pump();
+      expect(calls, 1);
+
+      pending.complete(true);
+      await tester.pump();
+      expect(tester.widget<IconButton>(button).onPressed, isNotNull);
+    });
+
+    testWidgets('w trybie edycji nie ma ikonki', (tester) async {
+      await pumpSheet(tester, pin: pin());
+
+      await tester.tap(find.text('Edytuj'));
+      await tester.pumpAndSettle();
+
+      expect(button, findsNothing);
+    });
   });
 
   testWidgets('pokazuje komunikat o duplikacie', (tester) async {
