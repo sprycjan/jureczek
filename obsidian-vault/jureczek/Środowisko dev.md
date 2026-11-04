@@ -58,6 +58,7 @@ dart run build_runner build   # po zmianie tabel drift (generuje *.g.dart), ~1 m
 ## Claude Code (od 2026-10-26)
 - `CLAUDE.md` w katalogu głównym projektu wczytuje się na starcie każdej sesji. Zawiera komendy, pułapki, reguły i mapę tego vaulta: najpierw przegląd i najnowsza wersja, reszta na żądanie.
 - Skill `/vault-update` (`.claude/skills/vault-update/`) dokumentuje zmianę w vaulcie: notatkę wersji, ADR, roadmapę, Backlog i notatki techniczne.
+- Skill `/make-it-better [kierunek]` (globalny, `~/.claude/skills/make-it-better/`, poza repo) sam wybiera jedną odważną zmianę, robi krótki research w sieci i dowozi zmianę na gałęzi `make-it-better/*`. Do `main` trafia dopiero po teście na telefonie i werdykcie „merguj”; pozostałe werdykty to „popraw” i „porzuć”. Historia uruchomień jest w `~/.claude/make-it-better/jureczek.md`. Co 5. uruchomienie to porządki w kodzie bez wzrostu liczby linii. Uruchamiany tylko ręcznie, serie przez `/loop` na jednej gałęzi.
 - Hook w `.claude/settings.json` po każdym Write/Edit pliku `.dart` uruchamia `dart format`.
 
 Powiązane: [[00 Jureczek – przegląd]], [[ADR-003 Token Mapbox]]
