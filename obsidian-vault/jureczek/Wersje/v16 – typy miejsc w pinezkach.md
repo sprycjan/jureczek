@@ -40,7 +40,7 @@ Prośba użytkownika z 2026-11-03: „zaimplementuj teraz te pinezki w aplikacji
 | 4 | Podpowiedź z `maki` | teraz |
 | 5 | Migracja v9 | 7 typów „inne” |
 | 6 | Zapis | kolumna `category` = klucz typu albo `standard`; schemat 7 = `UPDATE` |
-| 7 | Zachowanie wyboru | tap w kategorię nie zmienia wyboru; zielona pierwsza; edycja otwiera kategorię typu |
+| 7 | Zachowanie wyboru | tap w kategorię nie zmienia wyboru; zielona pierwsza; edycja otwiera kategorię typu. Zastąpione w [[v17 – krótszy formularz pinezki]]: kategoria ustawia „Inne” i otwiera listę typów |
 | 8 | Gdzie podpowiedź | long-tap POI, karta POI, wyszukiwarka |
 | 9 | Stare PNG v9 | usunięte (zostaje zielona) |
 | 10 | Symbol „inne” | 7 nowych ogólnych symboli |
@@ -90,7 +90,7 @@ Prośba użytkownika z 2026-11-03: „zaimplementuj teraz te pinezki w aplikacji
 - [ ] Użytkownik: wygodę wyboru w dwóch krokach, wysokość formularza, symbole „inne”, trafność podpowiedzi `maki`.
 
 ## Otwarte
-- Formularz z otwartą siatką jest wysoki (siatka + 24 kolory). Jeśli przeszkadza, można zwijać kolory (uwaga z v14).
+- ~~Formularz z otwartą siatką jest wysoki (siatka + 24 kolory).~~ Rozwiązane w [[v17 – krótszy formularz pinezki]].
 - `poi_category_ids` z wyszukiwarki dałoby więcej trafień niż samo `maki` (np. `winery`, `brewery`), ale wymaga drugiej tabeli.
 - Zielona „Pinezka” jest jedyna w PNG – mogłaby przejść na SVG, gdyby kiedyś trzeba było ją zmieniać.
 

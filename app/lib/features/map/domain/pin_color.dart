@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-/// Własny kolor pinezki (v14): 24 gotowe kolory w siatce 6×4. Bez koloru
-/// (`null` w [PlacePin.color]) pinezka ma kolor swojej kategorii.
+/// Własny kolor pinezki (v14): 24 gotowe kolory. Bez koloru (`null` w
+/// [PlacePin.color]) pinezka ma kolor swojej kategorii.
 ///
 /// [key] trafia do bazy – nie zmieniać istniejących wartości.
 enum PinColor {

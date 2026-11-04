@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -17,7 +17,7 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Chowanie ikony POI pod pinezką (`StandardPOIsState(hide: true)` + `setFeatureState`)
 - [x] Podpowiedź typu pinezki z `maki` (POI i wyszukiwarka) – v16
 - [ ] Podpowiedź z `poi_category_ids` wyszukiwarki (więcej trafień niż `maki`, np. winnica, browar)
-- [ ] Zwijana siatka kolorów w formularzu – z otwartą siatką typów jest wysoki
+- [x] Krótszy formularz pinezki: select boxy i linia kolorów zamiast zwijanej siatki – v17, [[v17 – krótszy formularz pinezki]]
 - [x] Biblioteka ikon 74 typów miejsc (v15, [[v15 – biblioteka ikon miejsc]])
 - [x] Typ miejsca w pinezce: wybór kategoria → typ, pinezki SVG na mapie, własny kolor dla SVG – v16, [[v16 – typy miejsc w pinezkach]]
 - [ ] Etykiety z nazwą na mapie (`textField`; przy edycji nazwy `manager.update`)
@@ -68,7 +68,7 @@ Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – w
 - [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
 - [ ] Dodanie większej ilości pinezek (Google Stitch) – czeka na grafiki od użytkownika
 - [x] Wybór koloru pinezki (24 opcje, nie pełny color picker) – v14, [[ADR-010 Kolor pinezki z warstw]]
-- [ ] Zwijana siatka kolorów, jeśli arkusz nowej pinezki okaże się za długi
+- [x] Arkusz nowej pinezki za długi – rozwiązane linią kolorów i select boxami (v17)
 - [ ] Pigułka zoomu i przycisk lokalizacji zasłaniają pinezki przy prawej krawędzi
 - [ ] Mruganie mapy i płynność przejścia do mapy (v11: zasłona + TLHC/TextureView) – czeka na potwierdzenie użytkownika
 - [x] Zaznaczona pinezka pokazywała się z opóźnieniem o krok (klatka TLHC) – `triggerRepaint` po zmianie wyglądu, [[v11 – poprawki wyglądu]]

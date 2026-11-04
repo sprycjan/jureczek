@@ -81,6 +81,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get pinColorReset => 'Domyślny';
 
   @override
+  String get pinColorScrollBack => 'Poprzednie kolory';
+
+  @override
+  String get pinColorScrollForward => 'Następne kolory';
+
+  @override
   String get pinColorRed => 'Czerwony';
 
   @override
@@ -250,7 +256,13 @@ class AppLocalizationsPl extends AppLocalizations {
   String get placeAdjustDone => 'Gotowe';
 
   @override
-  String get pinCategoryLabel => 'Typ pinezki';
+  String get pinCategoryField => 'Kategoria';
+
+  @override
+  String get pinTypeField => 'Typ';
+
+  @override
+  String get pinTypeNone => '—';
 
   @override
   String get pinCategoryStandard => 'Pinezka';

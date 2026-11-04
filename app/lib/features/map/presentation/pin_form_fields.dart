@@ -30,13 +30,26 @@ class PinFormFields extends StatelessWidget {
     required this.name,
     required this.address,
     required this.note,
-    this.autofocus = false,
   });
 
   final TextEditingController name;
   final TextEditingController address;
   final TextEditingController note;
-  final bool autofocus;
+
+  /// Licznik znaków pojawia się dopiero od tej części limitu (v17).
+  static const _counterFrom = 0.8;
+
+  static Widget? _counter(
+    BuildContext context, {
+    required int currentLength,
+    required bool isFocused,
+    required int? maxLength,
+  }) {
+    if (maxLength == null || currentLength < maxLength * _counterFrom) {
+      return null;
+    }
+    return Text('$currentLength/$maxLength');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,39 +59,38 @@ class PinFormFields extends StatelessWidget {
       children: [
         TextField(
           controller: name,
-          autofocus: autofocus,
           maxLength: PlacePin.maxNameLength,
+          buildCounter: _counter,
           textCapitalization: TextCapitalization.sentences,
           textInputAction: TextInputAction.next,
-          decoration: InputDecoration(
-            labelText: l10n.pinNameLabel,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: _decoration(l10n.pinNameLabel),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         TextField(
           controller: address,
           maxLength: PlacePin.maxAddressLength,
+          buildCounter: _counter,
           textCapitalization: TextCapitalization.sentences,
           textInputAction: TextInputAction.next,
-          decoration: InputDecoration(
-            labelText: l10n.pinAddressLabel,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: _decoration(l10n.pinAddressLabel),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         TextField(
           controller: note,
           maxLength: PlacePin.maxNoteLength,
-          minLines: 3,
+          buildCounter: _counter,
+          minLines: 1,
           maxLines: 6,
           textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            labelText: l10n.pinNoteLabel,
-            border: const OutlineInputBorder(),
-          ),
+          decoration: _decoration(l10n.pinNoteLabel),
         ),
       ],
     );
   }
+
+  static InputDecoration _decoration(String label) => InputDecoration(
+    labelText: label,
+    isDense: true,
+    border: const OutlineInputBorder(),
+  );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/select_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/folders_providers.dart';
 import '../domain/trip_folder.dart';
@@ -24,59 +25,53 @@ class FolderPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
     final folders = ref.watch(foldersProvider).value ?? const <TripFolder>[];
     final defaultFolder = folders
         .where((f) => f.name == TripFolder.defaultName)
         .firstOrNull;
+    final showDefault = offerDefault && defaultFolder == null;
 
     bool selected(TripFolder f) =>
         f.id == value || (value == null && f.id == defaultFolder?.id);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          l10n.folderLabel,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+    final current = folders.where(selected).firstOrNull;
+    return SelectField(
+      key: const ValueKey('folder-field'),
+      label: l10n.folderLabel,
+      value: current?.name ?? (showDefault ? TripFolder.defaultName : ''),
+      leading: _folderIcon(
+        current?.icon ?? FolderIcon.camper,
+        current?.color ?? FolderColor.emerald,
+      ),
+      options: [
+        if (showDefault)
+          SelectOption(
+            key: const ValueKey('folder-default'),
+            label: TripFolder.defaultName,
+            leading: _folderIcon(FolderIcon.camper, FolderColor.emerald),
+            selected: value == null,
+            onSelected: () => onChanged(null),
           ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            if (offerDefault && defaultFolder == null)
-              _FolderChip(
-                key: const ValueKey('folder-default'),
-                label: TripFolder.defaultName,
-                icon: FolderIcon.camper,
-                color: FolderColor.emerald,
-                selected: value == null,
-                onSelected: () => onChanged(null),
-              ),
-            for (final folder in folders)
-              _FolderChip(
-                key: ValueKey('folder-${folder.id}'),
-                label: folder.name,
-                icon: folder.icon,
-                color: folder.color,
-                selected: selected(folder),
-                onSelected: () => onChanged(folder.id),
-              ),
-            ActionChip(
-              key: const ValueKey('folder-new'),
-              avatar: const Icon(Icons.add),
-              label: Text(l10n.folderNew),
-              onPressed: () => _quickCreate(context, ref),
-            ),
-          ],
+        for (final folder in folders)
+          SelectOption(
+            key: ValueKey('folder-${folder.id}'),
+            label: folder.name,
+            leading: _folderIcon(folder.icon, folder.color),
+            selected: selected(folder),
+            onSelected: () => onChanged(folder.id),
+          ),
+        SelectOption(
+          key: const ValueKey('folder-new'),
+          label: l10n.folderNew,
+          leading: const Icon(Icons.add),
+          onSelected: () => _quickCreate(context, ref),
         ),
       ],
     );
   }
+
+  static Widget _folderIcon(FolderIcon icon, FolderColor color) =>
+      Icon(icon.icon, color: color.color, size: 24);
 
   Future<void> _quickCreate(BuildContext context, WidgetRef ref) async {
     final name = await showDialog<String>(
@@ -95,34 +90,6 @@ class FolderPicker extends ConsumerWidget {
         );
       }
     }
-  }
-}
-
-class _FolderChip extends StatelessWidget {
-  const _FolderChip({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final FolderIcon icon;
-  final FolderColor color;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      avatar: Icon(icon.icon, color: color.color, size: 18),
-      label: Text(label),
-      selected: selected,
-      showCheckmark: false,
-      onSelected: (_) => onSelected(),
-    );
   }
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/widgets/select_field.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../places/domain/place_category.dart';
 import '../../places/domain/place_type.dart';
@@ -14,10 +15,11 @@ extension PinKindLabel on PinKind {
       type?.fullLabel(l10n) ?? l10n.pinCategoryStandard;
 }
 
-/// Wybór typu pinezki w dwóch krokach (v16): rząd 8 pozycji – zielona
-/// „Pinezka” i 7 kategorii (ich pinezki „inne”) – a pod nim siatka typów
-/// otwartej kategorii. Tap w kategorię tylko otwiera siatkę; wybór zmienia
-/// dopiero tap w typ (albo w zieloną „Pinezkę”).
+/// Wybór typu pinezki (v17): dwa select boxy obok siebie, „Kategoria” i „Typ”.
+///
+/// Nowa kategoria od razu ustawia swój typ „Inne” i otwiera listę typów, więc
+/// wartość jest zawsze poprawna. Zielona „Pinezka” jest pierwszą pozycją
+/// kategorii i nie ma typów – pole „Typ” jest wtedy wyszarzone.
 class PinTypePicker extends StatefulWidget {
   const PinTypePicker({
     super.key,
@@ -37,220 +39,97 @@ class PinTypePicker extends StatefulWidget {
 }
 
 class _PinTypePickerState extends State<PinTypePicker> {
-  /// Przy edycji od razu otwarta kategoria zapisanego typu.
-  late PlaceCategory? _open = widget.value.type?.category;
+  static const _gap = 8.0;
 
-  @override
-  void didUpdateWidget(PinTypePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Wartość z zewnątrz (np. „Anuluj” w edycji, podpowiedź z POI) – siatka za nią.
-    final category = widget.value.type?.category;
-    if (widget.value != oldWidget.value && category != null) {
-      _open = category;
+  final _typeMenu = MenuController();
+
+  void _selectCategory(PlaceCategory category) {
+    // Ta sama kategoria nie kasuje wybranego typu.
+    if (widget.value.type?.category != category) {
+      widget.onChanged(PinKind(category.otherType));
     }
+    // Po przebudowie, gdy lista ma już typy nowej kategorii.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _typeMenu.open();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final value = widget.value;
-    final open = _open;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
+    final type = value.type;
+    final category = type?.category;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final fieldWidth = (width - _gap) / 2;
+        return Row(
           children: [
-            Text(
-              l10n.pinCategoryLabel,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                value.label(l10n),
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: colors.primary,
+            SizedBox(
+              width: fieldWidth,
+              child: SelectField(
+                key: const ValueKey('pin-category-field'),
+                label: l10n.pinCategoryField,
+                value: category?.label(l10n) ?? l10n.pinCategoryStandard,
+                leading: _pin(
+                  category == null
+                      ? PinKind.standard
+                      : PinKind(category.otherType),
                 ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: _Choice(
-                      key: const ValueKey('pin-category-standard'),
-                      label: l10n.pinCategoryStandard,
-                      selected: value.isStandard,
-                      highlighted: value.isStandard,
-                      onTap: () {
-                        setState(() => _open = null);
-                        widget.onChanged(PinKind.standard);
-                      },
-                      child: PinImage(PinKind.standard, color: widget.color),
-                    ),
+                menuWidth: width,
+                options: [
+                  SelectOption(
+                    key: const ValueKey('pin-category-standard'),
+                    label: l10n.pinCategoryStandard,
+                    leading: _pin(PinKind.standard),
+                    selected: value.isStandard,
+                    onSelected: () => widget.onChanged(PinKind.standard),
                   ),
-                  for (final category in PlaceCategory.values)
-                    Expanded(
-                      child: _Choice(
-                        key: ValueKey('pin-category-${category.key}'),
-                        label: category.label(l10n),
-                        selected: value.type?.category == category,
-                        highlighted: open == category,
-                        onTap: () => setState(
-                          () => _open = open == category ? null : category,
-                        ),
-                        child: PinImage(
-                          PinKind(category.otherType),
-                          color: widget.color,
-                        ),
-                      ),
+                  for (final option in PlaceCategory.values)
+                    SelectOption(
+                      key: ValueKey('pin-category-${option.key}'),
+                      label: option.label(l10n),
+                      leading: _pin(PinKind(option.otherType)),
+                      selected: option == category,
+                      onSelected: () => _selectCategory(option),
                     ),
                 ],
               ),
-              if (open != null) ...[
-                const Divider(height: 12),
-                _TypeGrid(
-                  category: open,
-                  value: value,
-                  color: widget.color,
-                  onChanged: widget.onChanged,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Siatka typów kategorii: pinezka i nazwa, wybrany podświetlony.
-class _TypeGrid extends StatelessWidget {
-  const _TypeGrid({
-    required this.category,
-    required this.value,
-    required this.color,
-    required this.onChanged,
-  });
-
-  final PlaceCategory category;
-  final PinKind value;
-  final PinColor? color;
-  final ValueChanged<PinKind> onChanged;
-
-  static const _columns = 4;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final types = PlaceType.of(category);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth / _columns;
-        return Wrap(
-          children: [
-            for (final type in types)
-              SizedBox(
-                width: width,
-                child: _Choice(
-                  key: ValueKey('pin-type-${type.key}'),
-                  label: type.label(l10n),
-                  selected: value.type == type,
-                  highlighted: value.type == type,
-                  onTap: () => onChanged(PinKind(type)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PinImage(PinKind(type), color: color, height: 30),
-                        const SizedBox(height: 2),
-                        Text(
-                          type.label(l10n),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelSmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+            ),
+            const SizedBox(width: _gap),
+            SizedBox(
+              width: fieldWidth,
+              child: SelectField(
+                key: const ValueKey('pin-type-field'),
+                label: l10n.pinTypeField,
+                value: type?.label(l10n) ?? l10n.pinTypeNone,
+                leading: type == null ? null : _pin(PinKind(type)),
+                enabled: type != null,
+                // „Inne” jest na końcu, a po zmianie kategorii lista ma
+                // pokazać typy od początku.
+                revealSelected: type?.isOther != true,
+                controller: _typeMenu,
+                menuWidth: width,
+                menuOffsetX: -(fieldWidth + _gap),
+                options: [
+                  if (category != null)
+                    for (final option in PlaceType.of(category))
+                      SelectOption(
+                        key: ValueKey('pin-type-${option.key}'),
+                        label: option.label(l10n),
+                        leading: _pin(PinKind(option)),
+                        selected: option == type,
+                        onSelected: () => widget.onChanged(PinKind(option)),
+                      ),
+                ],
               ),
+            ),
           ],
         );
       },
     );
   }
-}
 
-/// Pole wyboru: [selected] – obwódka (bieżąca wartość), [highlighted] – tło.
-class _Choice extends StatelessWidget {
-  const _Choice({
-    super.key,
-    required this.label,
-    required this.selected,
-    required this.highlighted,
-    required this.onTap,
-    required this.child,
-  });
-
-  final String label;
-  final bool selected;
-  final bool highlighted;
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: Tooltip(
-        message: label,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            constraints: const BoxConstraints(minHeight: 52),
-            margin: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: highlighted
-                  ? colors.surfaceContainerHighest
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: selected ? colors.primary : Colors.transparent,
-                width: 1.5,
-              ),
-            ),
-            alignment: Alignment.center,
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _pin(PinKind kind) => PinImage(kind, color: widget.color);
 }

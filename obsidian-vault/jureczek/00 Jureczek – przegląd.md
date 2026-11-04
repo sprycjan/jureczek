@@ -40,7 +40,8 @@ tags: [jureczek, przeglad]
 | v14 | Moja lokalizacja, ikony POI, mniej etykiet miejscowości, snackbary znikają z mapą, własny kolor pinezki (24 kolory, schemat 6) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v14 – lokalizacja, ikony POI i kolor pinezki]] |
 | v15 | Biblioteka ikon miejsc: 74 typy × (pinezka, zaznaczona, ikona 24 dp) = 222 SVG, komponenty Flutter, galeria deweloperska z mapą | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v15 – biblioteka ikon miejsc]] |
 | v16 | Typy miejsc w pinezkach: wybór kategoria → typ, pinezki SVG na mapie, podpowiedź typu z `maki`, migracja v9 → „inne” (schemat 7) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v16 – typy miejsc w pinezkach]] |
-| v17+ | Patrz [[Backlog]] | — |
+| v17 | Krótszy formularz pinezki: select boxy kategorii, typu i folderu, kolory w jednej linii ze strzałkami, gęstsze pola, edycja bez autofocusu | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v17 – krótszy formularz pinezki]] |
+| v18+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

@@ -76,15 +76,14 @@ void main() {
   ) async {
     final saved = await pumpSheet(tester);
 
-    final chip = tester.widget<ChoiceChip>(
+    expect(
       find.descendant(
-        of: find.byKey(const ValueKey('folder-default')),
-        matching: find.byType(ChoiceChip),
+        of: find.byKey(const ValueKey('folder-field')),
+        matching: find.text('Pinezki'),
       ),
+      findsOneWidget,
     );
-    expect(chip.selected, isTrue);
 
-    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
     await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
@@ -100,9 +99,10 @@ void main() {
     });
     final saved = await pumpSheet(tester);
 
+    await tester.tap(find.byKey(const ValueKey('folder-field')));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Portugalia'));
-    await tester.pump();
-    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
@@ -115,6 +115,8 @@ void main() {
   ) async {
     final saved = await pumpSheet(tester);
 
+    await tester.tap(find.byKey(const ValueKey('folder-field')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('folder-new')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'Bałkany');
@@ -124,7 +126,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bałkany'), findsOneWidget);
-    // Arkusz z kolorem (v14) jest dłuższy niż ekran – trzeba przewinąć.
     await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
@@ -133,6 +134,21 @@ void main() {
       () => container.read(foldersProvider.future),
     );
     expect(saved.single.folderId, folders!.single.id);
+  });
+
+  testWidgets('długa nazwa folderu mieści się na liście', (tester) async {
+    await tester.runAsync(() async {
+      await container
+          .read(foldersControllerProvider)
+          .create(name: 'Bardzo długa nazwa ' * 2 + 'folderu podróży!');
+    });
+    await pumpSheet(tester);
+
+    await tester.tap(find.byKey(const ValueKey('folder-field')));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('folder-new')), findsOneWidget);
   });
 
   testWidgets('w trybie folderu nie ma wyboru folderu', (tester) async {

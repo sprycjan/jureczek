@@ -232,6 +232,18 @@ abstract class AppLocalizations {
   /// **'Domyślny'**
   String get pinColorReset;
 
+  /// No description provided for @pinColorScrollBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Poprzednie kolory'**
+  String get pinColorScrollBack;
+
+  /// No description provided for @pinColorScrollForward.
+  ///
+  /// In pl, this message translates to:
+  /// **'Następne kolory'**
+  String get pinColorScrollForward;
+
   /// No description provided for @pinColorRed.
   ///
   /// In pl, this message translates to:
@@ -562,11 +574,23 @@ abstract class AppLocalizations {
   /// **'Gotowe'**
   String get placeAdjustDone;
 
-  /// No description provided for @pinCategoryLabel.
+  /// No description provided for @pinCategoryField.
   ///
   /// In pl, this message translates to:
-  /// **'Typ pinezki'**
-  String get pinCategoryLabel;
+  /// **'Kategoria'**
+  String get pinCategoryField;
+
+  /// No description provided for @pinTypeField.
+  ///
+  /// In pl, this message translates to:
+  /// **'Typ'**
+  String get pinTypeField;
+
+  /// No description provided for @pinTypeNone.
+  ///
+  /// In pl, this message translates to:
+  /// **'—'**
+  String get pinTypeNone;
 
   /// No description provided for @pinCategoryStandard.
   ///

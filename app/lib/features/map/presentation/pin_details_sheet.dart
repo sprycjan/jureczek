@@ -256,7 +256,6 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
           name: _nameController,
           address: _addressController,
           note: _noteController,
-          autofocus: true,
         ),
         if (_saveFailed) ...[
           const SizedBox(height: 8),

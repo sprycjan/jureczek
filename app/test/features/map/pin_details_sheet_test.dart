@@ -219,15 +219,21 @@ void main() {
 
     await tester.tap(find.text('Edytuj'));
     await tester.pumpAndSettle();
-    // Siatka od razu na kategorii zapisanego typu.
-    expect(find.byKey(const ValueKey('pin-type-waterfall')), findsOneWidget);
+    // Pola od razu pokazują zapisany typ, a klawiatura nie wyskakuje sama.
+    expect(find.text('Jezioro'), findsOneWidget);
+    expect(find.text('Natura i widoki'), findsOneWidget);
+    expect(
+      FocusManager.instance.primaryFocus?.context?.widget,
+      isNot(isA<EditableText>()),
+    );
 
+    await tester.tap(find.byKey(const ValueKey('pin-category-field')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pin-category-gastronomy')));
-    await tester.pump();
-    // Sama kategoria nie zmienia typu.
-    expect(find.text('Jezioro · Natura i widoki'), findsOneWidget);
+    await tester.pumpAndSettle();
+    // Kategoria otwiera listę typów.
     await tester.tap(find.byKey(const ValueKey('pin-type-cafe')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
@@ -276,12 +282,41 @@ void main() {
 
     await tester.tap(find.text('Edytuj'));
     await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('pin-color-sky')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('pin-color-sky')));
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Zapisz'));
     await tester.tap(find.text('Zapisz'));
     await tester.pumpAndSettle();
 
     expect(saved?.color, PinColor.sky);
+  });
+
+  testWidgets('w edycji pasek przewija się do zapisanego koloru', (
+    tester,
+  ) async {
+    await pumpSheet(
+      tester,
+      pin: pin(color: PinColor.black),
+      onSave: (_) async => true,
+    );
+
+    await tester.tap(find.text('Edytuj'));
+    await tester.pumpAndSettle();
+
+    final swatch = tester.getRect(
+      find.byKey(const ValueKey('pin-color-black')),
+    );
+    final bar = tester.getRect(
+      find
+          .ancestor(
+            of: find.byKey(const ValueKey('pin-color-black')),
+            matching: find.byType(SingleChildScrollView),
+          )
+          .first,
+    );
+    expect(swatch.right, lessThanOrEqualTo(bar.right));
+    expect(swatch.left, greaterThanOrEqualTo(bar.left));
   });
 }
