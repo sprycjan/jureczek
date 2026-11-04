@@ -203,6 +203,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get mapStyleFaded3d => '3D';
 
   @override
+  String get mapFilterOpen => 'Filtruj kategorie';
+
+  @override
+  String get mapFilterClose => 'Zamknij filtr kategorii';
+
+  @override
+  String get mapFilterAll => 'Wszystkie';
+
+  @override
   String get searchError => 'Nie udało się wyszukać – sprawdź połączenie';
 
   @override

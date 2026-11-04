@@ -15,6 +15,7 @@ import '../../share/application/shared_place_controller.dart';
 import '../application/place_search_controller.dart';
 import '../application/pins_providers.dart';
 import '../domain/duplicate_pin.dart';
+import '../domain/pin_category_filter.dart';
 import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
@@ -24,6 +25,7 @@ import 'map_style.dart';
 import 'map_style_picker.dart';
 import 'map_tools.dart';
 import 'new_pin_sheet.dart';
+import 'pin_category_filter_panel.dart';
 import 'pin_details_sheet.dart';
 import 'pin_drop.dart';
 import 'pin_form_fields.dart';
@@ -124,7 +126,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     const <({String id, Offset anchor, MemoryImage image, Size size})>[],
   );
 
-  /// Ostatni stan z bazy, do którego doprowadzamy mapę.
+  /// Pinezki trybu mapy (folder), bez filtra kategorii.
+  List<PlacePin> _modePins = const [];
+
+  /// Stan, do którego doprowadzamy mapę: [_modePins] po filtrze kategorii.
   List<PlacePin> _pins = const [];
 
   /// Kolejne synchronizacje idą po sobie, żeby się nie przeplatały.
@@ -156,6 +161,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Bieżący styl mapy i rozwinięta lista stylów (v13).
   MapStyleOption _style = MapStyleOption.vanventure;
   bool _stylesOpen = false;
+
+  /// Filtr kategorii i jego rozwinięta lista (v18). Trwa do wyjścia z mapy.
+  PinCategoryFilter _categoryFilter = PinCategoryFilter.all;
+  bool _filterOpen = false;
 
   /// Trwa ustalanie położenia po „Moja lokalizacja” (v14).
   bool _locating = false;
@@ -243,7 +252,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             'Czyszczenie pinezek po zmianie stylu nie powiodło się: $e',
           );
         });
-    _scheduleSync(ref.read(pinsProvider).value ?? _pins);
+    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
     final result = _result;
     if (result != null && !_adjusting) await _showResult(result, fly: false);
   }
@@ -331,8 +340,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _toggleStyles() {
     if (_searchOpen) _closeSearch();
-    setState(() => _stylesOpen = !_stylesOpen);
+    setState(() {
+      _stylesOpen = !_stylesOpen;
+      _filterOpen = false;
+    });
   }
+
+  void _toggleFilter() {
+    if (_searchOpen) _closeSearch();
+    setState(() {
+      _filterOpen = !_filterOpen;
+      _stylesOpen = false;
+    });
+  }
+
+  /// Lista stylów i filtr zamykają się przy tapnięciu w mapę, POI lub pinezkę.
+  void _closePanels() {
+    if (!mounted || (!_stylesOpen && !_filterOpen)) return;
+    setState(() {
+      _stylesOpen = false;
+      _filterOpen = false;
+    });
+  }
+
+  void _setCategoryFilter(PinCategoryFilter filter) {
+    if (!mounted || identical(filter, _categoryFilter)) return;
+    setState(() => _categoryFilter = filter);
+    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
+  }
+
+  /// Pinezka, która ma być widoczna, dołącza swoją kategorię do filtra.
+  void _revealKind(PinKind kind) =>
+      _setCategoryFilter(_categoryFilter.including(kind.type?.category));
 
   void _updateCurtain() {
     if (mounted && _styleLoaded && _cameraPlaced) _styleReady.value = true;
@@ -410,6 +449,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     map.addInteraction(
       TapInteraction(FeaturesetDescriptor(layerId: poiLabelLayerId), (poi, _) {
         _searchFocus.unfocus();
+        _closePanels();
         final place = placeFromPoi(
           name: poi.properties['name'] as String?,
           geometry: poi.geometry,
@@ -437,6 +477,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     map.addInteraction(
       TapInteraction(StandardPOIs(), (poi, _) {
         _searchFocus.unfocus();
+        _closePanels();
         final place = placeFromPoi(
           name: poi.name,
           geometry: poi.geometry,
@@ -476,7 +517,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     map.addInteraction(
       TapInteraction.onMap((_) {
         _searchFocus.unfocus();
-        if (_stylesOpen && mounted) setState(() => _stylesOpen = false);
+        _closePanels();
       }, stopPropagation: false),
     );
 
@@ -526,7 +567,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     await map.compass.updateSettings(
       CompassSettings(
         position: OrnamentPosition.TOP_RIGHT,
-        marginTop: insets.top + _toolsPadding + 2 * (_toolSize + 12),
+        marginTop: insets.top + _toolsPadding + 3 * (_toolSize + 12),
         marginRight: _toolsPadding + 4,
       ),
     );
@@ -550,7 +591,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   void _scheduleSync(List<PlacePin> pins) {
-    _pins = _visible(pins);
+    _modePins = _visible(pins);
+    _pins = _categoryFilter.apply(_modePins);
     _sync = _sync.then((_) => _syncPins()).catchError((Object e) {
       debugPrint('Synchronizacja pinezek nie powiodła się: $e');
     });
@@ -565,17 +607,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final wantedIds = {for (final pin in pins) pin.id};
 
     var changed = false;
-    final stale = _annotationsByPinId.keys
-        .where((id) => !wantedIds.contains(id))
-        .toList();
-    for (final id in stale) {
-      final annotation = _annotationsByPinId.remove(id)!;
-      _pinIdByAnnotationId.remove(annotation.id);
-      _lookByPinId.remove(id);
-      await manager.delete(annotation);
+    // Usuwanie i tworzenie grupowe (v18): filtr kategorii zmienia naraz wiele
+    // pinezek, a pojedynczo znikałyby i pojawiały się jedna po drugiej.
+    final stale = [
+      for (final id in _annotationsByPinId.keys.toList())
+        if (!wantedIds.contains(id)) id,
+    ];
+    if (stale.isNotEmpty) {
+      final annotations = <PointAnnotation>[];
+      for (final id in stale) {
+        final annotation = _annotationsByPinId.remove(id)!;
+        _pinIdByAnnotationId.remove(annotation.id);
+        _lookByPinId.remove(id);
+        annotations.add(annotation);
+      }
+      await manager.deleteMulti(annotations);
       changed = true;
     }
 
+    final missing = <(PlacePin, _PinLook)>[];
+    final options = <PointAnnotationOptions>[];
     for (final pin in pins) {
       final look = (pin.kind, pin.id == _selectedPinId, pin.color);
       final existing = _annotationsByPinId[pin.id];
@@ -589,7 +640,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         changed = true;
         continue;
       }
-      final annotation = await manager.create(
+      missing.add((pin, look));
+      options.add(
         PointAnnotationOptions(
           geometry: Point(coordinates: Position(pin.lng, pin.lat)),
           image: await _pinImage(look),
@@ -599,9 +651,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           iconOpacity: _droppingIds.contains(pin.id) ? 0 : 1,
         ),
       );
-      _annotationsByPinId[pin.id] = annotation;
-      _pinIdByAnnotationId[annotation.id] = pin.id;
-      _lookByPinId[pin.id] = look;
+    }
+    if (options.isNotEmpty) {
+      final created = await manager.createMulti(options);
+      for (final (index, annotation) in created.indexed) {
+        if (annotation == null) continue;
+        final (pin, look) = missing[index];
+        _annotationsByPinId[pin.id] = annotation;
+        _pinIdByAnnotationId[annotation.id] = pin.id;
+        _lookByPinId[pin.id] = look;
+      }
       changed = true;
     }
     if (changed) await _repaintMap();
@@ -689,6 +748,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final pin = _pins.where((p) => p.id == pinId).firstOrNull;
     if (pin == null || !mounted) return;
 
+    _closePanels();
     _clearResult();
     _openPinSheet(pin);
   }
@@ -717,7 +777,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _selectPin(String? id) {
     _selectedPinId = id;
-    _scheduleSync(ref.read(pinsProvider).value ?? _pins);
+    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
   }
 
   /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
@@ -734,6 +794,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             color: details.color,
             folderId: details.folderId,
           );
+      _revealKind(details.kind);
       return true;
     } catch (e) {
       debugPrint('Zapis nazwy/notatki nie powiódł się: $e');
@@ -758,7 +819,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           persist: false,
           action: SnackBarAction(
             label: l10n.undo,
-            onPressed: () => _run(() => controller.restore(removed)),
+            onPressed: () {
+              _revealKind(removed.kind);
+              _run(() => controller.restore(removed));
+            },
           ),
         ),
       );
@@ -771,6 +835,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       setState(() {
         _searchOpen = true;
         _stylesOpen = false;
+        _filterOpen = false;
       });
     }
   }
@@ -787,7 +852,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _searchFor(String name) {
     _clearResult();
     _searchText.text = name;
-    setState(() => _searchOpen = true);
+    setState(() {
+      _searchOpen = true;
+      _filterOpen = false;
+    });
     _searchFocus.requestFocus();
     _onSearchChanged(name);
   }
@@ -817,7 +885,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   /// Pokazuje miejsce z kartą „Dodaj pinezkę”. Gdy w pobliżu jest już pinezka,
-  /// zamiast tego otwiera jej arkusz. Przybliżone położenie nie jest sprawdzane,
+  /// także ukryta filtrem kategorii, zamiast tego otwiera jej arkusz. Przybliżone położenie nie jest sprawdzane,
   /// bo może być daleko od prawdziwego – sprawdzamy je po poprawieniu.
   Future<void> _showResult(PlaceResult result, {bool fly = true}) async {
     if (_map == null) {
@@ -825,7 +893,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return;
     }
     if (!result.approximate) {
-      final duplicate = nearestPinWithin(_pins, (
+      final duplicate = nearestPinWithin(_modePins, (
         lat: result.lat,
         lng: result.lng,
       ), duplicateThresholdMeters(result.lat, _resultZoom));
@@ -860,6 +928,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   Future<void> _showDuplicate(PlacePin pin) async {
     _clearResult();
+    _revealKind(pin.kind);
     _openPinSheet(pin, notice: AppLocalizations.of(context).pinDuplicate);
     await _flyTo(Point(coordinates: Position(pin.lng, pin.lat)));
   }
@@ -935,6 +1004,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             debugPrint('Zapis pinezki nie powiódł się: $e');
             return false;
           }
+          _revealKind(details.kind);
           _holdPin(addedId!);
           if (sheetContext.mounted) Navigator.of(sheetContext).pop();
           _clearResult();
@@ -1030,11 +1100,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     return PopScope(
       // Wstecz najpierw zamyka wyszukiwanie, poprawianie i kartę wyniku, dopiero potem aplikację.
-      canPop: !_searchOpen && !_stylesOpen && result == null && !sharing,
+      canPop:
+          !_searchOpen &&
+          !_stylesOpen &&
+          !_filterOpen &&
+          result == null &&
+          !sharing,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         if (_stylesOpen) {
           setState(() => _stylesOpen = false);
+        } else if (_filterOpen) {
+          setState(() => _filterOpen = false);
         } else if (_searchOpen) {
           _closeSearch();
         } else if (_adjusting) {
@@ -1154,6 +1231,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               : l10n.mapStylesOpen,
                           onPressed: _toggleStyles,
                         ),
+                        MapToolButton(
+                          key: const ValueKey('map-filter-button'),
+                          icon: _filterOpen
+                              ? Icons.close
+                              : _categoryFilter.isActive
+                              ? Icons.filter_alt
+                              : Icons.filter_alt_outlined,
+                          tooltip: _filterOpen
+                              ? l10n.mapFilterClose
+                              : l10n.mapFilterOpen,
+                          active: _categoryFilter.isActive,
+                          onPressed: _toggleFilter,
+                        ),
                       ],
                     ),
                   ],
@@ -1200,6 +1290,32 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     child: MapStylePicker(
                       selected: _style,
                       onSelected: _selectStyle,
+                    ),
+                  ),
+                ),
+              ),
+            if (_filterOpen)
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    // Obok przycisku filtra, z zapasem na dole na logo Mapbox.
+                    padding: const EdgeInsets.only(
+                      top: _toolsPadding + 2 * (_toolSize + 12),
+                      right: _toolsPadding + _toolSize + 12,
+                      left: _toolsPadding,
+                      bottom: 40,
+                    ),
+                    // Własny Consumer: liczby na liście śledzą bazę bez
+                    // przebudowy całego ekranu z mapą.
+                    child: Consumer(
+                      builder: (context, ref, _) => PinCategoryFilterPanel(
+                        pins: _visible(
+                          ref.watch(pinsProvider).value ?? _modePins,
+                        ),
+                        filter: _categoryFilter,
+                        onChanged: _setCategoryFilter,
+                      ),
                     ),
                   ),
                 ),

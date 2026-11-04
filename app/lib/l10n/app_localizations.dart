@@ -472,6 +472,24 @@ abstract class AppLocalizations {
   /// **'3D'**
   String get mapStyleFaded3d;
 
+  /// No description provided for @mapFilterOpen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Filtruj kategorie'**
+  String get mapFilterOpen;
+
+  /// No description provided for @mapFilterClose.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknij filtr kategorii'**
+  String get mapFilterClose;
+
+  /// No description provided for @mapFilterAll.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie'**
+  String get mapFilterAll;
+
   /// No description provided for @searchError.
   ///
   /// In pl, this message translates to:

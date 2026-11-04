@@ -75,13 +75,14 @@ await manager.create(PointAnnotationOptions(
 ));
 ```
 - `manager.create` zwraca `PointAnnotation` z własnym `id` (innym niż nasze id pinezki). Do usunięcia potrzebny jest ten obiekt: `manager.delete(annotation)`.
+- Wiele naraz (v18, SDK 3.33): `createMulti(options)` zwraca `List<PointAnnotation?>` w kolejności opcji, a `deleteMulti(annotations)` pomija nieznane. Mapa zmienia się wtedy jednym krokiem. Obraz stylu natywnie dodaje się raz na `iconImage`, więc wspólne id nie dekoduje PNG za każdym razem.
 - Tapnięcie: `final c = manager.tapEvents(onTap: (PointAnnotation a) {...})` zwraca `Cancelable`, które trzeba anulować w `dispose` (`c.cancel()`).
 - `manager.id` to id warstwy annotacji (Android: `AnnotationConfig(belowLayerId, id, id)`). Dzięki temu można zrobić interakcję tylko na pinezkach: `LongTapInteraction(FeaturesetDescriptor(layerId: manager.id), …, stopPropagation: true)`. Ma ona pierwszeństwo przed `LongTapInteraction.onMap` (sprawdzone na telefonie), więc tak blokujemy dublowanie pinezek.
 - Na przyszłość: `longPressEvents`, `dragEvents` na managerze; `textField` do etykiet; `CircleAnnotation` to prosta alternatywa bez assetu.
 
 ## Wzorzec w aplikacji (v2)
 Baza jest jedynym źródłem prawdy ([[ADR-005 Drift jako baza lokalna]]). Gesty wołają tylko `PinsController` (`add` / `remove` / `restore`), a `ref.listen(pinsProvider)` (strumień z drifta) uruchamia `_syncPins`:
-- diff mapy `_annotationsByPinId` (id pinezki → `PointAnnotation`) ze stanem: zbędne usuwa, brakujące tworzy,
+- diff mapy `_annotationsByPinId` (id pinezki → `PointAnnotation`) ze stanem: zbędne usuwa, brakujące tworzy (od v18 grupowo),
 - odwrotna mapa `_pinIdByAnnotationId` tłumaczy tapnięcie na id pinezki,
 - synchronizacje idą w łańcuchu `Future`, żeby szybkie zmiany się nie przeplatały.
 

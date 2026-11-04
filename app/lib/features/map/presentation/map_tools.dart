@@ -23,11 +23,15 @@ class MapToolButton extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.active = false,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
+
+  /// Ikona w kolorze akcentu – narzędzie zmienia to, co widać na mapie (v18).
+  final bool active;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +44,11 @@ class MapToolButton extends StatelessWidget {
         tooltip: tooltip,
         icon: AnimatedSwitcher(
           duration: const Duration(milliseconds: 150),
-          child: Icon(icon, key: ValueKey(icon)),
+          child: Icon(
+            icon,
+            key: ValueKey(icon),
+            color: active ? colors.primary : null,
+          ),
         ),
         onPressed: onPressed,
       ),
