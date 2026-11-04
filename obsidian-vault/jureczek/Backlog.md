@@ -65,8 +65,18 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [ ] Wybór okładki folderu (dziś stała nocna)
 - [ ] Synchronizacja z chmurą / backend
 
-- [ ] Licznik „odwiedzone X z Y” na folderze (dane są od v21) – [[v21 – pinezka odwiedzona]]
+- ~~Licznik „odwiedzone X z Y” na folderze~~ – odrzucone 2026-11-04, zob. „Porzucone” niżej – [[v21 – pinezka odwiedzona]]
 - [ ] Wyróżnienie pinezek z gwiazdką na liście lub liczniku folderu – [[v22 – pinezka z gwiazdką]]
+
+Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
+- [ ] Linia łącząca miejsca wyjazdu i ręczne ustawianie ich kolejności, pierwszy krok do planu dnia
+- [ ] Odległość od mojej lokalizacji przy miejscu (zgoda na lokalizację już jest)
+- [ ] Automatyczny przelot kamerą po miejscach wyjazdu, dla przyjemności oglądania
+- [ ] Układ miejsc rysowany na karcie folderu z samych współrzędnych, bez płatnego API
+- [ ] Lista miejsc wyjazdu do przeglądania, bez postępu i bez odhaczania
+
+## Porzucone
+- **Karty podróży** (z `/make-it-better`, 2026-11-04): karuzela kart na dole mapy zsynchronizowana z pinezkami, przelot kamery po przesunięciu karty, karta podsumowania z pierścieniem „odwiedzone 3/4”. Powód użytkownika: wyjazd nie ma być listą do wbicia na 100%, „to nie są zawody ani check lista, tylko wakacje”, odpoczynek od wbijania achievementów. Wniosek: żadnych pierścieni postępu, liczników „X z Y” ani procentów. Sprawdzone działanie kamery zostało w [[Mapbox Flutter]].
 
 ## Infrastruktura
 - [x] Repozytorium git na GitHubie (sprycjan/jureczek) – [[ADR-004 Struktura repo (app)]]

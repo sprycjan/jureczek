@@ -181,3 +181,6 @@ Powiązane: [[v9 – kategorie pinezek]], [[v8 – styl Nocturnal Expedition]], 
 - Ustawiony klucz wyłącza układanie według pozycji na ekranie, więc `pinSortKey` zawiera `-lat`.
 - Tap trafia tylko w górną adnotację, a obszar tapnięcia obejmuje całą ramkę obrazka z przezroczystym marginesem.
 - Zob. [[v22 – pinezka z gwiazdką]].
+
+## Dopasowanie kamery a dopełnienie
+- `cameraForCoordinatesPadding` zwraca kamerę z `padding` równym 0, a po `setCamera` lub `flyTo` stan kamery też ma `padding` 0 (sprawdzone logiem na telefonie 2026-11-04). Dopełnienie z argumentu wpływa tylko na wyliczony środek i zoom, więc celownik „Popraw położenie” nadal wskazuje środek ekranu. Taką kamerę można też podać do `flyTo`.
