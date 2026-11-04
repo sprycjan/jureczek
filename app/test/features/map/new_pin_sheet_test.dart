@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,6 +81,102 @@ void main() {
       expect(saved?.address, 'Jana Kilińskiego 4, 80-452 Gdańsk');
       expect(saved?.note, 'Kino');
       expect(saved?.kind, PinKind.standard);
+    });
+
+    group('adres POI pobierany w tle (v19)', () {
+      const poi = PlaceResult(
+        name: 'Wawel',
+        poiName: 'Wawel',
+        lat: 50.05,
+        lng: 19.93,
+      );
+
+      testWidgets('trafia do pustego pola adresu', (tester) async {
+        final lookup = Completer<String?>();
+        await pump(
+          tester,
+          NewPinSheet(
+            place: poi,
+            addressLookup: lookup.future,
+            onSave: (_) async => true,
+          ),
+        );
+
+        lookup.complete('Wawel 5, Kraków');
+        await tester.pump();
+
+        expect(
+          find.widgetWithText(TextField, 'Wawel 5, Kraków'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('nie nadpisuje adresu wpisanego przez użytkownika', (
+        tester,
+      ) async {
+        final lookup = Completer<String?>();
+        await pump(
+          tester,
+          NewPinSheet(
+            place: poi,
+            addressLookup: lookup.future,
+            onSave: (_) async => true,
+          ),
+        );
+
+        await tester.enterText(find.byType(TextField).at(1), 'Mój adres');
+        lookup.complete('Wawel 5, Kraków');
+        await tester.pump();
+
+        expect(find.widgetWithText(TextField, 'Mój adres'), findsOneWidget);
+      });
+
+      testWidgets('„Zapisz” czeka na adres i zapisuje go z pinezką', (
+        tester,
+      ) async {
+        final lookup = Completer<String?>();
+        PinDetailsInput? saved;
+        await pump(
+          tester,
+          NewPinSheet(
+            place: poi,
+            addressLookup: lookup.future,
+            onSave: (details) async {
+              saved = details;
+              return true;
+            },
+          ),
+        );
+
+        await tester.tap(find.text('Zapisz'));
+        await tester.pump();
+        expect(saved, isNull);
+
+        lookup.complete('Wawel 5, Kraków');
+        await tester.pump();
+        expect(saved?.address, 'Wawel 5, Kraków');
+      });
+
+      testWidgets('brak adresu nie blokuje zapisu', (tester) async {
+        PinDetailsInput? saved;
+        await pump(
+          tester,
+          NewPinSheet(
+            place: poi,
+            addressLookup: Future.value(),
+            onSave: (details) async {
+              saved = details;
+              return true;
+            },
+          ),
+        );
+
+        await tester.tap(find.text('Zapisz'));
+        await tester.pump();
+
+        expect(saved?.name, 'Wawel');
+        expect(saved?.address, isEmpty);
+      });
     });
 
     testWidgets('wybrany typ pinezki trafia do zapisu', (tester) async {

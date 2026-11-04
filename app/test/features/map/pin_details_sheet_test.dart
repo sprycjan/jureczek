@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/features/map/domain/pin_kind.dart';
@@ -8,6 +9,27 @@ import 'package:jureczek/features/map/domain/place_pin.dart';
 import 'package:jureczek/features/map/presentation/pin_details_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
 import 'package:jureczek/l10n/app_localizations.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class _FakeLauncher extends Fake
+    with MockPlatformInterfaceMixin
+    implements UrlLauncherPlatform {
+  _FakeLauncher({this.result = true, this.error});
+
+  final bool result;
+  final Object? error;
+  final urls = <String>[];
+  final modes = <PreferredLaunchMode>[];
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    urls.add(url);
+    modes.add(options.mode);
+    if (error != null) throw error!;
+    return result;
+  }
+}
 
 void main() {
   PlacePin pin({
@@ -174,12 +196,58 @@ void main() {
     expect(find.text('Otwórz w Google Maps'), findsOneWidget);
   });
 
-  testWidgets('bez linku źródłowego nie ma przycisku Google Maps', (
+  testWidgets('bez linku źródłowego też jest przycisk Google Maps (v19)', (
     tester,
   ) async {
     await pumpSheet(tester, pin: pin());
 
-    expect(find.text('Otwórz w Google Maps'), findsNothing);
+    expect(find.text('Otwórz w Google Maps'), findsOneWidget);
+    expect(find.text('Nie udało się otworzyć Google Maps'), findsNothing);
+  });
+
+  group('otwieranie Google Maps (v19)', () {
+    final original = UrlLauncherPlatform.instance;
+    tearDown(() => UrlLauncherPlatform.instance = original);
+
+    testWidgets('otwiera link pinezki w aplikacji zewnętrznej', (tester) async {
+      final launcher = _FakeLauncher(result: true);
+      UrlLauncherPlatform.instance = launcher;
+      await pumpSheet(
+        tester,
+        pin: pin(sourceUrl: 'https://maps.app.goo.gl/abc'),
+      );
+
+      await tester.tap(find.text('Otwórz w Google Maps'));
+      await tester.pump();
+
+      expect(launcher.urls, ['https://maps.app.goo.gl/abc']);
+      expect(launcher.modes, [PreferredLaunchMode.externalApplication]);
+      expect(find.text('Nie udało się otworzyć Google Maps'), findsNothing);
+    });
+
+    testWidgets('gdy link się nie otworzy, arkusz pokazuje błąd', (
+      tester,
+    ) async {
+      UrlLauncherPlatform.instance = _FakeLauncher(result: false);
+      await pumpSheet(tester, pin: pin());
+
+      await tester.tap(find.text('Otwórz w Google Maps'));
+      await tester.pump();
+
+      expect(find.text('Nie udało się otworzyć Google Maps'), findsOneWidget);
+    });
+
+    testWidgets('wyjątek platformy też pokazuje błąd', (tester) async {
+      UrlLauncherPlatform.instance = _FakeLauncher(
+        error: PlatformException(code: 'ACTIVITY_NOT_FOUND'),
+      );
+      await pumpSheet(tester, pin: pin());
+
+      await tester.tap(find.text('Otwórz w Google Maps'));
+      await tester.pump();
+
+      expect(find.text('Nie udało się otworzyć Google Maps'), findsOneWidget);
+    });
   });
 
   testWidgets('edycja wypełnia pole adresu', (tester) async {

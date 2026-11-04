@@ -27,6 +27,7 @@ class PinsController {
     String? note,
     String? address,
     String? sourceUrl,
+    String? poiName,
     PinKind kind = PinKind.standard,
     PinColor? color,
   }) async {
@@ -42,6 +43,7 @@ class PinsController {
         note: _normalize(note),
         address: _normalize(address),
         sourceUrl: _normalize(sourceUrl),
+        poiName: _normalize(poiName),
         kind: kind,
         color: color,
       ),

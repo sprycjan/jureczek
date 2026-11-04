@@ -17,6 +17,7 @@ class PlacePin {
     this.note,
     this.address,
     this.sourceUrl,
+    this.poiName,
     this.kind = PinKind.standard,
     this.color,
   });
@@ -36,6 +37,10 @@ class PlacePin {
 
   /// Link, z którego udostępniono miejsce (np. `maps.app.goo.gl`); tylko do odczytu.
   final String? sourceUrl;
+
+  /// Oryginalna nazwa POI (v19) do wyszukania w Google Maps; nie zmienia się
+  /// razem z [name]. `null` – pinezka nie pochodzi z POI.
+  final String? poiName;
 
   /// Typ (v16): zielona „Pinezka” albo typ miejsca.
   final PinKind kind;

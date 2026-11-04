@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]].
 
 ## Miejsca / pinezki
 - [x] Trwałość: drift/SQLite za repozytorium (v2, [[ADR-005 Drift jako baza lokalna]])
@@ -21,6 +21,8 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 - [x] Biblioteka ikon 74 typów miejsc (v15, [[v15 – biblioteka ikon miejsc]])
 - [x] Typ miejsca w pinezce: wybór kategoria → typ, pinezki SVG na mapie, własny kolor dla SVG – v16, [[v16 – typy miejsc w pinezkach]]
 - [x] Filtr kategorii pinezek na mapie – v18, [[v18 – filtr kategorii pinezek]]
+- [x] Odnośnik do Google Maps przy każdej pinezce – v19, [[v19 – odnośnik do Google Maps]]
+- [ ] Wybór podpowiedzi czasem zamyka listę bez wyniku; dwa razy w sesji `--no-resident`, po powrocie przez `am start`. Przy powtórce sprawdzić logi – [[v19 – odnośnik do Google Maps]]
 - [ ] Etykiety z nazwą na mapie (`textField`; przy edycji nazwy `manager.update`)
 
 ## Mapa

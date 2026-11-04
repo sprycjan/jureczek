@@ -526,6 +526,12 @@ abstract class AppLocalizations {
   /// **'Otwórz w Google Maps'**
   String get pinOpenInGoogleMaps;
 
+  /// No description provided for @pinOpenInMapsError.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się otworzyć Google Maps'**
+  String get pinOpenInMapsError;
+
   /// No description provided for @pinNewTitle.
   ///
   /// In pl, this message translates to:

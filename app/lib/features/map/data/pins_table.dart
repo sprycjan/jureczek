@@ -26,6 +26,10 @@ class Pins extends Table {
   /// Dodane w schemacie 6 (v14): klucz [PinColor]; `null` – kolor kategorii.
   TextColumn get color => text().nullable()();
 
+  /// Dodane w schemacie 8 (v19): oryginalna nazwa POI do wyszukania w Google
+  /// Maps, niezależna od [name]; `null` – pinezka nie pochodzi z POI.
+  TextColumn get poiName => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

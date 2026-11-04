@@ -239,5 +239,59 @@ void main() {
     expect(pins['r']?.kind, const PinKind(PlaceType.practicalOther));
     expect(pins['s']?.kind, PinKind.standard);
     expect(pins['s']?.color, PinColor.red);
+    expect(pins['s']?.poiName, isNull);
+  });
+
+  test('aktualizacja ze schematu 7 dodaje pustą nazwę POI (v19)', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute('''
+            CREATE TABLE folders (
+              id TEXT NOT NULL,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              icon TEXT NOT NULL,
+              color TEXT NOT NULL,
+              created_at INTEGER NOT NULL,
+              updated_at_ms INTEGER NOT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO folders VALUES ('f1', 'Kraków', NULL, 'camper', 'emerald', 1792886400, 1792886400000)",
+          );
+          raw.execute('''
+            CREATE TABLE pins (
+              id TEXT NOT NULL,
+              lat REAL NOT NULL,
+              lng REAL NOT NULL,
+              created_at INTEGER NOT NULL,
+              name TEXT NULL,
+              note TEXT NULL,
+              address TEXT NULL,
+              source_url TEXT NULL,
+              category TEXT NOT NULL DEFAULT 'standard',
+              folder_id TEXT NOT NULL,
+              color TEXT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO pins VALUES ('a', 50.06, 19.94, 1792886400, 'Wawel', NULL, NULL, "
+            "'https://maps.app.goo.gl/abc', 'castle', 'f1', 'red')",
+          );
+          raw.execute('PRAGMA user_version = 7');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final pin = await PinsRepository(db).findById('a');
+    expect(pin?.name, 'Wawel');
+    expect(pin?.sourceUrl, 'https://maps.app.goo.gl/abc');
+    expect(pin?.kind, const PinKind(PlaceType.castle));
+    expect(pin?.color, PinColor.red);
+    expect(pin?.poiName, isNull);
   });
 }

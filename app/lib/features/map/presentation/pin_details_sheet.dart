@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../folders/presentation/folder_picker.dart';
+import '../domain/google_maps_link.dart';
 import '../domain/pin_kind.dart';
 import '../domain/pin_color.dart';
 import '../domain/place_pin.dart';
@@ -50,6 +52,7 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
   bool _editing = false;
   bool _saving = false;
   bool _saveFailed = false;
+  bool _openFailed = false;
 
   final _nameController = TextEditingController();
   final _noteController = TextEditingController();
@@ -102,12 +105,19 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     });
   }
 
-  Future<void> _openSource(String url) async {
-    final opened = await launchUrl(
-      Uri.parse(url),
-      mode: LaunchMode.externalApplication,
-    );
-    if (!opened) debugPrint('Nie udało się otworzyć linku źródłowego');
+  /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
+  Future<void> _openInGoogleMaps() async {
+    setState(() => _openFailed = false);
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        googleMapsUri(widget.pin),
+        mode: LaunchMode.externalApplication,
+      );
+    } on PlatformException catch (e) {
+      debugPrint('Nie udało się otworzyć Google Maps: ${e.code}');
+    }
+    if (!opened && mounted) setState(() => _openFailed = true);
   }
 
   static String? _nonEmpty(String text) {
@@ -137,7 +147,6 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
     final theme = Theme.of(context);
     final pin = widget.pin;
     final date = DateFormat.yMMMd('pl').format(pin.createdAt);
-    final sourceUrl = pin.sourceUrl;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -184,15 +193,18 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
         ),
         const SizedBox(height: 4),
         Text(l10n.pinAddedOn(date), style: theme.textTheme.bodyMedium),
-        if (sourceUrl != null) ...[
-          const SizedBox(height: 8),
-          TextButton.icon(
-            style: TextButton.styleFrom(padding: EdgeInsets.zero),
-            onPressed: () => _openSource(sourceUrl),
-            icon: const Icon(Icons.open_in_new),
-            label: Text(l10n.pinOpenInGoogleMaps),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+          onPressed: _openInGoogleMaps,
+          icon: const Icon(Icons.open_in_new),
+          label: Text(l10n.pinOpenInGoogleMaps),
+        ),
+        if (_openFailed)
+          Text(
+            l10n.pinOpenInMapsError,
+            style: TextStyle(color: theme.colorScheme.error),
           ),
-        ],
         const SizedBox(height: 24),
         Row(
           children: [

@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../folders/application/folders_providers.dart';
 import '../../folders/presentation/folder_badge.dart';
 import '../../share/application/shared_place_controller.dart';
+import '../../share/data/geocoding_client.dart';
 import '../application/place_search_controller.dart';
 import '../application/pins_providers.dart';
 import '../domain/duplicate_pin.dart';
@@ -963,6 +964,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (result != null) await _showResult(result, fly: false);
   }
 
+  /// Adres w punkcie; błąd lub przekroczony czas to `null`, a zapis nie jest blokowany.
+  Future<String?> _lookupAddress(LatLng point) async {
+    try {
+      final found = await ref
+          .read(geocodingClientProvider)
+          .reverse(point)
+          .timeout(const Duration(seconds: 3));
+      return found?.fullAddress;
+    } catch (e) {
+      debugPrint('Pobranie adresu POI nie powiodło się: $e');
+      return null;
+    }
+  }
+
   /// Formularz z danymi wyniku; pinezka powstaje dopiero po „Zapisz”
   /// i spada, gdy arkusz się zamknie.
   Future<void> _addResultPin(PlaceResult result) async {
@@ -971,6 +986,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     String? addedId;
     var kind = PinKind.standard;
     PinColor? color;
+    // Tylko POI z mapy nie ma adresu; zapisany z pinezką nie jest pobierany ponownie.
+    final addressLookup = result.poiName != null && result.address == null
+        ? _lookupAddress((lat: result.lat, lng: result.lng))
+        : null;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -979,6 +998,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       builder: (sheetContext) => NewPinSheet(
         place: result,
         chooseFolder: widget.folderId == null,
+        addressLookup: addressLookup,
         onSave: (details) async {
           kind = details.kind;
           color = details.color;
@@ -997,6 +1017,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   address: details.address,
                   note: details.note,
                   sourceUrl: result.sourceUrl,
+                  poiName: result.poiName,
                   kind: details.kind,
                   color: details.color,
                 );

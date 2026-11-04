@@ -16,6 +16,7 @@ PlaceResult? placeFromPoi({
   if (lng is! num || lat is! num) return null;
   return PlaceResult(
     name: name,
+    poiName: name,
     lat: lat.toDouble(),
     lng: lng.toDouble(),
     suggestedType: placeTypeFromMaki(maki),

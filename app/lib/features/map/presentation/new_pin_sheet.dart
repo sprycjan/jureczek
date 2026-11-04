@@ -18,10 +18,15 @@ class NewPinSheet extends StatefulWidget {
     required this.place,
     required this.onSave,
     this.chooseFolder = false,
+    this.addressLookup,
   });
 
   final PlaceResult place;
   final SavePinDetails onSave;
+
+  /// Adres POI pobierany w tle (v19); trafia do pustego pola, a „Zapisz” na niego
+  /// czeka, żeby zapisał się z pinezką. Nie może kończyć się błędem.
+  final Future<String?>? addressLookup;
 
   /// Wybór folderu – poza trybem folderu na mapie (v10).
   final bool chooseFolder;
@@ -43,6 +48,16 @@ class _NewPinSheetState extends State<NewPinSheet> {
   bool _saveFailed = false;
 
   @override
+  void initState() {
+    super.initState();
+    widget.addressLookup?.then((address) {
+      if (mounted && address != null && _address.text.trim().isEmpty) {
+        _address.text = address;
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _name.dispose();
     _address.dispose();
@@ -52,6 +67,8 @@ class _NewPinSheetState extends State<NewPinSheet> {
 
   Future<void> _save() async {
     setState(() => _saving = true);
+    await widget.addressLookup;
+    if (!mounted) return;
     final ok = await widget.onSave((
       name: _name.text,
       address: _address.text,

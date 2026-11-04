@@ -177,6 +177,31 @@ void main() {
       },
     );
 
+    test('nazwę POI zapisuje tylko dla podpowiedzi typu poi (v19)', () async {
+      const body = {
+        'features': [
+          {
+            'geometry': {
+              'coordinates': [19.9354, 50.0541],
+            },
+          },
+        ],
+      };
+      Future<String?> poiNameOf(String? featureType) async =>
+          (await client(200, body).retrieve(
+            PlaceSuggestion(
+              mapboxId: 'x',
+              name: 'Wawel',
+              featureType: featureType,
+            ),
+            sessionToken: 's',
+          )).poiName;
+
+      expect(await poiNameOf('poi'), 'Wawel');
+      expect(await poiNameOf('address'), isNull);
+      expect(await poiNameOf(null), isNull);
+    });
+
     test('suggest czyta maki podpowiedzi', () async {
       final suggestions = await client(200, {
         'suggestions': [

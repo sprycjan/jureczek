@@ -79,6 +79,7 @@
   "searchResultClose": "Zamknij",
   "pinAddressLabel": "Adres",
   "pinOpenInGoogleMaps": "Otwórz w Google Maps",
+  "pinOpenInMapsError": "Nie udało się otworzyć Google Maps",
   "pinNewTitle": "Nowa pinezka",
   "pinDuplicate": "Ta pinezka już jest",
   "shareLoading": "Odczytuję miejsce…",

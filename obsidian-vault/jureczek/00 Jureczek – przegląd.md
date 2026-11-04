@@ -20,6 +20,7 @@ tags: [jureczek, przeglad]
 - Kolor pinezki: warstwy z `render_pins.py` barwione w aplikacji – [[ADR-010 Kolor pinezki z warstw]]
 - Ikony 74 typów miejsc: SVG z `tool/place_icons.py`, `flutter_svg`, cień malowany we Flutterze – [[ADR-011 Biblioteka ikon miejsc w SVG]]
 - Typ pinezki = typ miejsca (81 z „inne”) albo zielona bez typu, w kolumnie `category` – [[ADR-012 Typ miejsca jako typ pinezki]]
+- Odnośnik do Google Maps: link Google → nazwa POI z adresem → współrzędne, bez płatnego `place_id` – [[ADR-013 Odnośnik do Google Maps bez place_id]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -42,7 +43,8 @@ tags: [jureczek, przeglad]
 | v16 | Typy miejsc w pinezkach: wybór kategoria → typ, pinezki SVG na mapie, podpowiedź typu z `maki`, migracja v9 → „inne” (schemat 7) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v16 – typy miejsc w pinezkach]] |
 | v17 | Krótszy formularz pinezki: select boxy kategorii, typu i folderu, kolory w jednej linii ze strzałkami, gęstsze pola, edycja bez autofocusu | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v17 – krótszy formularz pinezki]] |
 | v18 | Filtr kategorii pinezek na mapie: przycisk z lejkiem, panel z liczbami, działa od razu; grupowa synchronizacja pinezek | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v18 – filtr kategorii pinezek]] |
-| v19+ | Patrz [[Backlog]] | — |
+| v19 | Odnośnik do Google Maps przy każdej pinezce: link Google, POI po nazwie z adresem albo współrzędne; adres POI z mapy zapisany przy dodaniu (schemat 8) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v19 – odnośnik do Google Maps]] |
+| v20+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

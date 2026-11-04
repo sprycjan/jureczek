@@ -72,6 +72,7 @@ class PlaceSearchClient {
     return PlaceResult(
       name: suggestion.name,
       address: suggestion.address,
+      poiName: suggestion.featureType == 'poi' ? suggestion.name : null,
       lng: (coordinates[0] as num).toDouble(),
       lat: (coordinates[1] as num).toDouble(),
       suggestedType:

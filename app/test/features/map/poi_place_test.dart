@@ -14,6 +14,7 @@ void main() {
     );
 
     expect(place?.name, 'Miradouro do Pico da Caldeira');
+    expect(place?.poiName, 'Miradouro do Pico da Caldeira');
     expect(place?.lat, 32.8065);
     expect(place?.lng, -16.8833);
     expect(place?.approximate, isFalse);
@@ -28,6 +29,7 @@ void main() {
     );
 
     expect(place?.name, isNull);
+    expect(place?.poiName, isNull);
     expect(place?.lat, 52.0);
     expect(place?.lng, 19.0);
   });

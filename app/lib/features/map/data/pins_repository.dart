@@ -40,6 +40,7 @@ class PinsRepository {
               note: Value(pin.note),
               address: Value(pin.address),
               sourceUrl: Value(pin.sourceUrl),
+              poiName: Value(pin.poiName),
               category: Value(pin.kind.key),
               color: Value(pin.color?.key),
               folderId: pin.folderId,
@@ -103,6 +104,7 @@ class PinsRepository {
     note: row.note,
     address: row.address,
     sourceUrl: row.sourceUrl,
+    poiName: row.poiName,
     kind: PinKind.fromKey(row.category),
     color: PinColor.fromKey(row.color),
   );

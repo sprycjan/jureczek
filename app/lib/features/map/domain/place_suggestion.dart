@@ -39,6 +39,7 @@ class PlaceResult {
     required this.lng,
     this.address,
     this.sourceUrl,
+    this.poiName,
     this.approximate = false,
     this.suggestedType,
   });
@@ -51,6 +52,9 @@ class PlaceResult {
 
   /// Link, z którego udostępniono miejsce.
   final String? sourceUrl;
+
+  /// Nazwa POI z mapy lub wyszukiwarki; `null`, gdy to nie POI (v19).
+  final String? poiName;
 
   /// Położenie wyznaczone geokodowaniem nazwy lub adresu – może być obok.
   final bool approximate;
@@ -65,6 +69,7 @@ class PlaceResult {
     lng: point.lng,
     address: address,
     sourceUrl: sourceUrl,
+    poiName: poiName,
     suggestedType: suggestedType,
   );
 }

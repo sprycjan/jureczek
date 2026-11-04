@@ -112,6 +112,25 @@ void main() {
     expect(pin.sourceUrl, 'https://maps.app.goo.gl/abc');
   });
 
+  test('nazwa POI zostaje po edycji i po cofnięciu usunięcia (v19)', () async {
+    final id = await controller().add(
+      folderId: 'f',
+      lat: 50.06,
+      lng: 19.94,
+      name: 'Café Camelot',
+      poiName: ' Café Camelot ',
+    );
+    expect((await pins()).single.poiName, 'Café Camelot');
+
+    await controller().updateDetails(id, name: 'Obiad, dzień 2');
+    expect((await pins()).single.name, 'Obiad, dzień 2');
+    expect((await pins()).single.poiName, 'Café Camelot');
+
+    final removed = await controller().remove(id);
+    await controller().restore(removed!);
+    expect((await pins()).single.poiName, 'Café Camelot');
+  });
+
   test('kolejne pinezki mają unikalne id', () async {
     await controller().add(folderId: 'f', lat: 52.23, lng: 21.01);
     await controller().add(folderId: 'f', lat: 54.35, lng: 18.65);

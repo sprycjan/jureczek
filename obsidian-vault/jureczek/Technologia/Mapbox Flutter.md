@@ -94,6 +94,7 @@ Plugin `mapbox_maps_flutter` **nie ma wyszukiwarki**, więc wołamy REST **Searc
 - `GET /retrieve/{mapbox_id}?session_token` zwraca GeoJSON `FeatureCollection` z `geometry.coordinates = [lng, lat]`.
 - Rozliczenie idzie za **sesję**: to samo `session_token` (UUID) w `suggest…` i `retrieve`. Sesja kończy się na `retrieve`, po 180 s bez niego albo po 50 zapytaniach `suggest`. Darmowe jest 500 sesji miesięcznie.
 - Geocoding v6 (`/search/geocode/v6/forward`) jest tańszy (100 tys. zapytań miesięcznie gratis), ale **nie zwraca POI**.
+- Geocoding v6 `reverse` z `types=address` daje najbliższy adres. Od v19 uzupełnia POI z mapy, który sam adresu nie ma – [[ADR-013 Odnośnik do Google Maps bez place_id]].
 - Tymczasowy znacznik wyniku to `CircleAnnotationManager` utworzony po managerze pinezek, więc leży nad nimi. `circleColor`/`circleStrokeColor` to `int` (`Colors.blue.toARGB32()`).
 - Przelot: `map.flyTo(CameraOptions(center: point, zoom: 15), MapAnimationOptions(duration: 1500))`. Działa obok `viewport:` w `MapWidget`, bo stała `_polandViewport` się nie zmienia i nie jest stosowana ponownie.
 - Środek mapy do `proximity`: `(await map.getCameraState()).center.coordinates`.

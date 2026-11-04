@@ -230,6 +230,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get pinOpenInGoogleMaps => 'Otwórz w Google Maps';
 
   @override
+  String get pinOpenInMapsError => 'Nie udało się otworzyć Google Maps';
+
+  @override
   String get pinNewTitle => 'Nowa pinezka';
 
   @override
