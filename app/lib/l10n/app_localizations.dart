@@ -988,6 +988,66 @@ abstract class AppLocalizations {
   /// **'Utwórz pierwszy folder'**
   String get homeEmptyAction;
 
+  /// No description provided for @homeNoCurrentTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie masz bieżących podróży'**
+  String get homeNoCurrentTitle;
+
+  /// No description provided for @homeTabTrips.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podróże'**
+  String get homeTabTrips;
+
+  /// No description provided for @homeTabArchive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Archiwum'**
+  String get homeTabArchive;
+
+  /// No description provided for @archiveTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Archiwum podróży'**
+  String get archiveTitle;
+
+  /// No description provided for @archiveEmpty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nic tu jeszcze nie ma'**
+  String get archiveEmpty;
+
+  /// No description provided for @folderArchive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Archiwizuj'**
+  String get folderArchive;
+
+  /// No description provided for @folderRestore.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przywróć'**
+  String get folderRestore;
+
+  /// No description provided for @folderArchived.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przeniesiono do archiwum'**
+  String get folderArchived;
+
+  /// No description provided for @folderRestored.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przywrócono z archiwum'**
+  String get folderRestored;
+
+  /// No description provided for @mapArchivedNoPins.
+  ///
+  /// In pl, this message translates to:
+  /// **'W archiwum nie można dodawać pinezek'**
+  String get mapArchivedNoPins;
+
   /// No description provided for @mapAllPins.
   ///
   /// In pl, this message translates to:

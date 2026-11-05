@@ -25,7 +25,9 @@ class FolderPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final folders = ref.watch(foldersProvider).value ?? const <TripFolder>[];
+    // Bez archiwum: pinezka zapisana w zarchiwizowanym folderze zniknęłaby z mapy.
+    final folders =
+        ref.watch(activeFoldersProvider).value ?? const <TripFolder>[];
     final defaultFolder = folders
         .where((f) => f.name == TripFolder.defaultName)
         .firstOrNull;

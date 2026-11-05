@@ -357,4 +357,67 @@ void main() {
     expect(a?.name, isNull);
     expect(a?.note, isNull);
   });
+
+  group('watchActive (v23)', () {
+    Future<void> folder(String id) => db
+        .into(db.folders)
+        .insert(
+          FoldersCompanion.insert(
+            id: id,
+            name: id,
+            icon: FolderIcon.camper.key,
+            color: FolderColor.emerald.key,
+            createdAt: DateTime(2026, 1, 1),
+            updatedAtMs: 1,
+          ),
+        );
+
+    test('pomija pinezki z archiwum, watchAll zostawia wszystkie', () async {
+      final folders = FoldersRepository(db);
+      await folder('f');
+      await folder('g');
+      await repository.insert(
+        PlacePin(
+          id: 'b',
+          folderId: 'g',
+          lat: 1,
+          lng: 2,
+          createdAt: DateTime(2026, 10, 26),
+        ),
+      );
+      await repository.insert(pin('a', DateTime(2026, 10, 25)));
+      await folders.setArchiveState(
+        'g',
+        archivedAt: DateTime(2026, 11, 1),
+        updatedAt: DateTime(2026, 11, 1),
+      );
+
+      expect((await repository.watchActive().first).map((p) => p.id), ['a']);
+      expect((await repository.watchAll().first).map((p) => p.id), ['a', 'b']);
+    });
+
+    test('emituje po samej zmianie stanu folderu', () async {
+      final folders = FoldersRepository(db);
+      await folder('f');
+      await repository.insert(pin('a', DateTime(2026, 10, 25)));
+
+      final done = expectLater(
+        repository.watchActive().map((pins) => pins.length),
+        emitsInOrder([1, 0, 1]),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await folders.setArchiveState(
+        'f',
+        archivedAt: DateTime(2026, 11, 1),
+        updatedAt: DateTime(2026, 11, 1),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await folders.setArchiveState(
+        'f',
+        archivedAt: null,
+        updatedAt: DateTime(2026, 11, 2),
+      );
+      await done;
+    });
+  });
 }

@@ -63,6 +63,7 @@ class TripFolder {
     this.icon = FolderIcon.camper,
     this.color = FolderColor.emerald,
     this.pinCount = 0,
+    this.archivedAt,
   });
 
   final String id;
@@ -77,6 +78,11 @@ class TripFolder {
 
   /// Liczba pinezek w folderze (tylko do odczytu, z zapytania listy).
   final int pinCount;
+
+  /// Chwila archiwizacji (v23); `null` to folder bieżący.
+  final DateTime? archivedAt;
+
+  bool get isArchived => archivedAt != null;
 
   static const maxNameLength = 45;
   static const maxDescriptionLength = 120;

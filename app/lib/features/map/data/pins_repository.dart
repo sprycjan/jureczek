@@ -19,6 +19,21 @@ class PinsRepository {
     return query.watch().map((rows) => rows.map(_toDomain).toList());
   }
 
+  /// Pinezki bez tych z folderów w archiwum (v23); emituje także po zmianie folderu.
+  Stream<List<PlacePin>> watchActive() {
+    return _db
+        .customSelect(
+          'SELECT * FROM pins WHERE folder_id NOT IN '
+          '(SELECT id FROM folders WHERE archived_at_ms IS NOT NULL) '
+          'ORDER BY created_at ASC',
+          readsFrom: {_db.pins, _db.folders},
+        )
+        .watch()
+        .map(
+          (rows) => [for (final row in rows) _toDomain(_db.pins.map(row.data))],
+        );
+  }
+
   Future<PlacePin?> findById(String id) async {
     final query = _db.select(_db.pins)..where((t) => t.id.equals(id));
     final row = await query.getSingleOrNull();

@@ -11,6 +11,11 @@ final pinsProvider = StreamProvider<List<PlacePin>>(
   (ref) => ref.watch(pinsRepositoryProvider).watchAll(),
 );
 
+/// Pinezki bez zarchiwizowanych folderów – mapa wszystkich pinezek (v23).
+final activePinsProvider = StreamProvider<List<PlacePin>>(
+  (ref) => ref.watch(pinsRepositoryProvider).watchActive(),
+);
+
 /// Akcje na pinezkach. Zmiany wracają do UI przez [pinsProvider].
 class PinsController {
   PinsController(this._repository);

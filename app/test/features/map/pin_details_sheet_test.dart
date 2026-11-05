@@ -68,6 +68,7 @@ void main() {
     Future<bool> Function(bool visited)? onSetVisited,
     Future<bool> Function(bool starred)? onSetStarred,
     String? notice,
+    bool readOnly = false,
   }) {
     // Wysoki ekran (jak P30, 360×780 dp, z zapasem) – arkusz z wyborem koloru (v14)
     // nie mieści się w domyślnym 800×600 px.
@@ -90,11 +91,49 @@ void main() {
             onSave: onSave ?? (_) async => true,
             onSetVisited: onSetVisited ?? (_) async => true,
             onSetStarred: onSetStarred ?? (_) async => true,
+            readOnly: readOnly,
           ),
         ),
       ),
     );
   }
+
+  group('tylko do podglądu (v23)', () {
+    testWidgets('bez edycji i usuwania, z linkiem do Google Maps', (
+      tester,
+    ) async {
+      await pumpSheet(tester, pin: pin(name: 'Wawel'), readOnly: true);
+
+      expect(find.text('Wawel'), findsOneWidget);
+      expect(find.text('Edytuj'), findsNothing);
+      expect(find.text('Usuń'), findsNothing);
+      expect(find.byIcon(Icons.open_in_new), findsOneWidget);
+    });
+
+    testWidgets('gwiazdka i kciuk tylko przy ustawionym stanie, nieklikalne', (
+      tester,
+    ) async {
+      await pumpSheet(
+        tester,
+        pin: pin(starred: true, visitedAt: DateTime(2026, 10, 26)),
+        readOnly: true,
+      );
+
+      expect(find.byIcon(Icons.star), findsOneWidget);
+      expect(find.byIcon(Icons.thumb_up), findsOneWidget);
+      expect(find.byType(PinStarButton), findsNothing);
+      expect(find.byKey(const ValueKey('pin-visited-button')), findsNothing);
+    });
+
+    testWidgets('bez gwiazdki i odwiedzenia nie pokazuje ikon', (tester) async {
+      await pumpSheet(tester, pin: pin(), readOnly: true);
+
+      expect(find.byIcon(Icons.star), findsNothing);
+      expect(find.byIcon(Icons.star_border), findsNothing);
+      expect(find.byIcon(Icons.thumb_up), findsNothing);
+      expect(find.byIcon(Icons.thumb_up_outlined), findsNothing);
+    });
+  });
 
   testWidgets('pokazuje współrzędne i datę dodania', (tester) async {
     await pumpSheet(tester, pin: pin());

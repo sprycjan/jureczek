@@ -22,6 +22,7 @@ tags: [jureczek, przeglad]
 - Typ pinezki = typ miejsca (81 z „inne”) albo zielona bez typu, w kolumnie `category` – [[ADR-012 Typ miejsca jako typ pinezki]]
 - Odnośnik do Google Maps: link Google → nazwa POI z adresem → współrzędne, bez płatnego `place_id` – [[ADR-013 Odnośnik do Google Maps bez place_id]]
 - Nazwy na mapie: kafelki `pl,en`, łaciński oryginał na POI i drogach, etykiety bez łacinki ukryte – [[ADR-014 Polskie nazwy na mapie]]
+- Archiwum folderów: data w `folders.archived_at_ms`, mapa wszystkich bez archiwum, folder z archiwum tylko do podglądu – [[ADR-015 Archiwizowanie folderów]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -48,7 +49,8 @@ tags: [jureczek, przeglad]
 | v20 | Polskie nazwy na mapie: bez cyrylicy i pisma arabskiego w stylach Domyślny i Teren; w 3D tylko język kafelków | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v20 – polskie nazwy na mapie]] |
 | v21 | Pinezka odwiedzona: kciuk w arkuszu zapisuje od razu, znaczek w rogu pinezki na mapie, data oznaczenia w bazie (schemat 9) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v21 – pinezka odwiedzona]] |
 | v22 | Pinezka z gwiazdką: przełącznik w arkuszu i formularzu nowej pinezki, kolumna znaczków przy główce, pinezki z gwiazdką rysowane nad zwykłymi, włączone nakładanie (schemat 10) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v22 – pinezka z gwiazdką]] |
-| v23+ | Patrz [[Backlog]] | — |
+| v23 | Archiwum podróży: dolna belka, archiwizacja gestem i z menu z „Cofnij”, szary pejzaż, pinezki z archiwum ukryte na mapie wszystkich, folder z archiwum tylko do podglądu (schemat 11) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v23 – archiwum podróży]] |
+| v24+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt

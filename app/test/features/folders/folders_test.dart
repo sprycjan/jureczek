@@ -103,6 +103,82 @@ void main() {
     expect(all.single.name, TripFolder.defaultName);
   });
 
+  group('archiwum (v23)', () {
+    Future<TripFolder> folder(String id) async =>
+        (await list()).firstWhere((f) => f.id == id);
+
+    Future<List<String>> activeNames() async {
+      await list();
+      return [
+        for (final f in container.read(activeFoldersProvider).requireValue)
+          f.name,
+      ];
+    }
+
+    test('archiwizacja ustawia datę i nie zmienia miejsca na liście', () async {
+      final a = await folders().create(name: 'A');
+      await tick();
+      await folders().create(name: 'B');
+      final before = await folder(a);
+
+      await folders().archive(before);
+
+      final after = await folder(a);
+      expect(after.isArchived, isTrue);
+      expect(after.updatedAt, before.updatedAt);
+      expect(await activeNames(), ['B']);
+    });
+
+    test(
+      'przywrócenie idzie na górę, „Cofnij” wraca na dawne miejsce',
+      () async {
+        final a = await folders().create(name: 'A');
+        await tick();
+        await folders().create(name: 'B');
+        final original = await folder(a);
+        await folders().archive(original);
+        await tick();
+
+        final archived = await folder(a);
+        await folders().restore(archived);
+        expect((await folder(a)).isArchived, isFalse);
+        expect(await activeNames(), ['A', 'B']);
+
+        await folders().undoArchiveChange(archived);
+        expect((await folder(a)).archivedAt, archived.archivedAt);
+        expect((await folder(a)).updatedAt, original.updatedAt);
+
+        await folders().undoArchiveChange(original);
+        expect(await activeNames(), ['B', 'A']);
+      },
+    );
+
+    test('edycja nie zdejmuje archiwum', () async {
+      final a = await folders().create(name: 'A');
+      await folders().archive(await folder(a));
+
+      await folders().update(
+        await folder(a),
+        name: 'A2',
+        icon: FolderIcon.ski,
+        color: FolderColor.slate,
+      );
+
+      expect((await folder(a)).isArchived, isTrue);
+    });
+
+    test('ensureDefault pomija „Pinezki” z archiwum i tworzy nowy', () async {
+      final old = await folders().ensureDefault();
+      await folders().archive(await folder(old));
+
+      final fresh = await folders().ensureDefault();
+
+      expect(fresh, isNot(old));
+      expect(await folders().ensureDefault(), fresh);
+      expect(await activeNames(), [TripFolder.defaultName]);
+    });
+  });
+
   test('klucze ikon i kolorów: unikalne, nieznany → domyślny', () {
     expect(FolderIcon.values.map((v) => v.key).toSet(), hasLength(15));
     expect(FolderColor.values.map((v) => v.key).toSet(), hasLength(9));

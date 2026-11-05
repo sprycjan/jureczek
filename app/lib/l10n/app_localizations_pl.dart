@@ -476,6 +476,36 @@ class AppLocalizationsPl extends AppLocalizations {
   String get homeEmptyAction => 'Utwórz pierwszy folder';
 
   @override
+  String get homeNoCurrentTitle => 'Nie masz bieżących podróży';
+
+  @override
+  String get homeTabTrips => 'Podróże';
+
+  @override
+  String get homeTabArchive => 'Archiwum';
+
+  @override
+  String get archiveTitle => 'Archiwum podróży';
+
+  @override
+  String get archiveEmpty => 'Nic tu jeszcze nie ma';
+
+  @override
+  String get folderArchive => 'Archiwizuj';
+
+  @override
+  String get folderRestore => 'Przywróć';
+
+  @override
+  String get folderArchived => 'Przeniesiono do archiwum';
+
+  @override
+  String get folderRestored => 'Przywrócono z archiwum';
+
+  @override
+  String get mapArchivedNoPins => 'W archiwum nie można dodawać pinezek';
+
+  @override
   String get mapAllPins => 'Wszystkie pinezki';
 
   @override

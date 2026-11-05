@@ -892,6 +892,17 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, FolderRow> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _archivedAtMsMeta = const VerificationMeta(
+    'archivedAtMs',
+  );
+  @override
+  late final GeneratedColumn<int> archivedAtMs = GeneratedColumn<int>(
+    'archived_at_ms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -901,6 +912,7 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, FolderRow> {
     color,
     createdAt,
     updatedAtMs,
+    archivedAtMs,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -971,6 +983,15 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, FolderRow> {
     } else if (isInserting) {
       context.missing(_updatedAtMsMeta);
     }
+    if (data.containsKey('archived_at_ms')) {
+      context.handle(
+        _archivedAtMsMeta,
+        archivedAtMs.isAcceptableOrUnknown(
+          data['archived_at_ms']!,
+          _archivedAtMsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1008,6 +1029,10 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, FolderRow> {
         DriftSqlType.int,
         data['${effectivePrefix}updated_at_ms'],
       )!,
+      archivedAtMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}archived_at_ms'],
+      ),
     );
   }
 
@@ -1031,6 +1056,10 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
   /// Milisekundy epoki, bo `dateTime()` w drifcie ma dokładność do sekundy
   /// i szybkie zmiany dawałyby remis.
   final int updatedAtMs;
+
+  /// Chwila archiwizacji (v23, schemat 11), milisekundy epoki; `null` to folder
+  /// bieżący. Kolejność w archiwum: od ostatnio zarchiwizowanego.
+  final int? archivedAtMs;
   const FolderRow({
     required this.id,
     required this.name,
@@ -1039,6 +1068,7 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
     required this.color,
     required this.createdAt,
     required this.updatedAtMs,
+    this.archivedAtMs,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1052,6 +1082,9 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
     map['color'] = Variable<String>(color);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at_ms'] = Variable<int>(updatedAtMs);
+    if (!nullToAbsent || archivedAtMs != null) {
+      map['archived_at_ms'] = Variable<int>(archivedAtMs);
+    }
     return map;
   }
 
@@ -1066,6 +1099,9 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
       color: Value(color),
       createdAt: Value(createdAt),
       updatedAtMs: Value(updatedAtMs),
+      archivedAtMs: archivedAtMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(archivedAtMs),
     );
   }
 
@@ -1082,6 +1118,7 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
       color: serializer.fromJson<String>(json['color']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAtMs: serializer.fromJson<int>(json['updatedAtMs']),
+      archivedAtMs: serializer.fromJson<int?>(json['archivedAtMs']),
     );
   }
   @override
@@ -1095,6 +1132,7 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
       'color': serializer.toJson<String>(color),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAtMs': serializer.toJson<int>(updatedAtMs),
+      'archivedAtMs': serializer.toJson<int?>(archivedAtMs),
     };
   }
 
@@ -1106,6 +1144,7 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
     String? color,
     DateTime? createdAt,
     int? updatedAtMs,
+    Value<int?> archivedAtMs = const Value.absent(),
   }) => FolderRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1114,6 +1153,7 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
     color: color ?? this.color,
     createdAt: createdAt ?? this.createdAt,
     updatedAtMs: updatedAtMs ?? this.updatedAtMs,
+    archivedAtMs: archivedAtMs.present ? archivedAtMs.value : this.archivedAtMs,
   );
   FolderRow copyWithCompanion(FoldersCompanion data) {
     return FolderRow(
@@ -1128,6 +1168,9 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
       updatedAtMs: data.updatedAtMs.present
           ? data.updatedAtMs.value
           : this.updatedAtMs,
+      archivedAtMs: data.archivedAtMs.present
+          ? data.archivedAtMs.value
+          : this.archivedAtMs,
     );
   }
 
@@ -1140,14 +1183,23 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
           ..write('icon: $icon, ')
           ..write('color: $color, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAtMs: $updatedAtMs')
+          ..write('updatedAtMs: $updatedAtMs, ')
+          ..write('archivedAtMs: $archivedAtMs')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, description, icon, color, createdAt, updatedAtMs);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    description,
+    icon,
+    color,
+    createdAt,
+    updatedAtMs,
+    archivedAtMs,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1158,7 +1210,8 @@ class FolderRow extends DataClass implements Insertable<FolderRow> {
           other.icon == this.icon &&
           other.color == this.color &&
           other.createdAt == this.createdAt &&
-          other.updatedAtMs == this.updatedAtMs);
+          other.updatedAtMs == this.updatedAtMs &&
+          other.archivedAtMs == this.archivedAtMs);
 }
 
 class FoldersCompanion extends UpdateCompanion<FolderRow> {
@@ -1169,6 +1222,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
   final Value<String> color;
   final Value<DateTime> createdAt;
   final Value<int> updatedAtMs;
+  final Value<int?> archivedAtMs;
   final Value<int> rowid;
   const FoldersCompanion({
     this.id = const Value.absent(),
@@ -1178,6 +1232,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
     this.color = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAtMs = const Value.absent(),
+    this.archivedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FoldersCompanion.insert({
@@ -1188,6 +1243,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
     required String color,
     required DateTime createdAt,
     required int updatedAtMs,
+    this.archivedAtMs = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -1203,6 +1259,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
     Expression<String>? color,
     Expression<DateTime>? createdAt,
     Expression<int>? updatedAtMs,
+    Expression<int>? archivedAtMs,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1213,6 +1270,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
       if (color != null) 'color': color,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAtMs != null) 'updated_at_ms': updatedAtMs,
+      if (archivedAtMs != null) 'archived_at_ms': archivedAtMs,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1225,6 +1283,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
     Value<String>? color,
     Value<DateTime>? createdAt,
     Value<int>? updatedAtMs,
+    Value<int?>? archivedAtMs,
     Value<int>? rowid,
   }) {
     return FoldersCompanion(
@@ -1235,6 +1294,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
       color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
       updatedAtMs: updatedAtMs ?? this.updatedAtMs,
+      archivedAtMs: archivedAtMs ?? this.archivedAtMs,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1263,6 +1323,9 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
     if (updatedAtMs.present) {
       map['updated_at_ms'] = Variable<int>(updatedAtMs.value);
     }
+    if (archivedAtMs.present) {
+      map['archived_at_ms'] = Variable<int>(archivedAtMs.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1279,6 +1342,7 @@ class FoldersCompanion extends UpdateCompanion<FolderRow> {
           ..write('color: $color, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAtMs: $updatedAtMs, ')
+          ..write('archivedAtMs: $archivedAtMs, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1671,6 +1735,7 @@ typedef $$FoldersTableCreateCompanionBuilder =
       required String color,
       required DateTime createdAt,
       required int updatedAtMs,
+      Value<int?> archivedAtMs,
       Value<int> rowid,
     });
 typedef $$FoldersTableUpdateCompanionBuilder =
@@ -1682,6 +1747,7 @@ typedef $$FoldersTableUpdateCompanionBuilder =
       Value<String> color,
       Value<DateTime> createdAt,
       Value<int> updatedAtMs,
+      Value<int?> archivedAtMs,
       Value<int> rowid,
     });
 
@@ -1726,6 +1792,11 @@ class $$FoldersTableFilterComposer
 
   ColumnFilters<int> get updatedAtMs => $composableBuilder(
     column: $table.updatedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get archivedAtMs => $composableBuilder(
+    column: $table.archivedAtMs,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1773,6 +1844,11 @@ class $$FoldersTableOrderingComposer
     column: $table.updatedAtMs,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get archivedAtMs => $composableBuilder(
+    column: $table.archivedAtMs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FoldersTableAnnotationComposer
@@ -1806,6 +1882,11 @@ class $$FoldersTableAnnotationComposer
 
   GeneratedColumn<int> get updatedAtMs => $composableBuilder(
     column: $table.updatedAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get archivedAtMs => $composableBuilder(
+    column: $table.archivedAtMs,
     builder: (column) => column,
   );
 }
@@ -1845,6 +1926,7 @@ class $$FoldersTableTableManager
                 Value<String> color = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> updatedAtMs = const Value.absent(),
+                Value<int?> archivedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FoldersCompanion(
                 id: id,
@@ -1854,6 +1936,7 @@ class $$FoldersTableTableManager
                 color: color,
                 createdAt: createdAt,
                 updatedAtMs: updatedAtMs,
+                archivedAtMs: archivedAtMs,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1865,6 +1948,7 @@ class $$FoldersTableTableManager
                 required String color,
                 required DateTime createdAt,
                 required int updatedAtMs,
+                Value<int?> archivedAtMs = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FoldersCompanion.insert(
                 id: id,
@@ -1874,6 +1958,7 @@ class $$FoldersTableTableManager
                 color: color,
                 createdAt: createdAt,
                 updatedAtMs: updatedAtMs,
+                archivedAtMs: archivedAtMs,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

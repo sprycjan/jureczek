@@ -25,4 +25,4 @@ Pinezki trzeba grupować według podróży albo wspólnego mianownika („Portug
 - Usuwanie folderów, daty wyjazdów czy udostępnianie folderu – osobne decyzje w przyszłości ([[Backlog]]).
 
 ## Powiązane
-[[v10 – foldery i ekran startowy]], [[ADR-005 Drift jako baza lokalna]], [[00 Jureczek – przegląd]]
+[[v10 – foldery i ekran startowy]], [[ADR-005 Drift jako baza lokalna]], [[ADR-015 Archiwizowanie folderów]], [[00 Jureczek – przegląd]]

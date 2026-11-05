@@ -106,13 +106,21 @@ const _toolsPadding = 16.0;
 const _toolSize = 48.0;
 
 class MapScreen extends ConsumerStatefulWidget {
-  const MapScreen({super.key, required this.accessToken, this.folderId});
+  const MapScreen({
+    super.key,
+    required this.accessToken,
+    this.folderId,
+    this.readOnly = false,
+  });
 
   final String accessToken;
 
   /// Tryb folderu (v10): widać tylko jego pinezki i do niego trafiają nowe.
   /// `null` – wszystkie pinezki, wybór folderu w formularzu, udostępnienia.
   final String? folderId;
+
+  /// Folder z archiwum (v23): tylko podgląd, bez dodawania i wyszukiwania.
+  final bool readOnly;
 
   @override
   ConsumerState<MapScreen> createState() => _MapScreenState();
@@ -295,7 +303,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             'Czyszczenie pinezek po zmianie stylu nie powiodło się: $e',
           );
         });
-    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
+    _scheduleSync(ref.read(_pinsSource).value ?? _modePins);
     final result = _result;
     if (result != null && !_adjusting) await _showResult(result, fly: false);
   }
@@ -409,7 +417,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _setCategoryFilter(PinCategoryFilter filter) {
     if (!mounted || identical(filter, _categoryFilter)) return;
     setState(() => _categoryFilter = filter);
-    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
+    _scheduleSync(ref.read(_pinsSource).value ?? _modePins);
   }
 
   /// Pinezka, która ma być widoczna, dołącza swoją kategorię do filtra.
@@ -424,7 +432,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   /// Bez pinezek albo z wynikiem do pokazania (udostępnienie) zostaje widok startowy.
   Future<void> _placeCamera() async {
     final map = _map;
-    final all = ref.read(pinsProvider).value;
+    final all = ref.read(_pinsSource).value;
     if (_cameraPlaced || map == null || all == null || _pinImages.isEmpty) {
       return;
     }
@@ -501,7 +509,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           geometry: poi.geometry,
           maki: poi.properties['maki'],
         );
-        if (place != null) _showResult(place, fly: false);
+        if (place != null && !widget.readOnly) _showResult(place, fly: false);
       }),
     );
     map.addInteraction(
@@ -529,7 +537,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           geometry: poi.geometry,
           maki: poi.maki,
         );
-        if (place != null) _showResult(place, fly: false);
+        if (place != null && !widget.readOnly) _showResult(place, fly: false);
       }),
     );
     map.addInteraction(
@@ -567,7 +575,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }, stopPropagation: false),
     );
 
-    _scheduleSync(ref.read(pinsProvider).value ?? const []);
+    _scheduleSync(ref.read(_pinsSource).value ?? const []);
     await _placeCamera();
 
     final pending = _pendingResult;
@@ -628,6 +636,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
     );
   }
+
+  /// Mapa wszystkich pinezek nie pokazuje archiwum, a folder zawsze swoje pinezki (v23).
+  StreamProvider<List<PlacePin>> get _pinsSource =>
+      widget.folderId == null ? activePinsProvider : pinsProvider;
 
   /// Pinezki widoczne w tym trybie mapy.
   List<PlacePin> _visible(List<PlacePin> all) {
@@ -838,6 +850,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         onSetVisited: (visited) => _setPinVisited(pin.id, visited),
         onSetStarred: (starred) => _setPinStarred(pin.id, starred),
         canMoveFolder: true,
+        readOnly: widget.readOnly,
       ),
     );
     if (_selectedPinId == pin.id) _selectPin(null);
@@ -845,7 +858,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   void _selectPin(String? id) {
     _selectedPinId = id;
-    _scheduleSync(ref.read(pinsProvider).value ?? _modePins);
+    _scheduleSync(ref.read(_pinsSource).value ?? _modePins);
   }
 
   /// Błąd pokazuje sam arkusz, bo snackbar byłby pod nim niewidoczny.
@@ -1072,6 +1085,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Future<void> _addResultPin(PlaceResult result) async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    if (widget.readOnly) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.mapArchivedNoPins)));
+      return;
+    }
     String? addedId;
     var kind = PinKind.standard;
     PinColor? color;
@@ -1195,7 +1214,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       return const MissingTokenView();
     }
 
-    ref.listen(pinsProvider, (_, next) {
+    ref.listen(_pinsSource, (_, next) {
       switch (next) {
         case AsyncData(:final value):
           _scheduleSync(value);
@@ -1291,7 +1310,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               SafeArea(
                 child: Padding(
                   padding: const EdgeInsets.all(_toolsPadding),
-                  child: _MapModeChip(folderId: widget.folderId),
+                  child: _MapModeChip(
+                    folderId: widget.folderId,
+                    archived: widget.readOnly,
+                  ),
                 ),
               ),
             SafeArea(
@@ -1329,13 +1351,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
                     MapTools(
                       children: [
-                        MapToolButton(
-                          icon: _searchOpen ? Icons.close : Icons.search,
-                          tooltip: _searchOpen
-                              ? l10n.searchClose
-                              : l10n.searchOpen,
-                          onPressed: _toggleSearch,
-                        ),
+                        if (!widget.readOnly)
+                          MapToolButton(
+                            icon: _searchOpen ? Icons.close : Icons.search,
+                            tooltip: _searchOpen
+                                ? l10n.searchClose
+                                : l10n.searchOpen,
+                            onPressed: _toggleSearch,
+                          ),
                         MapToolButton(
                           icon: _stylesOpen
                               ? Icons.close
@@ -1397,8 +1420,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   alignment: Alignment.topRight,
                   child: Padding(
                     // Obok przycisku stylów: pod lupą, na lewo od kolumny narzędzi.
-                    padding: const EdgeInsets.only(
-                      top: _toolsPadding + _toolSize + 12,
+                    padding: EdgeInsets.only(
+                      top: _toolTop(widget.readOnly ? 0 : 1),
                       right: _toolsPadding + _toolSize + 12,
                     ),
                     child: MapStylePicker(
@@ -1414,8 +1437,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   alignment: Alignment.topRight,
                   child: Padding(
                     // Obok przycisku filtra, z zapasem na dole na logo Mapbox.
-                    padding: const EdgeInsets.only(
-                      top: _toolsPadding + 2 * (_toolSize + 12),
+                    padding: EdgeInsets.only(
+                      top: _toolTop(widget.readOnly ? 1 : 2),
                       right: _toolsPadding + _toolSize + 12,
                       left: _toolsPadding,
                       bottom: 40,
@@ -1425,7 +1448,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     child: Consumer(
                       builder: (context, ref, _) => PinCategoryFilterPanel(
                         pins: _visible(
-                          ref.watch(pinsProvider).value ?? _modePins,
+                          ref.watch(_pinsSource).value ?? _modePins,
                         ),
                         filter: _categoryFilter,
                         onChanged: _setCategoryFilter,
@@ -1472,11 +1495,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 }
 
+/// Górna krawędź narzędzia [index] w kolumnie po prawej stronie mapy.
+double _toolTop(int index) => _toolsPadding + index * (_toolSize + 12);
+
 /// Lewy górny róg mapy: powrót do listy folderów i nazwa bieżącego folderu.
 class _MapModeChip extends ConsumerWidget {
-  const _MapModeChip({required this.folderId});
+  const _MapModeChip({required this.folderId, this.archived = false});
 
   final String? folderId;
+
+  /// Mapa folderu z archiwum: ikona przy nazwie (v23).
+  final bool archived;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1527,6 +1556,15 @@ class _MapModeChip extends ConsumerWidget {
                       style: theme.textTheme.titleSmall,
                     ),
                   ),
+                  if (archived) ...[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      key: const ValueKey('map-archived-icon'),
+                      size: 16,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
                 ],
               ),
             ),

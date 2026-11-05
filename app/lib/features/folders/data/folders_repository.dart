@@ -37,9 +37,10 @@ class FoldersRepository {
     return row == null ? null : _toDomain(row);
   }
 
-  Future<TripFolder?> findByName(String name) async {
+  /// Najstarszy folder bieżący o tej nazwie; archiwum nie jest przeszukiwane.
+  Future<TripFolder?> findActiveByName(String name) async {
     final query = _db.select(_db.folders)
-      ..where((t) => t.name.equals(name))
+      ..where((t) => t.name.equals(name) & t.archivedAtMs.isNull())
       ..orderBy([(t) => OrderingTerm.asc(t.createdAt)])
       ..limit(1);
     final row = await query.getSingleOrNull();
@@ -76,6 +77,20 @@ class FoldersRepository {
     );
   }
 
+  /// Zapisuje stan archiwum razem z chwilą zmiany, od której zależy kolejność listy.
+  Future<void> setArchiveState(
+    String id, {
+    required DateTime? archivedAt,
+    required DateTime updatedAt,
+  }) {
+    return (_db.update(_db.folders)..where((t) => t.id.equals(id))).write(
+      FoldersCompanion(
+        archivedAtMs: Value(archivedAt?.millisecondsSinceEpoch),
+        updatedAtMs: Value(updatedAt.millisecondsSinceEpoch),
+      ),
+    );
+  }
+
   static TripFolder _toDomain(FolderRow row, {int pinCount = 0}) => TripFolder(
     id: row.id,
     name: row.name,
@@ -85,6 +100,9 @@ class FoldersRepository {
     createdAt: row.createdAt,
     updatedAt: DateTime.fromMillisecondsSinceEpoch(row.updatedAtMs),
     pinCount: pinCount,
+    archivedAt: row.archivedAtMs == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(row.archivedAtMs!),
   );
 }
 

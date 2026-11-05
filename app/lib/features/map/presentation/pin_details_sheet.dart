@@ -25,6 +25,7 @@ class PinDetailsSheet extends StatefulWidget {
     required this.onSetStarred,
     this.notice,
     this.canMoveFolder = false,
+    this.readOnly = false,
   });
 
   final PlacePin pin;
@@ -42,6 +43,9 @@ class PinDetailsSheet extends StatefulWidget {
 
   /// W edycji można przenieść pinezkę do innego folderu (v10).
   final bool canMoveFolder;
+
+  /// Pinezka z folderu w archiwum (v23): bez edycji, usuwania i przełączników.
+  final bool readOnly;
 
   @override
   State<PinDetailsSheet> createState() => _PinDetailsSheetState();
@@ -223,23 +227,38 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
                 ),
               ),
             ),
-            PinStarButton(
-              starred: _starred,
-              onPressed: _savingStarred ? null : _toggleStarred,
-            ),
-            IconButton(
-              key: const ValueKey('pin-visited-button'),
-              visualDensity: VisualDensity.compact,
-              tooltip: _visited ? l10n.pinUnmarkVisited : l10n.pinMarkVisited,
-              onPressed: _savingVisited ? null : _toggleVisited,
-              icon: Icon(
-                _visited ? Icons.thumb_up : Icons.thumb_up_outlined,
-                size: 20,
-                color: _visited
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
+            if (widget.readOnly) ...[
+              if (_starred) ...[
+                const SizedBox(width: 8),
+                const Icon(Icons.star, size: 20, color: pinStarColor),
+              ],
+              if (_visited) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.thumb_up,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+              ],
+            ] else ...[
+              PinStarButton(
+                starred: _starred,
+                onPressed: _savingStarred ? null : _toggleStarred,
               ),
-            ),
+              IconButton(
+                key: const ValueKey('pin-visited-button'),
+                visualDensity: VisualDensity.compact,
+                tooltip: _visited ? l10n.pinUnmarkVisited : l10n.pinMarkVisited,
+                onPressed: _savingVisited ? null : _toggleVisited,
+                icon: Icon(
+                  _visited ? Icons.thumb_up : Icons.thumb_up_outlined,
+                  size: 20,
+                  color: _visited
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ],
         ),
         if (_visitedFailed || _starredFailed)
@@ -276,30 +295,32 @@ class _PinDetailsSheetState extends State<PinDetailsSheet> {
             l10n.pinOpenInMapsError,
             style: TextStyle(color: theme.colorScheme.error),
           ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _startEditing,
-                icon: const Icon(Icons.edit_outlined),
-                label: Text(l10n.pinEdit),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: theme.colorScheme.error,
-                  foregroundColor: theme.colorScheme.onError,
+        if (!widget.readOnly) ...[
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _startEditing,
+                  icon: const Icon(Icons.edit_outlined),
+                  label: Text(l10n.pinEdit),
                 ),
-                onPressed: widget.onDelete,
-                icon: const Icon(Icons.delete_outline),
-                label: Text(l10n.pinDelete),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.colorScheme.error,
+                    foregroundColor: theme.colorScheme.onError,
+                  ),
+                  onPressed: widget.onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(l10n.pinDelete),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

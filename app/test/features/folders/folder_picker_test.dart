@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/core/database/app_database.dart';
 import 'package:jureczek/features/folders/application/folders_providers.dart';
+import 'package:jureczek/features/folders/data/folders_repository.dart';
+import 'package:jureczek/features/folders/domain/trip_folder.dart';
 import 'package:jureczek/features/map/domain/place_suggestion.dart';
 import 'package:jureczek/features/map/presentation/new_pin_sheet.dart';
 import 'package:jureczek/features/map/presentation/pin_form_fields.dart';
@@ -149,6 +151,51 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byKey(const ValueKey('folder-new')), findsOneWidget);
+  });
+
+  testWidgets('folderów z archiwum nie ma na liście (v23)', (tester) async {
+    await tester.runAsync(() async {
+      final folders = container.read(foldersControllerProvider);
+      await folders.create(name: 'Bieżący');
+      final old = await folders.create(name: 'Stary');
+      await container
+          .read(foldersRepositoryProvider)
+          .setArchiveState(
+            old,
+            archivedAt: DateTime(2026, 11, 1),
+            updatedAt: DateTime(2026, 11, 1),
+          );
+    });
+    await pumpSheet(tester);
+
+    await tester.tap(find.byKey(const ValueKey('folder-field')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bieżący'), findsWidgets);
+    expect(find.text('Stary'), findsNothing);
+  });
+
+  testWidgets('„Pinezki” z archiwum nie blokuje nowego domyślnego (v23)', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final id = await container
+          .read(foldersControllerProvider)
+          .create(name: TripFolder.defaultName);
+      await container
+          .read(foldersRepositoryProvider)
+          .setArchiveState(
+            id,
+            archivedAt: DateTime(2026, 11, 1),
+            updatedAt: DateTime(2026, 11, 1),
+          );
+    });
+    await pumpSheet(tester);
+
+    await tester.tap(find.byKey(const ValueKey('folder-field')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('folder-default')), findsOneWidget);
   });
 
   testWidgets('w trybie folderu nie ma wyboru folderu', (tester) async {

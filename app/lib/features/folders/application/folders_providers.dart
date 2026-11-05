@@ -4,12 +4,19 @@ import 'package:uuid/uuid.dart';
 import '../data/folders_repository.dart';
 import '../domain/trip_folder.dart';
 
-/// Foldery od ostatnio zmienionego, z liczbą pinezek.
+/// Wszystkie foldery, także z archiwum, od ostatnio zmienionego, z liczbą pinezek.
 final foldersProvider = StreamProvider<List<TripFolder>>(
   (ref) => ref.watch(foldersRepositoryProvider).watchAll(),
 );
 
-/// Akcje na folderach. Folderów się nie usuwa (decyzja v10).
+/// Foldery bieżące w kolejności [foldersProvider].
+final activeFoldersProvider = Provider<AsyncValue<List<TripFolder>>>(
+  (ref) => ref
+      .watch(foldersProvider)
+      .whenData((all) => [...all.where((f) => !f.isArchived)]),
+);
+
+/// Akcje na folderach. Folderów się nie usuwa (decyzja v10), można je zarchiwizować (v23).
 class FoldersController {
   FoldersController(this._repository);
 
@@ -59,10 +66,38 @@ class FoldersController {
     );
   }
 
-  /// Id folderu „Pinezki”; tworzy go przy pierwszym użyciu (v10, leniwie).
+  /// Id bieżącego folderu „Pinezki”; tworzy go przy pierwszym użyciu (v10,
+  /// leniwie) i gdy dotychczasowy jest w archiwum (v23).
   Future<String> ensureDefault() async {
-    final existing = await _repository.findByName(TripFolder.defaultName);
+    final existing = await _repository.findActiveByName(TripFolder.defaultName);
     return existing?.id ?? create(name: TripFolder.defaultName);
+  }
+
+  /// Przenosi folder do archiwum; miejsce na liście bieżącej zostaje na „Cofnij”.
+  Future<void> archive(TripFolder folder) {
+    return _repository.setArchiveState(
+      folder.id,
+      archivedAt: DateTime.now(),
+      updatedAt: folder.updatedAt,
+    );
+  }
+
+  /// Przywraca folder z archiwum na górę listy bieżącej.
+  Future<void> restore(TripFolder folder) {
+    return _repository.setArchiveState(
+      folder.id,
+      archivedAt: null,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// „Cofnij”: wraca do stanu archiwum i miejsca na liście sprzed zmiany.
+  Future<void> undoArchiveChange(TripFolder before) {
+    return _repository.setArchiveState(
+      before.id,
+      archivedAt: before.archivedAt,
+      updatedAt: before.updatedAt,
+    );
   }
 
   static String _name(String name) {

@@ -103,6 +103,8 @@ void main() {
     expect(pin?.folderId, folders.single.id);
     expect(pin?.visitedAt, isNull);
     expect(pin?.starred, isFalse);
+    // Tabela tworzona w tej migracji ma już kolumnę archiwum (schemat 11).
+    expect(folders.single.isArchived, isFalse);
   });
 
   test('migracja 4 → 5 bez pinezek nie tworzy folderu', () async {
@@ -412,5 +414,66 @@ void main() {
 
     await repository.setStarred('a', starred: true);
     expect((await repository.findById('a'))?.starred, isTrue);
+  });
+
+  test('aktualizacja ze schematu 10 zostawia foldery bieżące (v23)', () async {
+    final db = AppDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute('''
+            CREATE TABLE folders (
+              id TEXT NOT NULL,
+              name TEXT NOT NULL,
+              description TEXT NULL,
+              icon TEXT NOT NULL,
+              color TEXT NOT NULL,
+              created_at INTEGER NOT NULL,
+              updated_at_ms INTEGER NOT NULL,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO folders VALUES ('f1', 'Kraków', 'Opis', 'castle', 'amber', 1792886400, 1792886400000)",
+          );
+          raw.execute('''
+            CREATE TABLE pins (
+              id TEXT NOT NULL,
+              lat REAL NOT NULL,
+              lng REAL NOT NULL,
+              created_at INTEGER NOT NULL,
+              name TEXT NULL,
+              note TEXT NULL,
+              address TEXT NULL,
+              source_url TEXT NULL,
+              category TEXT NOT NULL DEFAULT 'standard',
+              folder_id TEXT NOT NULL,
+              color TEXT NULL,
+              poi_name TEXT NULL,
+              visited_at_ms INTEGER NULL,
+              starred INTEGER NOT NULL DEFAULT 0,
+              PRIMARY KEY (id)
+            )
+          ''');
+          raw.execute(
+            "INSERT INTO pins VALUES ('a', 50.06, 19.94, 1792886400, 'Wawel', NULL, NULL, "
+            "NULL, 'castle', 'f1', NULL, NULL, NULL, 1)",
+          );
+          raw.execute('PRAGMA user_version = 10');
+        },
+      ),
+    );
+    addTearDown(db.close);
+
+    final folders = FoldersRepository(db);
+    final folder = (await folders.watchAll().first).single;
+    expect(folder.name, 'Kraków');
+    expect(folder.description, 'Opis');
+    expect(folder.pinCount, 1);
+    expect(folder.isArchived, isFalse);
+    expect((await PinsRepository(db).watchActive().first).single.name, 'Wawel');
+
+    final at = DateTime.fromMillisecondsSinceEpoch(1792886500000);
+    await folders.setArchiveState('f1', archivedAt: at, updatedAt: at);
+    expect((await folders.findById('f1'))?.archivedAt, at);
   });
 }

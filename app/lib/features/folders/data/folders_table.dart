@@ -18,6 +18,10 @@ class Folders extends Table {
   /// i szybkie zmiany dawałyby remis.
   IntColumn get updatedAtMs => integer()();
 
+  /// Chwila archiwizacji (v23, schemat 11), milisekundy epoki; `null` to folder
+  /// bieżący. Kolejność w archiwum: od ostatnio zarchiwizowanego.
+  IntColumn get archivedAtMs => integer().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

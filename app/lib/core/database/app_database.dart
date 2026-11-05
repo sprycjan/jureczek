@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'jureczek'));
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -35,13 +35,14 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         // Przebudowa tabeli w _addFolders tworzy ją od razu w bieżącym
         // schemacie, razem z kolumnami koloru (6), nazwy POI (8), odwiedzenia (9)
-        // i gwiazdki (10).
+        // i gwiazdki (10). Tabela folderów powstaje z kolumną archiwum (11).
         await _addFolders(m);
       } else {
         if (from < 6) await m.addColumn(pins, pins.color);
         if (from < 8) await m.addColumn(pins, pins.poiName);
         if (from < 9) await m.addColumn(pins, pins.visitedAtMs);
         if (from < 10) await m.addColumn(pins, pins.starred);
+        if (from < 11) await m.addColumn(folders, folders.archivedAtMs);
       }
       if (from < 7) {
         // v16: typy miejsc zamiast kategorii v9 – pinezka kategorii dostaje

@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Jureczek: Android-only Flutter app for planning trips by marking places on a map. Starts on a home screen with pin folders (trips); the map shows one folder's pins or all of them. Code in `app/`, docs in `obsidian-vault/jureczek/` (Polish). Git repo, remote `origin` = https://github.com/sprycjan/jureczek (branch `main`).
+Jureczek: Android-only Flutter app for planning trips by marking places on a map. Starts on a home screen with pin folders (trips), with an archive tab; the map shows one folder's pins or all current ones. Code in `app/`, docs in `obsidian-vault/jureczek/` (Polish). Git repo, remote `origin` = https://github.com/sprycjan/jureczek (branch `main`).
 
 ## Obsidian vault — project source of truth
 Not loaded automatically; read on demand:
@@ -32,6 +32,7 @@ After every change, update the vault without asking (use `/vault-update`): versi
 - Riverpod 3 pauses providers without listeners. In tests: `container.listen(p, (_, _) {})` → `pumpEventQueue()` → `read(p).requireValue`; `read(p.future)` hangs.
 - The drift DB is the single source of truth (`StreamProvider` over `watchAll()`, writes through controllers). Ids are UUID v4.
 - Schema changes: bump `schemaVersion`, hand-write `if (from < N)` in `onUpgrade`, and add a migration test that builds the old schema with raw SQL + `PRAGMA user_version` (`test/core/database/app_database_migration_test.dart`). Upgrades from schema < 4 wipe the DB on purpose (v9 reset); real migrations start at 4 → 5. Drift `dateTime()` has 1 s precision — use an int ms column when ordering by recency.
+- Archive (v23): the all-pins map reads pins through `_pinsSource` (`activePinsProvider`), never `pinsProvider`, or archived pins come back. `Dismissible` must leave the tree right after `onDismissed`, but drift streams arrive later: the home list uses `_pendingMoves`, and a failed write waits for `endOfFrame` before the card returns.
 - Widget tests with drift streams: data arrives outside fake async — `await tester.runAsync(() => Future.delayed(50ms))` then `pump`.
 - Never log `ClientException.toString()` — it contains the URL with `access_token`; use `e.message`.
 - Flutter 3.41: a `SnackBar` with an action needs `persist: false` or it never closes.

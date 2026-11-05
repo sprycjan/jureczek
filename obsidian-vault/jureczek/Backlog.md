@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]], [[v22 – pinezka z gwiazdką]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]], [[v22 – pinezka z gwiazdką]], [[v23 – archiwum podróży]].
 
 ## Miejsca / pinezki
 - [x] Oznaczenie pinezki jako odwiedzonej – v21, [[v21 – pinezka odwiedzona]]
@@ -58,10 +58,13 @@ Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – t
 
 ## Planowanie
 - [x] Foldery jako kontener na miejsca (v10, [[ADR-007 Foldery pinezek]])
+- [x] Archiwizowanie folderów z dolną belką – v23, [[v23 – archiwum podróży]]
+- [ ] Własny wygląd archiwum, na razie to ekran startowy z szarym pejzażem – [[v23 – archiwum podróży]]
+- [ ] Mapa wszystkich pinezek z archiwum (świadomie pominięta w v23) – [[v23 – archiwum podróży]]
 - [ ] Daty wyjazdu w folderze
 - [ ] Usuwanie folderu (świadomie pominięte w v10 – trzeba zdecydować, co z pinezkami)
 - [x] Mapa folderu: kamera dopasowana do jego pinezek zamiast widoku Polski ([[v10 – foldery i ekran startowy]], poprawki po teście)
-- [ ] Elementy makiety startowej pominięte w v10: pogoda, dzwonek, wyszukiwarka list, chipy filtrów (kraje), tagi, „Ostatnio zapisane miejsca”, dolna nawigacja
+- [ ] Elementy makiety startowej pominięte w v10: pogoda, dzwonek, wyszukiwarka list, chipy filtrów (kraje), tagi, „Ostatnio zapisane miejsca” (dolna nawigacja jest od v23)
 - [ ] Wybór okładki folderu (dziś stała nocna)
 - [ ] Synchronizacja z chmurą / backend
 
@@ -89,7 +92,7 @@ Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
 
 ## Moje uwagi
 Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].
-- [ ] Dolne menu – decyzja: na razie brak, wraca, gdy pojawi się treść (np. „Ostatnio zapisane”, ustawienia)
+- [x] Dolne menu – od v23 belka „Podróże” / „Archiwum”; kolejne pozycje (np. „Ostatnio zapisane”, ustawienia), gdy pojawi się treść
 - [x] Mapa: biała obwódka wokół nazw miejscowości i POI – rozwiązane własnym stylem z ciemną obwódką (v12)
 - [x] Przełącznik stylów mapy: własny / Outdoors / Satelita / Faded 3D z nachyleniem – v13
 - [x] Zmiana tekstów na ekranach (v11: „Cześć!”, bez podtytułu i zastępczego opisu)
