@@ -21,7 +21,7 @@ Prośba użytkownika z 2026-11-05: foldery z pinezkami można archiwizować, a n
 |---|---|---|
 | 1 | Co znaczy „nie można edytować” | cały folder z zawartością: bez dodawania, edycji, usuwania, kciuka i gwiazdki; link do Google Maps zostaje |
 | 2 | Zarchiwizowany folder „Pinezki” | powstaje nowy „Pinezki”; dwa o tej samej nazwie są dopuszczalne |
-| 3 | Belka | ikona + podpis: „Podróże” (walizka), „Archiwum” (pudełko) |
+| 3 | Belka | ikona + podpis: „Podróże” (kompas), „Archiwum” (pudełko) |
 | 4 | Przyciski w archiwum | bez mapy i „Nowy folder”; puste archiwum bez przycisku |
 | 5 | Gest i cofanie | przesunięcie w obie strony albo menu; od razu, z „Cofnij”, bez potwierdzenia |
 | 6 | Kolejność | archiwum od ostatnio zarchiwizowanego; przywrócony na górę listy; „Cofnij” na dawne miejsce |
@@ -68,6 +68,9 @@ Prośba użytkownika z 2026-11-05: foldery z pinezkami można archiwizować, a n
 - [ ] Błąd zapisu na telefonie (tylko test ekranu startowego).
 - [ ] Użytkownik: odczucie gestu i wygląd tła pod kartą.
 - [ ] Użytkownik: czy nazwy i ikony belki pasują.
+
+## Poprawki po teście
+- Ikona „Podróże”: walizka wyglądała jak śmietnik (uwaga użytkownika), teraz kompas (`Icons.explore`).
 
 ## Otwarte
 - Snackbar „W archiwum nie można dodawać pinezek” na chwilę zasłania logo Mapbox, jak pozostałe snackbary mapy.

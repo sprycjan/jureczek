@@ -204,8 +204,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               setState(() => _showArchive = index == 1),
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.luggage_outlined),
-              selectedIcon: const Icon(Icons.luggage),
+              icon: const Icon(Icons.explore_outlined),
+              selectedIcon: const Icon(Icons.explore),
               label: l10n.homeTabTrips,
             ),
             NavigationDestination(
