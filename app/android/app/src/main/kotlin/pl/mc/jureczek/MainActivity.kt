@@ -7,6 +7,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
 /// Przekazuje do Fluttera tekst udostępniony z innej aplikacji (np. Google Maps)
@@ -35,6 +36,15 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "nextSceneTurn" -> result.success(nextSceneTurn())
+                    "sceneScroll" -> {
+                        val scroll = splashPrefs().getFloat(scrollKey(call), 0f)
+                        result.success(scroll.toDouble())
+                    }
+                    "saveSceneScroll" -> {
+                        val scroll = call.argument<Double>("scroll") ?: 0.0
+                        splashPrefs().edit().putFloat(scrollKey(call), scroll.toFloat()).apply()
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -53,11 +63,16 @@ class MainActivity : FlutterActivity() {
 
     /// Numer tego uruchomienia; ekran powitalny bierze z niego kolejną scenę.
     private fun nextSceneTurn(): Int {
-        val prefs = getSharedPreferences(SPLASH_PREFS, Context.MODE_PRIVATE)
+        val prefs = splashPrefs()
         val turn = prefs.getInt(SCENE_TURN, 0)
         prefs.edit().putInt(SCENE_TURN, turn + 1).apply()
         return turn
     }
+
+    private fun splashPrefs() = getSharedPreferences(SPLASH_PREFS, Context.MODE_PRIVATE)
+
+    /// Każda scena pamięta własne miejsce; klucz sceny przeżyje zmianę ich kolejności.
+    private fun scrollKey(call: MethodCall) = "scroll_" + call.argument<String>("scene")
 
     private fun tap() {
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return

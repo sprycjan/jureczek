@@ -3,7 +3,7 @@ import 'dart:ui';
 /// Wszystkie parametry ekranu powitalnego w jednym miejscu.
 class SplashConfig {
   const SplashConfig({
-    this.minimumDuration = const Duration(milliseconds: 3500),
+    this.minimumDuration = const Duration(seconds: 2),
     this.readinessLimit = const Duration(seconds: 10),
     this.launchFade = const Duration(milliseconds: 400),
     this.firstFrameLimit = const Duration(seconds: 1),
@@ -27,7 +27,7 @@ class SplashConfig {
     this.squat = 2.6,
     this.wheelHz = 7,
     this.wheelDamping = 0.35,
-    this.pebbleFirst = (1.7, 2.2),
+    this.pebbleFirst = (1.4, 1.6),
     this.pebbleEvery = (3.0, 5.0),
     this.pebbleLift = 5,
     this.pebbleContact = 30,

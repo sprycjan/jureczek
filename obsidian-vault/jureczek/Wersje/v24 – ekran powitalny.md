@@ -12,7 +12,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 
 ## Zakres
 - **Fazy:** A wjazd kampera, B jazda z paralaksą, C przyspieszenie i odjazd, a na końcu przenikanie do ekranu startowego.
-- **Czas:** minimum 3,5 s, ale bez blokowania startu. Faza C rusza raz, gdy aplikacja jest gotowa i minimum minęło.
+- **Czas:** minimum 2 s (wcześniej 3,5 s), ale bez blokowania startu. Faza C rusza raz, gdy aplikacja jest gotowa i minimum minęło.
 - **Gotowość:** pierwszy wynik `foldersProvider` (dane albo błąd) i obraz nagłówka. Limit 10 s.
 - **Pory dnia:** 4 palety wg `Landscape.at()`. W nocy świecą okna, przednia szyba, namiot i reflektor, a tylna lampa ma czerwoną poświatę.
 - **Start:** okno startowe Androida jest wyłączone (`windowDisablePreview`), więc po kliknięciu zostaje pulpit, a około 0,4 s później rozwija się z niego scena z ruszającym kamperem. Gradient we Flutterze i 0,4 s przejścia to tylko zapas na scenę spóźnioną ponad limit 1 s albo niewczytaną.
@@ -28,18 +28,20 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 | 4 | Pominięcie stuknięciem | tak; przed gotowością zapamiętane, w fazie C ignorowane, w fazie A kamper rusza z bieżącego miejsca |
 | 5 | Zawieszona gotowość | limit 10 s, potem ekran startowy z własnym stanem ładowania |
 | 6 | Pierwsza klatka | bez okna startowego Androida, bo nie zna sceny ani pory dnia; Flutter wstrzymany do gotowej sceny, bez zasłony (po uwagach użytkownika). Koszt: około 0,4 s bez reakcji po kliknięciu |
-| 7 | Wyjście | około 1,1 s: odjazd 0,7 s, przenikanie 0,5 s od 0,6 s; razem około 4,6 s |
+| 7 | Wyjście | około 1,1 s: odjazd 0,7 s, przenikanie 0,5 s od 0,6 s; razem około 3,1 s |
 | 8 | Różnorodność | 8 krajobrazów po kolei, licznik w `SharedPreferences` po stronie Androida (zmiana użytkownika; wcześniej czysty los). Każde uruchomienie to kolejna scena, a pora dnia dalej wg zegara |
-| 9 | „Usuń animacje” w systemie | nieruchoma scena 3,5 s, potem przenikanie |
+| 9 | „Usuń animacje” w systemie | nieruchoma scena przez minimum, potem przenikanie |
 | 10 | Napis | brak |
 | 11 | Chmury | wspólny kłębiasty kontur z pasami światła; świadome odejście od referencji (brązowe kopuły, grube pasy, drobiny), która w pionowym kadrze wyglądała jak bąble |
 | 12 | Góry | różne sylwetki; pierwszy kadr ułożony tak, by w pionie było widać różne kształty, bo dalekie warstwy prawie się nie przesuwają |
 | 13 | Rysowanie | same `Picture`, bez rasteryzacji warstw, zob. pomiar niżej |
 | 14 | Życie kampera | fizyka zamiast ręcznych klatek: hamowanie na wjeździe siada na przód, przyspieszanie na odjeździe na tył, po zatrzymaniu nadwozie odbija; kamyk unosi kolejno przednie i tylne koło |
-| 15 | Kamyki | pierwszy najazd 1,7–2,2 s, kolejne co 3–5 s, różna wielkość; podczas odjazdu bez najazdów, bo kamper zmienia prędkość |
+| 15 | Kamyki | pierwszy najazd 1,4–1,6 s (po wjeździe, przed odjazdem; przy minimum 2 s tylne koło już nie zdąży podskoczyć), kolejne co 3–5 s, różna wielkość; podczas odjazdu bez najazdów, bo kamper zmienia prędkość |
 | 16 | Sceny 2–8 | te same klocki co w Alpach, własne okresy warstw i pierwszy kadr ułożony pod pion; kolory pierwszego planu różne tylko tam, gdzie zielony by nie pasował (modrzewie, stoliwa, przełęcz) |
 | 17 | Wąwóz | most kończy się za ścianami skalnymi, żeby przy przewijaniu nie było widać urwanego końca |
 | 19 | Stała scena w oknie Androida | odrzucona: zasób okna jest wpisany w APK, więc znana kolejność do niego nie trafi; wyłączenie okna daje ten sam brak gradientu i zachowuje 8 scen i 4 pory |
+| 20 | Miejsce sceny | każda scena pamięta przewinięcie z chwili zniknięcia ekranu i następnym razem zaczyna od niego (prośba użytkownika); klucz to nazwa sceny. Stuknięcie i udostępnienie też zapisują, przerwany start nie |
+| 21 | Koniec przewijania | bez wspólnego powrotu do pierwszego kadru: każda warstwa zapętla się bez szwu w swoim okresie |
 | 18 | Start od kliknięcia | scena wczytywana od `main()`, pierwsza klatka czeka na nią najwyżej 1 s; minimum 3,5 s i tempo wyjścia bez zmian |
 
 ## Pliki
@@ -50,8 +52,8 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 - `lib/features/splash/domain/splash_manifest.dart`: opis grafik.
 - `lib/features/splash/application/splash_motion.dart`: `SplashFrame`, fazy A/B/C, zawieszenie i kamyki, bez zegara.
 - `lib/features/splash/application/splash_start.dart`: scena wczytywana przed `runApp`, wstrzymanie pierwszej klatki i limit.
-- `lib/features/splash/data/splash_scene_turn.dart`: numer kolejnej sceny z kanału `pl.mc.jureczek/splash`.
-- `android/app/src/main/kotlin/pl/mc/jureczek/MainActivity.kt`: licznik uruchomień dla rotacji.
+- `lib/features/splash/data/splash_progress.dart`: numer kolejnej sceny i miejsce każdej sceny, przez kanał `pl.mc.jureczek/splash`.
+- `android/app/src/main/kotlin/pl/mc/jureczek/MainActivity.kt`: licznik uruchomień i miejsca scen w `SharedPreferences` (`splash`).
 - `android/app/src/main/res/values*/styles.xml`: `windowDisablePreview`.
 - `lib/main.dart`: tworzy `SplashStart`, gdy jest token.
 - `lib/features/splash/data/splash_art_loader.dart`: `ColorMapper` palety, wczytanie tylko wybranej sceny.
@@ -102,7 +104,19 @@ Wiersz „Scena w pełni widoczna” przed zmianą to czas wczytania sceny plus 
 
 Bez okna startowego, `release`: „Displayed” 370–443 ms (5 startów), czyli tyle trwa pulpit bez reakcji. Serie zrzutów co 100 ms od uruchomienia (po jednym na start, 7 startów): przed zmianą gradient na zrzutach 0,1–0,4 s, po zmianie pulpit do 0,4 s, a na 0,5 s scena w rozwijanym oknie. Gradientu nie ma na żadnym.
 
-**Aplikacja jest gotowa około 0,35 s po kliknięciu (`release`), więc ekran powitalny nie przykrywa długiego ładowania.** Dalsze około 3,3 s to wybrane minimum. Mapa nie wchodzi w ten czas, bo wczytuje się dopiero po wejściu na nią.
+**Aplikacja jest gotowa około 0,35 s po kliknięciu (`release`), więc ekran powitalny nie przykrywa długiego ładowania.** Dalsza część animacji to wybrane minimum, od tej poprawki 2 s. Mapa nie wchodzi w ten czas, bo wczytuje się dopiero po wejściu na nią.
+
+## Ile zajmuje obejrzenie sceny
+Jeden start przewija scenę o około 2,9 s (zmierzone w `splash.xml`: 2,93–2,95 s). Pierwszy kadr na P30 ma 461 jednostek szerokości. Liczby dla Alp, inne sceny są podobne:
+
+| Warstwa | Okres / prędkość | Pełne okrążenie | Startów tej sceny | Startów aplikacji (8 scen) |
+|---|---|---|---|---|
+| droga | 1240 / 170 | 7 s | około 3 | około 20 |
+| drzewa | 1700 / 92 | 18 s | około 6 | około 50 |
+| wzgórza | 2600 / 54 | 48 s | około 17 | około 130 |
+| bliskie góry | 1900 / 26 | 73 s | około 25 | około 200 |
+| dalekie góry | 2200 / 12 | 183 s | około 63 | około 500 |
+| chmury | 2400 / 5 | 480 s | około 165 | około 1300 |
 
 ## Pułapki
 - `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”), gdy wcześniej ktoś wywołał `rootBundle.loadString`, bo pamięć podręczna trzyma wtedy `Future`. **W `flutter test` tego błędu nie widać**, nawet po `loadString`, więc test nie zastąpi sprawdzenia na telefonie. Bundle podajemy tylko w testach sceny, a `renderPlacePinPng` nie ma już takiego parametru.
@@ -152,6 +166,12 @@ Bez okna startowego, `release`: „Displayed” 370–443 ms (5 startów), czyli
 - [x] P30 przez adb, `release`: seria zrzutów bez gradientu, scena rozwija się z pulpitu
 - [x] P30 przez adb, `release`: 9 kolejnych zimnych startów to modrzewie, stoliwa, fiord, przełęcz, Alpy, jezioro, łąki, wąwóz, modrzewie, czyli kolejność z manifestu z zawinięciem
 - [x] P30 przez adb, `release`: ponowne uruchomienie po „Wstecz”, zimny start z udostępnienia (mapa z kartą miejsca) i mapa z pinezkami bez błędów w logu
+- [x] Po skróceniu i zapamiętywaniu: `flutter analyze` 0 issues, `flutter test` 364/364
+- [x] P30 przez adb, `profile`: po 10 startach `splash.xml` ma po około 2,93 s dla sześciu scen i około 5,8 s dla dwóch pokazanych dwa razy, czyli drugi start ciągnie dalej od zapisu
+- [x] P30 przez adb, `profile`: fiord ustawiony na 100 s pokazuje ten sam układ co arkusz i zapisuje 102,94 s
+- [x] Chrome: 8 scen po 9 kadrów do 160 s, pora dzienna: bez dziur i prześwitów nieba. Tylko ta pora i tylko te kadry
+- [x] P30 przez adb, `release`: seria zrzutów, ekran startowy między 3,0 a 3,5 s od uruchomienia; „Displayed” 396–426 ms; mapa z pinezkami
+- [ ] Użytkownik: tempo przy minimum 2 s, zwłaszcza kamyk i odjazd zaraz po wjeździe
 - [ ] Użytkownik: start z ikony bez gradientu, czy około 0,4 s bez reakcji nie przeszkadza
 - [ ] P30: płynność pierwszej sekundy po tej zmianie nie była mierzona osobno
 - [ ] Ścieżka limitu 1 s na telefonie: nie wystąpiła w pomiarach, sprawdzają ją testy `SplashStart` i przenikania
@@ -164,12 +184,13 @@ Bez okna startowego, `release`: „Displayed” 370–443 ms (5 startów), czyli
 - Kurz także za przednimi kołami, zawieszenie reagujące na przyspieszanie i hamowanie, kamyki na drodze (prośba użytkownika).
 - **Start od kliknięcia:** użytkownik zauważył, że różowy ekran wygląda jak ładowanie, a animacja jak dodatek po nim. Pomiar przyznał mu rację: gotowość przychodziła przed animacją, a Flutter sam rysował różowe klatki i jeszcze 0,4 s zanikania. Teraz scena wczytuje się od `main()`, pierwsza klatka na nią czeka, a zasłony nie ma. Na telefonie był też build `profile`, wolniejszy o około 0,5 s; teraz jest `release`.
 - **Regresja v24, pinezki znikały z mapy:** ekran powitalny czyta `manifest.json` i `palettes.json` przez `rootBundle.loadString`, a potem pinezka typu wysyłała `rootBundle` do izolatu. Wyjątek przerywał całą synchronizację, więc mapa była pusta. Sprawdzone na czystym 0f78d2c. Wykryte przy tej poprawce; zapisane pinezki nie były zagrożone.
+- **Krócej i dalej:** minimum 2 s i pamiętanie miejsca każdej sceny, po uwadze użytkownika, że zawsze ogląda początek. Kamyk przesunięty na 1,4–1,6 s, żeby zdążył przed odjazdem.
 - **Bez gradientu i po kolei:** użytkownik poprosił o stałą kolejność scen, żeby usunąć gradient. Sama kolejność tego nie umożliwia, więc rotacja jest zrobiona zgodnie z prośbą, a gradient usunęło wyłączenie okna startowego.
 - Etap 3, własny przegląd arkusza przed pokazaniem: filary mostu i rzeka wisiały w powietrzu, fiord nie miał stromych ścian, pod wodą i u stóp gór prześwitywało niebo, wodospad na przełęczy zaczynał się w powietrzu, chmura zasłaniała słońce na łąkach.
 
 ## Otwarte
 - Po kliknięciu około 0,4 s bez reakcji (`release`). Jeśli przeszkadza, cofnięcie to jedna linia w `styles.xml`, ale wraca gradient.
-- Czy minimum 3,5 s zostaje, skoro aplikacja jest gotowa po około 0,35 s: decyzja użytkownika.
+- Dalekie góry wymagają około 500 startów aplikacji, tabela wyżej. Możliwy przeskok między startami: [[Backlog]].
 - Kosmetyka rysunków w [[Backlog]].
 - Skała jest bardziej kanciasta niż na referencji; użytkownik zaakceptował styl z 2026-11-07.
 - `resorces/bgs.png` nie jest w repo: to cudza ilustracja, służy tylko jako referencja.

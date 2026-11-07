@@ -51,7 +51,7 @@ tags: [jureczek, przeglad]
 | v21 | Pinezka odwiedzona: kciuk w arkuszu zapisuje od razu, znaczek w rogu pinezki na mapie, data oznaczenia w bazie (schemat 9) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v21 – pinezka odwiedzona]] |
 | v22 | Pinezka z gwiazdką: przełącznik w arkuszu i formularzu nowej pinezki, kolumna znaczków przy główce, pinezki z gwiazdką rysowane nad zwykłymi, włączone nakładanie (schemat 10) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v22 – pinezka z gwiazdką]] |
 | v23 | Archiwum podróży: dolna belka, archiwizacja gestem i z menu z „Cofnij”, szary pejzaż, pinezki z archiwum ukryte na mapie wszystkich, folder z archiwum tylko do podglądu (schemat 11) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v23 – archiwum podróży]] |
-| v24 | Animowany ekran powitalny: kamper z paralaksą, 8 krajobrazów po kolei, 4 pory dnia, gotowość aplikacji; poprawki: start bez okna systemowego i gradientu, scena od pierwszej klatki, naprawa pustej mapy | ✅ działa na telefonie, poprawka startu sprawdzona przez adb, czeka na potwierdzenie – [[v24 – ekran powitalny]] |
+| v24 | Animowany ekran powitalny: kamper z paralaksą, 8 krajobrazów po kolei, każdy od miejsca ostatniego odjazdu, 4 pory dnia, gotowość aplikacji, minimum 2 s; poprawki: start bez okna systemowego i gradientu, scena od pierwszej klatki, naprawa pustej mapy | ✅ działa na telefonie, poprawka startu sprawdzona przez adb, czeka na potwierdzenie – [[v24 – ekran powitalny]] |
 | v25+ | Patrz [[Backlog]] | — |
 
 ## Inne

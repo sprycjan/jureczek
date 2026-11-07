@@ -266,6 +266,47 @@ void main() {
     expect(curtain().opacity.value, 0);
   });
 
+  testWidgets('po odjeździe zapisuje miejsce sceny, liczone od zapisanego', (
+    tester,
+  ) async {
+    const channel = MethodChannel('pl.mc.jureczek/splash');
+    final messenger = tester.binding.defaultBinaryMessenger;
+    final saved = <MethodCall>[];
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      saved.add(call);
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+    final art = await tester.runAsync(() async {
+      return loadSplashArt(
+        manifest: await loadSplashManifest(rootBundle),
+        sceneIndex: 2,
+        period: Landscape.day,
+        startScroll: 40,
+        bundle: rootBundle,
+      );
+    });
+
+    await pump(tester, loadArt: (_) async => art!);
+    await ready(tester);
+    expect(saved, isEmpty);
+    // Ticker przycina długie kroki, więc czas podajemy drobnymi klatkami.
+    final total =
+        _config.minimumDuration + _config.fadeDelay + _config.fadeDuration;
+    const frame = Duration(milliseconds: 16);
+    for (var t = Duration.zero; t < total * 2; t += frame) {
+      await tester.pump(frame);
+      if (saved.isNotEmpty) break;
+    }
+
+    expect(_overlay, findsNothing);
+    expect(saved.single.method, 'saveSceneScroll');
+    final args = saved.single.arguments as Map<Object?, Object?>;
+    expect(args['scene'], 'meadows');
+    final seconds = total.inMilliseconds / 1000;
+    expect(args['scroll'], closeTo(40 + seconds, 0.3));
+  });
+
   testWidgets('nieudane wczytanie też zwalnia pierwszą klatkę', (tester) async {
     var settled = 0;
     await pump(

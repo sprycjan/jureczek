@@ -22,7 +22,7 @@ Aplikacja startowała od ciemnego tła. Użytkownik chce animowanej ilustracji: 
 - Rysujemy same `Picture`. Na P30 daje to około 60 klatek/s, bez kosztu pamięci rastra ([[v24 – ekran powitalny]]).
 - `SplashStart` wczytuje scenę od `main()` i wstrzymuje pierwszą klatkę Fluttera do jej gotowości, najwyżej 1 s. Gradient we Flutterze zostaje tylko na spóźnienie albo błąd.
 - Okno startowe Androida jest wyłączone (`windowDisablePreview`), bo to zasób stały, wpisany w APK, który nie zna sceny ani pory dnia. Pierwszym obrazem jest scena rozwijana z pulpitu.
-- Sceny idą po kolei, a licznik jest w `SharedPreferences` po stronie Androida: jest dostępny przed bazą i nie wymaga nowej zależności.
+- Sceny idą po kolei, a każda zaczyna od miejsca ostatniego odjazdu. Licznik i miejsca są w `SharedPreferences` po stronie Androida: są dostępne przed bazą i nie wymagają nowej zależności.
 
 ## Konsekwencje
 - Grafikę poprawia się w generatorze, a SVG jest wynikiem.

@@ -91,7 +91,8 @@ Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
 - [x] Snackbary mapy zostają widoczne po powrocie na ekran startowy – v14 (własny `ScaffoldMessenger`)
 - [ ] Android 12+ pokazuje przed Flutterem własny ekran z ikoną, a `windowDisablePreview` może tam nie działać; P30 (Android 10) tego nie sprawdzi. Do obejrzenia na nowszym telefonie – [[v24 – ekran powitalny]]
 - [x] Gradient na starcie: okno startowe wyłączone (`windowDisablePreview`), bez stałego obrazka – [[v24 – ekran powitalny]]
-- [ ] Ekran powitalny: czy zostawić minimum 3,5 s, skoro aplikacja jest gotowa po około 0,35 s – [[v24 – ekran powitalny]]
+- [x] Minimum ekranu powitalnego skrócone do 2 s – [[v24 – ekran powitalny]]
+- [ ] Przeskok przewijania między startami, np. 15 s, żeby dalsze góry nie czekały około 500 startów; decyzja użytkownika – [[v24 – ekran powitalny]]
 - [x] Powtórki scen ekranu powitalnego: sceny idą po kolei zamiast losowania – [[v24 – ekran powitalny]]
 - [ ] Ekran powitalny, kosmetyka: jasna płyta na ścianach wąwozu wygląda jak przyklejony wielokąt, w poziomie ściany wąwozu czytają się jak dwie skalne wieże, jasne pasy stoliw odcinają się nocą – [[v24 – ekran powitalny]]
 - [ ] Ekran startowy w poziomie: nagłówek zajmuje prawie cały ekran, zauważone przy teście obrotu – [[v24 – ekran powitalny]]

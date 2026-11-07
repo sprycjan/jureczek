@@ -128,10 +128,14 @@ void main() {
   group('kamyk', () {
     double firstContact() => frame.pebbles.first.frontContact;
 
-    test('pierwszy przychodzi w jeździe, przed końcem minimum', () {
-      expect(firstContact(), inInclusiveRange(1.7, 2.2));
-      final rearContact = firstContact() + 149 / 170;
-      expect(rearContact, lessThan(3.5));
+    // Przy minimum 2 s tylna oś trafia na kamyk już w odjeździe, więc podskakuje tylko
+    // przednia: wcześniej kamper jeszcze wjeżdża i koło minęłoby się z kamykiem.
+    test('pierwszy trafia przednie koło po wjeździe, a przed odjazdem', () {
+      const config = SplashConfig();
+      final entered = config.enterDuration.inMilliseconds / 1000;
+      final leaving = config.minimumDuration.inMilliseconds / 1000;
+      expect(firstContact(), greaterThan(entered));
+      expect(firstContact(), lessThan(leaving - 0.3));
     });
 
     test('najpierw podskakuje przednie koło, potem tylne', () {

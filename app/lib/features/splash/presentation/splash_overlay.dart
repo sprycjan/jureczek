@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ import '../../home/domain/landscape.dart';
 import '../../share/application/shared_place_controller.dart';
 import '../application/splash_motion.dart';
 import '../data/splash_art_loader.dart';
-import '../data/splash_scene_turn.dart';
+import '../data/splash_progress.dart';
 import '../domain/splash_config.dart';
 import '../domain/splash_gate.dart';
 import 'splash_scene_painter.dart';
@@ -28,13 +29,16 @@ Future<void> _precacheHeader(BuildContext context, Landscape period) =>
     // `precacheImage` nie rzuca: brak obrazu nie może zatrzymać startu.
     precacheImage(AssetImage(period.asset), context);
 
-/// Następna scena z manifestu, po kolei; wczytywana jest tylko ona.
+/// Następna scena z manifestu, po kolei, od miejsca ostatniego odjazdu z niej;
+/// wczytywana jest tylko ona.
 Future<SplashArt> loadNextSplashArt(Landscape period) async {
   final manifest = await loadSplashManifest();
+  final scene = await nextSplashScene(manifest.scenes.length);
   return loadSplashArt(
     manifest: manifest,
-    sceneIndex: await nextSplashScene(manifest.scenes.length),
+    sceneIndex: scene,
     period: period,
+    startScroll: await readSplashScroll(manifest.scenes[scene].key),
   );
 }
 
@@ -150,6 +154,7 @@ class _SplashOverlayState extends ConsumerState<SplashOverlay>
         art.dispose();
         return;
       }
+      _frame.scroll = art.startScroll;
       setState(() => _art = art);
       if (_leaving) return;
       // Scena zdążyła na pierwszą klatkę: gradientu nigdy nie było widać, więc nie ma
@@ -207,6 +212,8 @@ class _SplashOverlayState extends ConsumerState<SplashOverlay>
 
   void _onFadeStatus(AnimationStatus status) {
     if (status != AnimationStatus.dismissed || _done) return;
+    final art = _art;
+    if (art != null) unawaited(saveSplashScroll(art.sceneKey, _frame.scroll));
     _ticker.stop();
     setState(() => _done = true);
     SystemChrome.setSystemUIOverlayStyle(_appStatusBar);

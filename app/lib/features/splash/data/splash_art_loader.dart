@@ -56,6 +56,8 @@ class SplashLayerArt {
 class SplashArt {
   SplashArt({
     required this.manifest,
+    required this.sceneKey,
+    required this.startScroll,
     required this.sky,
     required this.layers,
     required this.camperShadow,
@@ -68,6 +70,10 @@ class SplashArt {
   });
 
   final SplashManifest manifest;
+  final String sceneKey;
+
+  /// Skąd zacząć przewijanie: z miejsca, w którym kamper ostatnio odjechał.
+  final double startScroll;
   final PictureInfo sky;
   final List<SplashLayerArt> layers;
   final PictureInfo camperShadow;
@@ -107,6 +113,7 @@ Future<SplashArt> loadSplashArt({
   required SplashManifest manifest,
   required int sceneIndex,
   required Landscape period,
+  double startScroll = 0,
   AssetBundle? bundle,
 }) async {
   final assets = bundle ?? rootBundle;
@@ -137,6 +144,8 @@ Future<SplashArt> loadSplashArt({
   final layers = await Future.wait(scene.layers.map((l) => load(l.file)));
   return SplashArt(
     manifest: manifest,
+    sceneKey: scene.key,
+    startScroll: startScroll,
     sky: common[0],
     camperUnder: common[1],
     camperBody: common[2],
