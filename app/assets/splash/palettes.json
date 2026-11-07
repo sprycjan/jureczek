@@ -1,0 +1,752 @@
+{
+"#100000": {
+"dawn": "#8FA6B5",
+"day": "#A9D2D8",
+"night": "#25305E",
+"sunset": "#6F8F96"
+},
+"#100007": {
+"dawn": "#FFEBD8",
+"day": "#FFFFFF",
+"night": "#8E8DD2",
+"sunset": "#FFE0B4"
+},
+"#10000E": {
+"dawn": "#F9CFC8",
+"day": "#F2F7FC",
+"night": "#5F5DA8",
+"sunset": "#F8B39A"
+},
+"#100015": {
+"dawn": "#E0AABE",
+"day": "#D6E3F0",
+"night": "#3F3D86",
+"sunset": "#D8849C"
+},
+"#10001C": {
+"dawn": "#AF93C6",
+"day": "#B2C8E1",
+"night": "#272662",
+"sunset": "#9C72B0"
+},
+"#100023": {
+"dawn": "#E9B2C4",
+"day": "#DCE9F4",
+"night": "#34326F",
+"sunset": "#E58FA6"
+},
+"#10002A": {
+"dawn": "#B79CCB",
+"day": "#BCD2E7",
+"night": "#232258",
+"sunset": "#A77CB8"
+},
+"#100031": {
+"dawn": "#2C2440",
+"day": "#123A30",
+"night": "#080818",
+"sunset": "#2B1A33"
+},
+"#100038": {
+"dawn": "#3C2F52",
+"day": "#1B5040",
+"night": "#101028",
+"sunset": "#3A2442"
+},
+"#10003F": {
+"dawn": "#6B5C72",
+"day": "#6A6E72",
+"night": "#20204A",
+"sunset": "#5F4B62"
+},
+"#100046": {
+"dawn": "#4C4058",
+"day": "#4B5258",
+"night": "#14143A",
+"sunset": "#42314A"
+},
+"#10004D": {
+"dawn": "#EFD9B0",
+"day": "#F4E9C6",
+"night": "#6A689C",
+"sunset": "#E8C29A"
+},
+"#100054": {
+"dawn": "#A99A92",
+"day": "#BFB9A3",
+"night": "#3A3868",
+"sunset": "#94776F"
+},
+"#10005B": {
+"dawn": "#40365A",
+"day": "#3D4A58",
+"night": "#12122E",
+"sunset": "#3C2C4A"
+},
+"#100062": {
+"dawn": "#5E5275",
+"day": "#5A6A78",
+"night": "#1E1E48",
+"sunset": "#57446B"
+},
+"#100069": {
+"dawn": "#8D7C99",
+"day": "#8FA09F",
+"night": "#37366F",
+"sunset": "#8F7392"
+},
+"#100070": {
+"dawn": "#1F2829",
+"day": "#1F2A2B",
+"night": "#0E151E",
+"sunset": "#1F2726"
+},
+"#100077": {
+"dawn": "#FBE6C7",
+"day": "#FBF0D2",
+"night": "#737893",
+"sunset": "#FBDDB9"
+},
+"#10007E": {
+"dawn": "#EFD4AB",
+"day": "#EFDDB4",
+"night": "#6E6E7E",
+"sunset": "#EFCB9E"
+},
+"#100085": {
+"dawn": "#E2C193",
+"day": "#E2C99B",
+"night": "#68646C",
+"sunset": "#E2B988"
+},
+"#10008C": {
+"dawn": "#5B846A",
+"day": "#5B8A70",
+"night": "#2A454E",
+"sunset": "#5B7F63"
+},
+"#100093": {
+"dawn": "#476B56",
+"day": "#476F5B",
+"night": "#213840",
+"sunset": "#476650"
+},
+"#10009A": {
+"dawn": "#3A5848",
+"day": "#3A5C4C",
+"night": "#1B2E35",
+"sunset": "#3A5543"
+},
+"#1000A1": {
+"dawn": "#EE8E72",
+"day": "#EE9478",
+"night": "#6D4A54",
+"sunset": "#EE886A"
+},
+"#1000A8": {
+"dawn": "#DE7861",
+"day": "#DE7D66",
+"night": "#663E47",
+"sunset": "#DE735A"
+},
+"#1000AF": {
+"dawn": "#E89F85",
+"day": "#E8A68C",
+"night": "#6B5362",
+"sunset": "#E8997B"
+},
+"#1000B6": {
+"dawn": "#FAD0A0",
+"day": "#FAD9A8",
+"night": "#736C76",
+"sunset": "#FAC894"
+},
+"#1000BD": {
+"dawn": "#F3BD8B",
+"day": "#F3C592",
+"night": "#706266",
+"sunset": "#F3B580"
+},
+"#1000C4": {
+"dawn": "#D9B798",
+"day": "#D9BFA0",
+"night": "#646070",
+"sunset": "#D9B08D"
+},
+"#1000CB": {
+"dawn": "#C8775D",
+"day": "#C87C62",
+"night": "#5C3E45",
+"sunset": "#C87256"
+},
+"#1000D2": {
+"dawn": "#A9614B",
+"day": "#A9654F",
+"night": "#4E3237",
+"sunset": "#A95D46"
+},
+"#1000D9": {
+"dawn": "#E8E4E4",
+"day": "#E8EEF0",
+"night": "#6B77A8",
+"sunset": "#E8DBD3"
+},
+"#1000E0": {
+"dawn": "#A8ADB1",
+"day": "#A8B4BA",
+"night": "#4D5A82",
+"sunset": "#A8A6A4"
+},
+"#1000E7": {
+"dawn": "#FBDA9C",
+"day": "#FBE3A4",
+"night": "#737273",
+"sunset": "#FBD190"
+},
+"#1000EE": {
+"dawn": "#E7B46D",
+"day": "#E7BC73",
+"night": "#6A5E50",
+"sunset": "#E7AD65"
+},
+"#1000F5": {
+"dawn": "#355546",
+"day": "#35594A",
+"night": "#182C34",
+"sunset": "#355241"
+},
+"#1000FC": {
+"dawn": "#223930",
+"day": "#223B33",
+"night": "#101E24",
+"sunset": "#22362D"
+},
+"#100103": {
+"dawn": "#16201D",
+"day": "#16211F",
+"night": "#0A1016",
+"sunset": "#161E1B"
+},
+"#10010A": {
+"dawn": "#2A1E3A",
+"day": "#1D3A2C",
+"night": "#05061A",
+"sunset": "#2A1630"
+},
+"#100111": {
+"dawn": "#FFC56E",
+"day": "#FFC56E",
+"night": "#FFC56E",
+"sunset": "#FFC56E"
+},
+"#100118": {
+"dawn": "#FFF0B8",
+"day": "#FFF0B8",
+"night": "#FFF0B8",
+"sunset": "#FFF0B8"
+},
+"#10011F": {
+"dawn": "#FFE9A8",
+"day": "#FFE9A8",
+"night": "#FFE9A8",
+"sunset": "#FFE9A8"
+},
+"#100126": {
+"dawn": "#F2261C",
+"day": "#F2261C",
+"night": "#F2261C",
+"sunset": "#F2261C"
+},
+"#10012D": {
+"dawn": "#FFB9A4",
+"day": "#FFB9A4",
+"night": "#FFB9A4",
+"sunset": "#FFB9A4"
+},
+"#100134": {
+"dawn": "#FF2A1C",
+"day": "#FF2A1C",
+"night": "#FF2A1C",
+"sunset": "#FF2A1C"
+},
+"#10013B": {
+"dawn": "#E5CBA5",
+"day": "#E5D3AE",
+"night": "#696A7A",
+"sunset": "#E5C299"
+},
+"#100142": {
+"dawn": "#BF9F7C",
+"day": "#BFA683",
+"night": "#58535C",
+"sunset": "#BF9973"
+},
+"#100149": {
+"dawn": "#5F76BF",
+"day": "#5F76BF",
+"night": "#5F76BF",
+"sunset": "#5F76BF"
+},
+"#100150": {
+"dawn": "#9D8CC6",
+"day": "#9D8CC6",
+"night": "#9D8CC6",
+"sunset": "#9D8CC6"
+},
+"#100157": {
+"dawn": "#E0A5BE",
+"day": "#E0A5BE",
+"night": "#E0A5BE",
+"sunset": "#E0A5BE"
+},
+"#10015E": {
+"dawn": "#F9C8A5",
+"day": "#F9C8A5",
+"night": "#F9C8A5",
+"sunset": "#F9C8A5"
+},
+"#100165": {
+"dawn": "#FBDDB2",
+"day": "#FBDDB2",
+"night": "#FBDDB2",
+"sunset": "#FBDDB2"
+},
+"#10016C": {
+"dawn": "#FFE3B0",
+"day": "#FFE3B0",
+"night": "#FFE3B0",
+"sunset": "#FFE3B0"
+},
+"#100173": {
+"dawn": "#FFD9A0",
+"day": "#FFD9A0",
+"night": "#FFD9A0",
+"sunset": "#FFD9A0"
+},
+"#10017A": {
+"dawn": "#FFF4D6",
+"day": "#FFF4D6",
+"night": "#FFF4D6",
+"sunset": "#FFF4D6"
+},
+"#100181": {
+"dawn": "#2F8FD9",
+"day": "#2F8FD9",
+"night": "#2F8FD9",
+"sunset": "#2F8FD9"
+},
+"#100188": {
+"dawn": "#5BB4E4",
+"day": "#5BB4E4",
+"night": "#5BB4E4",
+"sunset": "#5BB4E4"
+},
+"#10018F": {
+"dawn": "#93D6E8",
+"day": "#93D6E8",
+"night": "#93D6E8",
+"sunset": "#93D6E8"
+},
+"#100196": {
+"dawn": "#CBEBE5",
+"day": "#CBEBE5",
+"night": "#CBEBE5",
+"sunset": "#CBEBE5"
+},
+"#10019D": {
+"dawn": "#EEF3D5",
+"day": "#EEF3D5",
+"night": "#EEF3D5",
+"sunset": "#EEF3D5"
+},
+"#1001A4": {
+"dawn": "#FFFBE0",
+"day": "#FFFBE0",
+"night": "#FFFBE0",
+"sunset": "#FFFBE0"
+},
+"#1001AB": {
+"dawn": "#FFF4B8",
+"day": "#FFF4B8",
+"night": "#FFF4B8",
+"sunset": "#FFF4B8"
+},
+"#1001B2": {
+"dawn": "#FFFBDC",
+"day": "#FFFBDC",
+"night": "#FFFBDC",
+"sunset": "#FFFBDC"
+},
+"#1001B9": {
+"dawn": "#8C78BC",
+"day": "#8C78BC",
+"night": "#8C78BC",
+"sunset": "#8C78BC"
+},
+"#1001C0": {
+"dawn": "#AB86BC",
+"day": "#AB86BC",
+"night": "#AB86BC",
+"sunset": "#AB86BC"
+},
+"#1001C7": {
+"dawn": "#D585A4",
+"day": "#D585A4",
+"night": "#D585A4",
+"sunset": "#D585A4"
+},
+"#1001CE": {
+"dawn": "#EB8C90",
+"day": "#EB8C90",
+"night": "#EB8C90",
+"sunset": "#EB8C90"
+},
+"#1001D5": {
+"dawn": "#F29C86",
+"day": "#F29C86",
+"night": "#F29C86",
+"sunset": "#F29C86"
+},
+"#1001DC": {
+"dawn": "#FFD58A",
+"day": "#FFD58A",
+"night": "#FFD58A",
+"sunset": "#FFD58A"
+},
+"#1001E3": {
+"dawn": "#E4B24C",
+"day": "#E4B24C",
+"night": "#E4B24C",
+"sunset": "#E4B24C"
+},
+"#1001EA": {
+"dawn": "#FFE9A6",
+"day": "#FFE9A6",
+"night": "#FFE9A6",
+"sunset": "#FFE9A6"
+},
+"#1001F1": {
+"dawn": "#0E0E2E",
+"day": "#0E0E2E",
+"night": "#0E0E2E",
+"sunset": "#0E0E2E"
+},
+"#1001F8": {
+"dawn": "#1A1848",
+"day": "#1A1848",
+"night": "#1A1848",
+"sunset": "#1A1848"
+},
+"#1001FF": {
+"dawn": "#2E2565",
+"day": "#2E2565",
+"night": "#2E2565",
+"sunset": "#2E2565"
+},
+"#100206": {
+"dawn": "#4B3580",
+"day": "#4B3580",
+"night": "#4B3580",
+"sunset": "#4B3580"
+},
+"#10020D": {
+"dawn": "#6A4590",
+"day": "#6A4590",
+"night": "#6A4590",
+"sunset": "#6A4590"
+},
+"#100214": {
+"dawn": "#F4F2E0",
+"day": "#F4F2E0",
+"night": "#F4F2E0",
+"sunset": "#F4F2E0"
+},
+"#10021B": {
+"dawn": "#A4A6DC",
+"day": "#A4A6DC",
+"night": "#A4A6DC",
+"sunset": "#A4A6DC"
+},
+"#100222": {
+"dawn": "#EDE9D2",
+"day": "#EDE9D2",
+"night": "#EDE9D2",
+"sunset": "#EDE9D2"
+},
+"#100229": {
+"dawn": "#CFCBBC",
+"day": "#CFCBBC",
+"night": "#CFCBBC",
+"sunset": "#CFCBBC"
+},
+"#100230": {
+"dawn": "#8F8FE0",
+"day": "#8F8FE0",
+"night": "#8F8FE0",
+"sunset": "#8F8FE0"
+},
+"#100237": {
+"dawn": "#8577A7",
+"day": "#7989B9",
+"night": "#252B6B",
+"sunset": "#7E6998"
+},
+"#10023E": {
+"dawn": "#7E73A6",
+"day": "#7384B8",
+"night": "#212663",
+"sunset": "#756499"
+},
+"#100245": {
+"dawn": "#776EA6",
+"day": "#6C80B8",
+"night": "#1D215A",
+"sunset": "#6C609B"
+},
+"#10024C": {
+"dawn": "#8C7BA7",
+"day": "#808EBA",
+"night": "#293074",
+"sunset": "#876E97"
+},
+"#100253": {
+"dawn": "#706AA5",
+"day": "#657BB7",
+"night": "#191C51",
+"sunset": "#635B9C"
+},
+"#10025A": {
+"dawn": "#9480A8",
+"day": "#8793BA",
+"night": "#2D357D",
+"sunset": "#907296"
+},
+"#100261": {
+"dawn": "#A98DAA",
+"day": "#9BA2BC",
+"night": "#384597",
+"sunset": "#AB8092"
+},
+"#100268": {
+"dawn": "#9B84A9",
+"day": "#8D98BB",
+"night": "#313A85",
+"sunset": "#997795"
+},
+"#10026F": {
+"dawn": "#A289A9",
+"day": "#949DBB",
+"night": "#353F8E",
+"sunset": "#A27B93"
+},
+"#100276": {
+"dawn": "#B896AB",
+"day": "#A8ACBD",
+"night": "#404FA8",
+"sunset": "#BD8990"
+},
+"#10027D": {
+"dawn": "#B092AA",
+"day": "#A1A7BD",
+"night": "#3C4AA0",
+"sunset": "#B48591"
+},
+"#100284": {
+"dawn": "#FFEFDA",
+"day": "#FFFFEF",
+"night": "#718AE4",
+"sunset": "#FFE0B8"
+},
+"#10028B": {
+"dawn": "#B0A6D2",
+"day": "#AAC1E7",
+"night": "#313777",
+"sunset": "#9E95C7"
+},
+"#100292": {
+"dawn": "#565687",
+"day": "#506294",
+"night": "#192158",
+"sunset": "#514D7D"
+},
+"#100299": {
+"dawn": "#515287",
+"day": "#4B5E94",
+"night": "#161C50",
+"sunset": "#4A497E"
+},
+"#1002A0": {
+"dawn": "#4B4E86",
+"day": "#465A93",
+"night": "#131849",
+"sunset": "#43457F"
+},
+"#1002A7": {
+"dawn": "#5B5988",
+"day": "#556795",
+"night": "#1C2560",
+"sunset": "#58517C"
+},
+"#1002AE": {
+"dawn": "#464A85",
+"day": "#415693",
+"night": "#101441",
+"sunset": "#3D4280"
+},
+"#1002B5": {
+"dawn": "#615D88",
+"day": "#5A6B95",
+"night": "#1F2968",
+"sunset": "#5F557B"
+},
+"#1002BC": {
+"dawn": "#666189",
+"day": "#5F6F96",
+"night": "#222D70",
+"sunset": "#65597A"
+},
+"#1002C3": {
+"dawn": "#71688A",
+"day": "#697797",
+"night": "#273680",
+"sunset": "#736077"
+},
+"#1002CA": {
+"dawn": "#6C6589",
+"day": "#647396",
+"night": "#253278",
+"sunset": "#6C5C79"
+},
+"#1002D1": {
+"dawn": "#7C708B",
+"day": "#727F98",
+"night": "#2D3E8F",
+"sunset": "#816875"
+},
+"#1002D8": {
+"dawn": "#766C8A",
+"day": "#6E7B98",
+"night": "#2A3A88",
+"sunset": "#7A6476"
+},
+"#1002DF": {
+"dawn": "#324D4A",
+"day": "#295851",
+"night": "#0C1B2E",
+"sunset": "#2F4442"
+},
+"#1002E6": {
+"dawn": "#487F57",
+"day": "#409160",
+"night": "#17424E",
+"sunset": "#49754B"
+},
+"#1002ED": {
+"dawn": "#324E4A",
+"day": "#2A5A51",
+"night": "#0D1D30",
+"sunset": "#304542"
+},
+"#1002F4": {
+"dawn": "#355E49",
+"day": "#306B50",
+"night": "#102B38",
+"sunset": "#345641"
+},
+"#1002FB": {
+"dawn": "#91AF4D",
+"day": "#87C755",
+"night": "#35634B",
+"sunset": "#96A442"
+},
+"#100302": {
+"dawn": "#749945",
+"day": "#6FAE4B",
+"night": "#294D3A",
+"sunset": "#748F3D"
+},
+"#100309": {
+"dawn": "#CFD45A",
+"day": "#C3F162",
+"night": "#4F7C5B",
+"sunset": "#D8C84C"
+},
+"#100310": {
+"dawn": "#5B7F47",
+"day": "#57924E",
+"night": "#1A2E2B",
+"sunset": "#537343"
+},
+"#100317": {
+"dawn": "#2B4A43",
+"day": "#26554A",
+"night": "#0B1B2A",
+"sunset": "#29423D"
+},
+"#10031E": {
+"dawn": "#528852",
+"day": "#4B9A5A",
+"night": "#1D4B4F",
+"sunset": "#547F46"
+},
+"#100325": {
+"dawn": "#97C03E",
+"day": "#90D943",
+"night": "#3C7343",
+"sunset": "#9FB634"
+},
+"#10032C": {
+"dawn": "#4C8336",
+"day": "#49953B",
+"night": "#1B422E",
+"sunset": "#4C7A31"
+},
+"#100333": {
+"dawn": "#F3E862",
+"day": "#E7FF6A",
+"night": "#608B6A",
+"sunset": "#FFDC53"
+},
+"#10033A": {
+"dawn": "#173C31",
+"day": "#174435",
+"night": "#071820",
+"sunset": "#16372E"
+},
+"#100341": {
+"dawn": "#367640",
+"day": "#348646",
+"night": "#154542",
+"sunset": "#387037"
+},
+"#100348": {
+"dawn": "#97B953",
+"day": "#90D15A",
+"night": "#3C6F5A",
+"sunset": "#9FB046"
+},
+"#10034F": {
+"dawn": "#1C4234",
+"day": "#1C4C38",
+"night": "#091B22",
+"sunset": "#1A3D30"
+},
+"#100356": {
+"dawn": "#418043",
+"day": "#3E9149",
+"night": "#184741",
+"sunset": "#42783B"
+},
+"#10035D": {
+"dawn": "#8EB244",
+"day": "#87C94A",
+"night": "#386B4A",
+"sunset": "#94A93A"
+},
+"#100364": {
+"dawn": "#3C753C",
+"day": "#3A8541",
+"night": "#163B33",
+"sunset": "#3C6E36"
+}
+}

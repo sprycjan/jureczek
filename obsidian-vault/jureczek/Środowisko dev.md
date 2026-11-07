@@ -20,6 +20,9 @@ tags: [jureczek, srodowisko]
 - ⚠️ „Wstecz” na ekranie startowym zamyka aplikację – kolejne gesty trafiają w pulpit telefonu. Powrót: `adb shell monkey -p pl.mc.jureczek -c android.intent.category.LAUNCHER 1`.
 - Kopia bazy przed instalacją nowej wersji (pinezki już znikały): polecenie z „Podgląd bazy” do pliku poza repo.
 - Test migracji na urządzeniu: zbuduj lokalnie bazę w starym schemacie (`sqlite3`, `PRAGMA user_version = N`), `adb push` do `/data/local/tmp`, a potem `run-as pl.mc.jureczek cp` do `app_flutter/jureczek.sqlite` przy zatrzymanej aplikacji.
+- Wersja `--profile` na telefon bez `flutter run`: `flutter build apk --profile --target-platform android-arm64 --dart-define-from-file=env/dev.json`, potem `adb install -r build/app/outputs/flutter-apk/app-profile.apk`. `flutter run --no-resident ... | tail` potrafił wisieć ponad godzinę bez nowej wersji; zawartość APK można sprawdzić przez `unzip -p`.
+- Huawei nie ma `screenrecord`, a Flutter nie trafia do `gfxinfo`. Przebieg animacji sprawdzamy serią `adb exec-out screencap -p`, a czasy klatek przez `FrameTiming` w trybie `--profile`.
+- Ekran powitalny: grafiki `python3 -I tool/splash_art.py assets/splash --preview <katalog>` (podgląd w Chrome), a podgląd na telefonie to `lib/dev/splash_main.dart`: stuknięcie zmienia porę dnia, w logu są czasy klatek. Zob. [[v24 – ekran powitalny]].
 
 ## ⚠️ Pułapka: Gradle vs Java 25
 `flutter create` generuje Gradle 8.14, który nie działa z Java 25 (build kończy się błędem „What went wrong: 25.0.3”). Rozwiązanie: w `app/android/gradle/wrapper/gradle-wrapper.properties` ustawić `gradle-9.1.0-all.zip`. AGP 8.11.1 i Kotlin 2.2.20 działają z nim bez zmian. Pierwszy build trwa ~7 min (pobieranie Gradle i Mapbox SDK).

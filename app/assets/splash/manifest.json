@@ -1,0 +1,80 @@
+{
+ "sceneHeight": 1000,
+ "ground": 884,
+ "skyWidth": 3000,
+ "camperScale": 0.48,
+ "camper": {
+  "x": 215,
+  "y": 225,
+  "w": 620,
+  "h": 480,
+  "wheels": [
+   [
+    358,
+    641
+   ],
+   [
+    669,
+    641
+   ]
+  ],
+  "radius": 47.5,
+  "ground": 688.5,
+  "centerX": 530,
+  "nightPad": 100
+ },
+ "launchSky": [
+  "#7D74B4",
+  "#B884AE",
+  "#D98E9E"
+ ],
+ "scenes": [
+  {
+   "key": "alps",
+   "layers": [
+    {
+     "file": "scene_01/clouds.svg",
+     "period": 2400,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_01/far.svg",
+     "period": 2200,
+     "speed": 12,
+     "start": 1100
+    },
+    {
+     "file": "scene_01/near.svg",
+     "period": 1900,
+     "speed": 26,
+     "start": 950
+    },
+    {
+     "file": "scene_01/hills.svg",
+     "period": 2600,
+     "speed": 54,
+     "start": 1300
+    },
+    {
+     "file": "scene_01/trees.svg",
+     "period": 1700,
+     "speed": 92,
+     "start": 300
+    },
+    {
+     "file": "scene_01/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 0
+    },
+    {
+     "file": "scene_01/front.svg",
+     "period": 1500,
+     "speed": 215,
+     "start": 0
+    }
+   ]
+  }
+ ]
+}

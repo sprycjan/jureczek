@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tło przy starcie aplikacji: surface ze stylu Nocturnal (v8), bez białego błysku. -->
+<!-- Tło przy starcie aplikacji: neutralny zmierzch, ten sam co w pierwszej klatce ekranu
+     powitalnego (SplashConfig.launchSky, v24). Nie zależy od godziny, bo to zasób Androida. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <color android:color="#0D1511" />
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="270"
+                android:startColor="#7D74B4"
+                android:centerColor="#B884AE"
+                android:endColor="#D98E9E"
+                android:type="linear" />
+        </shape>
     </item>
 </layer-list>

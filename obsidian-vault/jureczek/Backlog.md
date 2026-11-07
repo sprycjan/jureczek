@@ -3,7 +3,7 @@ tags: [jureczek, backlog]
 ---
 # Backlog
 
-Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]], [[v22 – pinezka z gwiazdką]], [[v23 – archiwum podróży]].
+Pomysły i świadomie odłożone rzeczy po [[v1 – mapa i pinezki]], [[v2 – trwałe pinezki i usuwanie]] i [[v3 – nazwa i notatka]], [[v4 – wyszukiwarka miejsc]], [[v5 – kompas i skala]], [[v6 – klikalne POI]], [[v7 – animacja spadania pinezki]], [[v8 – styl Nocturnal Expedition]], [[v9 – kategorie pinezek]], [[v10 – foldery i ekran startowy]], [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]], [[v13 – przełącznik stylów mapy]], [[v14 – lokalizacja, ikony POI i kolor pinezki]], [[v15 – biblioteka ikon miejsc]], [[v16 – typy miejsc w pinezkach]], [[v17 – krótszy formularz pinezki]], [[v18 – filtr kategorii pinezek]], [[v19 – odnośnik do Google Maps]], [[v20 – polskie nazwy na mapie]], [[v21 – pinezka odwiedzona]], [[v22 – pinezka z gwiazdką]], [[v23 – archiwum podróży]], [[v24 – ekran powitalny]].
 
 ## Miejsca / pinezki
 - [x] Oznaczenie pinezki jako odwiedzonej – v21, [[v21 – pinezka odwiedzona]]
@@ -89,6 +89,9 @@ Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
 - [ ] Eksport / kopia zapasowa bazy (po niewyjaśnionej utracie pinezek testowych na telefonie 2026-10-26 – [[v3 – nazwa i notatka]])
 - [ ] Zbadać znikanie pinezek: znowu 2026-11-01 między instalacją v9 i v10 (baza po migracji pusta, migracja 4 → 5 sama działa) – [[v10 – foldery i ekran startowy]]
 - [x] Snackbary mapy zostają widoczne po powrocie na ekran startowy – v14 (własny `ScaffoldMessenger`)
+- [ ] Android 12+ pokazuje przed Flutterem własny ekran z ikoną; P30 (Android 10) tego nie sprawdzi. Do obejrzenia na nowszym telefonie – [[v24 – ekran powitalny]]
+- [ ] Zapis ostatniej sceny ekranu powitalnego, gdyby powtórki losowania przeszkadzały – [[v24 – ekran powitalny]]
+- [ ] Raster wolnych warstw ekranu powitalnego, gdyby pojawiły się przycięcia: zapas rastra na P30 jest mały – [[ADR-016 Ekran powitalny z warstw SVG]]
 
 ## Moje uwagi
 Rozpisane 2026-11-02 na v11–v13 – [[v11 – poprawki wyglądu]], [[v12 – własny styl mapy]].

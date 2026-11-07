@@ -88,6 +88,8 @@ flutter:
     - assets/place_icons/practical/
     - assets/landscapes/
     - assets/map/
+    - assets/splash/
+    - assets/splash/scene_01/
     - assets/fonts/OFL-Epilogue.txt
     - assets/fonts/OFL-SpaceGrotesk.txt
 

@@ -23,6 +23,7 @@ tags: [jureczek, przeglad]
 - Odnośnik do Google Maps: link Google → nazwa POI z adresem → współrzędne, bez płatnego `place_id` – [[ADR-013 Odnośnik do Google Maps bez place_id]]
 - Nazwy na mapie: kafelki `pl,en`, łaciński oryginał na POI i drogach, etykiety bez łacinki ukryte – [[ADR-014 Polskie nazwy na mapie]]
 - Archiwum folderów: data w `folders.archived_at_ms`, mapa wszystkich bez archiwum, folder z archiwum tylko do podglądu – [[ADR-015 Archiwizowanie folderów]]
+- Ekran powitalny: warstwy SVG z `tool/splash_art.py`, palety przez `ColorMapper`, nakładka nad Navigatorem – [[ADR-016 Ekran powitalny z warstw SVG]]
 
 ## Roadmapa
 | Wersja | Zakres | Status |
@@ -50,7 +51,8 @@ tags: [jureczek, przeglad]
 | v21 | Pinezka odwiedzona: kciuk w arkuszu zapisuje od razu, znaczek w rogu pinezki na mapie, data oznaczenia w bazie (schemat 9) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v21 – pinezka odwiedzona]] |
 | v22 | Pinezka z gwiazdką: przełącznik w arkuszu i formularzu nowej pinezki, kolumna znaczków przy główce, pinezki z gwiazdką rysowane nad zwykłymi, włączone nakładanie (schemat 10) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v22 – pinezka z gwiazdką]] |
 | v23 | Archiwum podróży: dolna belka, archiwizacja gestem i z menu z „Cofnij”, szary pejzaż, pinezki z archiwum ukryte na mapie wszystkich, folder z archiwum tylko do podglądu (schemat 11) | 🧪 sprawdzone przez adb, czeka na potwierdzenie – [[v23 – archiwum podróży]] |
-| v24+ | Patrz [[Backlog]] | — |
+| v24 | Animowany ekran powitalny: kamper w górach z paralaksą, 4 pory dnia, gotowość aplikacji, natywny gradient (etap 2 z 4: jedna scena z ośmiu) | 🚧 sprawdzone przez adb, czeka na test użytkownika – [[v24 – ekran powitalny]] |
+| v25+ | Patrz [[Backlog]] | — |
 
 ## Inne
 - [[Środowisko dev]] – jak uruchomić projekt
