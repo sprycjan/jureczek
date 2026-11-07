@@ -219,13 +219,13 @@ Future<Uint8List> renderPlacePinPng(
   bool selected = false,
   double pixelRatio = 3,
   Color? color,
-  AssetBundle? bundle,
 }) async {
   final geometry = PlacePinGeometry.of(selected: selected);
   final info = await vg.loadPicture(
+    // Bez `assetBundle`: po `loadString` rootBundle trzyma w pamięci `Future`, więc nie
+    // przejdzie do izolatu parsującego SVG. Domyślny bundle loader rozwiązuje poza nim.
     SvgAssetLoader(
       type.pinAsset(selected: selected),
-      assetBundle: bundle,
       colorMapper: color == null ? null : PinColorMapper(type.category, color),
     ),
     null,

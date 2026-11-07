@@ -183,7 +183,6 @@ Future<Uint8List> _renderBasePng(
       selected: selected,
       pixelRatio: pinImageScale,
       color: color?.color,
-      bundle: bundle,
     );
   }
   return _renderStandardPng(bundle, selected: selected, color: color);
