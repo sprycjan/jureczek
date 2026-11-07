@@ -60,6 +60,7 @@ MATERIALS = {  # colour, roughness, metallic
     "felga": ("#EBD5BE", 0.4, 0.0),
     "kolpak": ("#BCC9CF", 0.6, 0.0),
     "metal": ("#C9D2D6", 0.6, 0.0),  # painted look: no mirror reflections, to match the drawing
+    "lustro": ("#8FA6B2", 0.3, 0.0),
     "zderzak": ("#F1DFBE", 0.45, 0.0),
     "reflektor": ("#E5BD82", 0.15, 0.0),
     "swiatlo_tyl": ("#C28273", 0.25, 0.0),
@@ -210,6 +211,17 @@ def ellipsoid(c, rx, ry, rz, segs=10, rows=6):
             )
         rings.append(ring)
     return loft(rings)
+
+
+def yaw(tris, center, angle):
+    """Rotates a solid about the vertical axis through center."""
+    c, s = math.cos(angle), math.sin(angle)
+
+    def turn(p):
+        x, z = p[0] - center[0], p[2] - center[2]
+        return (center[0] + x * c + z * s, p[1], center[2] - x * s + z * c)
+
+    return [tuple(turn(p) for p in t) for t in tris]
 
 
 def lathe(profile, axis, center, segs):
@@ -973,6 +985,7 @@ def add_rear(part, proj):
     part.emboss(proj, "guma", plate, ((0.018, 0.004), (0.012, 0.016), (0.0, 0.012)), cap="krem")
 
 
+MIRROR_REACH = 0.15  # mirror head centre, measured out from the wall
 BUMPER_OFFSET = 0.05  # bumper centreline outside the body outline
 BUMPER_HALF_THICK = 0.055  # so its inner face just touches the body
 BUMPER_Y0, BUMPER_Y1 = 0.31, 0.56  # overlaps the body's lower edge at 0.45
@@ -1086,13 +1099,21 @@ def build_body():
             outline=0.012,
         )
 
-        x_out = s * (W * taper(1.5) + 0.04)
-        arm0 = (s * W * 0.82, *crop(1195, 595)[::-1])
-        elbow = (x_out, *crop(1190, 560)[::-1])
-        glass = (x_out + s * 0.02, *crop(1155, 530)[::-1])
-        part.solid("metal", tube(arm0, elbow, 0.014), outline=0.007)
-        part.solid("metal", tube(elbow, glass, 0.014), outline=0.007)
-        part.solid("metal", ellipsoid(glass, 0.03, 0.095, 0.058), outline=0.01)
+        # Mirror: the head is wide across the car and thin along it, its glass facing
+        # backwards and turned slightly towards the driver.
+        y_foot, z_foot = crop(1195, 595)[::-1]
+        y_head, z_head = crop(1155, 530)[::-1]
+        foot = (s * (body_side_x(y_foot, z_foot) - 0.01), y_foot, z_foot)
+        wall = body_side_x(y_head, z_head)
+        elbow = (s * (wall + 0.07), y_head - 0.1, z_head + 0.05)
+        head = (s * (wall + MIRROR_REACH), y_head, z_head)
+        part.solid("metal", tube(foot, elbow, 0.014), outline=0.007)
+        part.solid("metal", tube(elbow, (head[0] - s * 0.05, y_head - 0.05, z_head), 0.014), outline=0.007)
+        turn = s * math.radians(22)
+        shell = ellipsoid(head, 0.09, 0.105, 0.03, segs=16, rows=12)
+        part.solid("metal", yaw(shell, head, turn), outline=0.01)
+        pane = ellipsoid((head[0], head[1], head[2] - 0.018), 0.076, 0.09, 0.016, segs=16, rows=10)
+        part.solid("lustro", yaw(pane, head, turn), crease=80)
     return part
 
 
