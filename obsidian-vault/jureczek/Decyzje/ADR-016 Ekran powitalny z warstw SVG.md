@@ -20,6 +20,7 @@ Aplikacja startowała od ciemnego tła. Użytkownik chce animowanej ilustracji: 
 - `SplashOverlay` leży w `MaterialApp.builder`, nad Navigatorem. `HomeScreen` powstaje od razu pod spodem.
 - `SplashGate` to czysta klasa z timerami: jedno wyzwolenie, testowana w `fake_async`.
 - Rysujemy same `Picture`. Na P30 daje to około 60 klatek/s, bez kosztu pamięci rastra ([[v24 – ekran powitalny]]).
+- `SplashStart` wczytuje scenę od `main()` i wstrzymuje pierwszą klatkę Fluttera do jej gotowości, najwyżej 1 s. Dzięki temu po oknie Androida od razu widać scenę. Gradient we Flutterze zostaje tylko na spóźnienie albo błąd.
 
 ## Konsekwencje
 - Grafikę poprawia się w generatorze, a SVG jest wynikiem.
@@ -27,6 +28,8 @@ Aplikacja startowała od ciemnego tła. Użytkownik chce animowanej ilustracji: 
 - Zapas rastra na P30 jest mały, więc sceny nie mogą być cięższe od „Alp”. Wszystkie 8 scen mieści się w tym budżecie (ścieżki: 498–1657, odcinki: 21 699–44 933; najcięższe są same Alpy) i na P30 jedzie około 60 klatek/s; przy zimnym starcie przerwy przypadają na pierwszą sekundę, gdy wczytuje się scena, zob. [[v24 – ekran powitalny]]. Gdyby były albo pojawiły się przycięcia, kolejny krok to raster wolnych warstw (niebo, chmury, dalekie góry) do obrazu wielkości widoku.
 - Android 12+ pokazuje przed Flutterem własny ekran z ikoną; P30 tego nie sprawdzi ([[Backlog]]).
 - Grafika jest ozdobą: błąd wczytania daje sam gradient i normalny start.
+- Okno startowe Androida to zasób stały, więc do pierwszej klatki nie zna sceny ani pory dnia. Na Androidzie 10 tego się nie obejdzie; dopasowanie wymagałoby stałego obrazka i przenikania do wylosowanej sceny ([[Backlog]]).
+- Pierwsza klatka przychodzi o około 100 ms później niż dawna klatka z gradientem, ale scena jest w pełni widoczna o około 400 ms wcześniej.
 
 ## Powiązane
 [[v24 – ekran powitalny]], [[ADR-011 Biblioteka ikon miejsc w SVG]], [[ADR-002 Riverpod]], [[00 Jureczek – przegląd]]

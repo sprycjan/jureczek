@@ -6,6 +6,7 @@ class SplashConfig {
     this.minimumDuration = const Duration(milliseconds: 3500),
     this.readinessLimit = const Duration(seconds: 10),
     this.launchFade = const Duration(milliseconds: 400),
+    this.firstFrameLimit = const Duration(seconds: 1),
     this.enterDuration = const Duration(milliseconds: 1300),
     this.driveOffDuration = const Duration(milliseconds: 700),
     this.fadeDelay = const Duration(milliseconds: 600),
@@ -38,8 +39,11 @@ class SplashConfig {
   /// Po tym czasie ekran znika, nawet gdy aplikacja nie zgłosiła gotowości.
   final Duration readinessLimit;
 
-  /// Przejście z natywnego tła startowego w niebo pory dnia.
+  /// Przejście z gradientu w scenę, tylko gdy scena spóźniła się na pierwszą klatkę.
   final Duration launchFade;
+
+  /// Tyle najwyżej pierwsza klatka Fluttera czeka na scenę; potem pokazuje gradient.
+  final Duration firstFrameLimit;
 
   /// Wjazd kampera (faza A).
   final Duration enterDuration;
@@ -93,8 +97,8 @@ class SplashConfig {
   final double pebbleLift;
   final double pebbleContact;
 
-  /// Neutralny zmierzch: ten sam w `launch_background.xml` i w pierwszej klatce Fluttera.
-  /// Natywne tło nie zależy od godziny, więc nie może mieć koloru pory dnia.
+  /// Neutralny zmierzch z `launch_background.xml`, a we Flutterze zapas na spóźnioną albo
+  /// niewczytaną scenę. Natywne tło nie zależy od godziny, więc nie ma koloru pory dnia.
   static const launchSky = [
     Color(0xFF7D74B4),
     Color(0xFFB884AE),

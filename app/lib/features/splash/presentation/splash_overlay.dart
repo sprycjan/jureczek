@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,12 +46,16 @@ class SplashOverlay extends ConsumerStatefulWidget {
     this.config = const SplashConfig(),
     this.loadArt = loadRandomSplashArt,
     this.precacheHeader = _precacheHeader,
+    this.onArtSettled,
   });
 
   final Widget child;
   final SplashConfig config;
   final SplashArtSource loadArt;
   final SplashImagePrecache precacheHeader;
+
+  /// Scena jest gotowa do rysowania albo jej nie będzie: można pokazać pierwszą klatkę.
+  final VoidCallback? onArtSettled;
 
   @override
   ConsumerState<SplashOverlay> createState() => _SplashOverlayState();
@@ -146,7 +151,13 @@ class _SplashOverlayState extends ConsumerState<SplashOverlay>
       }
       setState(() => _art = art);
       if (_leaving) return;
-      _launch.reverse();
+      // Scena zdążyła na pierwszą klatkę: gradientu nigdy nie było widać, więc nie ma
+      // czego przenikać. Bez tego różowa zasłona zostawała jeszcze 0,4 s.
+      if (RendererBinding.instance.sendFramesToEngine) {
+        _launch.reverse();
+      } else {
+        _launch.value = 0;
+      }
       if (!_still) {
         _motion
           ..attach(art)
@@ -158,6 +169,8 @@ class _SplashOverlayState extends ConsumerState<SplashOverlay>
       // Grafika jest ozdobą: bez niej zostaje gradient, a aplikacja startuje normalnie.
       debugPrint('Ekran powitalny bez grafiki: ${e.runtimeType}');
       if (mounted) _gate.skipMinimum();
+    } finally {
+      widget.onArtSettled?.call();
     }
   }
 

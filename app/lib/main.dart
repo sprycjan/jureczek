@@ -6,14 +6,32 @@ import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'app.dart';
 import 'core/config/app_config.dart';
+import 'features/home/domain/landscape.dart';
 import 'features/map/presentation/map_labels.dart';
+import 'features/splash/application/splash_start.dart';
+import 'features/splash/domain/splash_config.dart';
+import 'features/splash/presentation/splash_overlay.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
   MapboxOptions.setAccessToken(mapboxAccessToken);
   MapboxMapsOptions.setLanguage(mapLabelLanguage);
   _registerFontLicenses();
-  runApp(const ProviderScope(child: JureczekApp()));
+  runApp(
+    ProviderScope(
+      child: JureczekApp(
+        // Bez tokenu nie ma nakładki, która zwolniłaby pierwszą klatkę.
+        splashStart: mapboxAccessToken.isEmpty
+            ? null
+            : SplashStart(
+                art: loadRandomSplashArt(Landscape.at(DateTime.now())),
+                deferFirstFrame: binding.deferFirstFrame,
+                allowFirstFrame: binding.allowFirstFrame,
+                limit: const SplashConfig().firstFrameLimit,
+              ),
+      ),
+    ),
+  );
 }
 
 /// Licencje OFL dołączonych czcionek – widoczne na liście licencji aplikacji.

@@ -15,7 +15,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 - **Czas:** minimum 3,5 s, ale bez blokowania startu. Faza C rusza raz, gdy aplikacja jest gotowa i minimum minęło.
 - **Gotowość:** pierwszy wynik `foldersProvider` (dane albo błąd) i obraz nagłówka. Limit 10 s.
 - **Pory dnia:** 4 palety wg `Landscape.at()`. W nocy świecą okna, przednia szyba, namiot i reflektor, a tylna lampa ma czerwoną poświatę.
-- **Natywne tło:** neutralny gradient zmierzchu, ten sam w pierwszej klatce Fluttera, potem 0,4 s przejścia w niebo pory dnia.
+- **Natywne tło:** neutralny gradient zmierzchu tylko do pierwszej klatki Fluttera, a ta jest już sceną z ruszającym kamperem. Gradient we Flutterze i 0,4 s przejścia to zapas na scenę spóźnioną ponad limit 1 s.
 - **Rysunki:** `tool/splash_art.py` generuje kampera, kamyk, 4 nieba i 8 scen po 7 warstw: Alpy, dolina z turkusowym jeziorem, łąki z krętą drogą, wąwóz z rzeką i wiaduktem, złoty las modrzewiowy, czerwone skały i stoliwa, fiord, wysoka przełęcz z głazami i wodospadem.
 - **Zawieszenie:** dwa końce nadwozia na sprężynach, oparte o koła na własnych, sztywniejszych sprężynach. Nadwozie i nadkola się przechylają, a koła i cień zostają na drodze.
 
@@ -27,7 +27,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 | 3 | Zimny start z udostępnienia | bez minimum, faza C od razu po gotowości |
 | 4 | Pominięcie stuknięciem | tak; przed gotowością zapamiętane, w fazie C ignorowane, w fazie A kamper rusza z bieżącego miejsca |
 | 5 | Zawieszona gotowość | limit 10 s, potem ekran startowy z własnym stanem ładowania |
-| 6 | Pierwsza klatka | natywny fiołkowy zmierzch, bo zasób Androida nie zależy od godziny |
+| 6 | Pierwsza klatka | okno Androida: fiołkowy zmierzch, bo zasób nie zależy od godziny. Flutter: wstrzymana do gotowej sceny, bez zasłony (po uwadze użytkownika) |
 | 7 | Wyjście | około 1,1 s: odjazd 0,7 s, przenikanie 0,5 s od 0,6 s; razem około 4,6 s |
 | 8 | Różnorodność | 8 krajobrazów, czysty los przy każdym uruchomieniu, bez zapisu (etap 3) |
 | 9 | „Usuń animacje” w systemie | nieruchoma scena 3,5 s, potem przenikanie |
@@ -39,6 +39,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 | 15 | Kamyki | pierwszy najazd 1,7–2,2 s, kolejne co 3–5 s, różna wielkość; podczas odjazdu bez najazdów, bo kamper zmienia prędkość |
 | 16 | Sceny 2–8 | te same klocki co w Alpach, własne okresy warstw i pierwszy kadr ułożony pod pion; kolory pierwszego planu różne tylko tam, gdzie zielony by nie pasował (modrzewie, stoliwa, przełęcz) |
 | 17 | Wąwóz | most kończy się za ścianami skalnymi, żeby przy przewijaniu nie było widać urwanego końca |
+| 18 | Start od kliknięcia | scena wczytywana od `main()`, pierwsza klatka czeka na nią najwyżej 1 s; minimum 3,5 s i tempo wyjścia bez zmian |
 
 ## Pliki
 - `tool/splash_art.py`: generator SVG, palet i manifestu. SVG się nie edytuje.
@@ -47,6 +48,8 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 - `lib/features/splash/domain/splash_gate.dart`: czysta bramka gotowości, jedno wyzwolenie.
 - `lib/features/splash/domain/splash_manifest.dart`: opis grafik.
 - `lib/features/splash/application/splash_motion.dart`: `SplashFrame`, fazy A/B/C, zawieszenie i kamyki, bez zegara.
+- `lib/features/splash/application/splash_start.dart`: scena wczytywana przed `runApp`, wstrzymanie pierwszej klatki i limit.
+- `lib/main.dart`: tworzy `SplashStart`, gdy jest token.
 - `lib/features/splash/data/splash_art_loader.dart`: `ColorMapper` palety, wczytanie tylko wybranej sceny.
 - `lib/features/splash/presentation/splash_scene_painter.dart`: paralaksa, kamper na zawieszeniu, kurz, kamyki.
 - `lib/features/splash/presentation/splash_overlay.dart`: nakładka, gotowość, cykl życia.
@@ -80,8 +83,25 @@ Zimny start w prawdziwej aplikacji, z tymczasowym logiem `FrameTiming` usunięty
 - przerwy ponad 25 ms przypadają na pierwszą sekundę, gdy wczytuje się scena; najdłuższa ma 99 ms. Po pierwszej sekundzie przerw nie ma, wyjątkiem jest jeden start z dwiema (łąki);
 - **pierwszy start po instalacji** (4 próby: Alpy trzy razy, modrzewie raz) ma przerwę około 900 ms i około 222 klatek, także w lżejszej scenie, więc wynika z instalacji, a nie z rysunku. Kolejne starty tej samej wersji jej nie mają.
 
+## Pomiar czasu startu na P30
+Od `START u0` w logcacie, 6 zimnych startów na build, pierwszy start po instalacji odrzucony. Znaczniki były tymczasowe.
+
+| Moment | `release` przed | `release` po | `profile` po |
+|---|---|---|---|
+| `main()` | 166–190 ms | 160–203 ms | 625–658 ms |
+| Foldery i obraz nagłówka gotowe | 307–399 ms | 300–351 ms | 784–869 ms |
+| Pierwsza klatka Fluttera | 256–291 ms, gradient | 337–430 ms, scena | 861–910 ms, scena |
+| Scena w pełni widoczna | około 760–840 ms | 337–430 ms | 861–910 ms |
+| „Displayed” | 309–336 ms | 358–453 ms | 879–934 ms |
+
+Wiersz „Scena w pełni widoczna” przed zmianą to czas wczytania sceny plus 400 ms przenikania, wyliczony, a nie zmierzony. Sama `profile` przed zmianą: „Displayed” 779–812 ms. Różnicę między `profile` a `release` daje prawie w całości czas do `main()`.
+
+**Aplikacja jest gotowa około 0,35 s po kliknięciu (`release`), więc ekran powitalny nie przykrywa długiego ładowania.** Dalsze około 3,3 s to wybrane minimum. Mapa nie wchodzi w ten czas, bo wczytuje się dopiero po wejściu na nią.
+
 ## Pułapki
-- `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”). Bundle podajemy tylko w testach.
+- `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”), gdy wcześniej ktoś wywołał `rootBundle.loadString`, bo pamięć podręczna trzyma wtedy `Future`. **W `flutter test` tego błędu nie widać**, nawet po `loadString`, więc test nie zastąpi sprawdzenia na telefonie. Bundle podajemy tylko w testach sceny, a `renderPlacePinPng` nie ma już takiego parametru.
+- `allowFirstFrame` musi mieć dokładnie jedną parę z `deferFirstFrame`, dlatego wstrzymanie jest w `main()`, a nie w nakładce: testy i `showSplash: false` go nie dotykają.
+- Kontynuacja po `await` wykonuje się w teście po klatce, więc pierwszy takt animacji uruchomionej po dostarczeniu sceny przypada na kolejny `pump`.
 - Nocna nakładka leży nad całym nadwoziem, więc przykrywa wszystko, co w dzień jest nad szybą. Podziałka i lusterko są wspólnymi elementami i są rysowane w obu wersjach.
 - Cień kampera leży na drodze, a nadkola należą do nadwozia, dlatego `camper_under.svg` rozdzielono na cień i nadkola.
 - Fizyka liczy się krokiem 1/240 s: sprężyna koła jest sztywna, a krok równy klatce mógłby ją rozhuśtać.
@@ -117,6 +137,14 @@ Zimny start w prawdziwej aplikacji, z tymczasowym logiem `FrameTiming` usunięty
 - [x] Chrome: szew pętli wszystkich 56 warstw, pomiar różnicy kolumn na granicy kafelków i oględziny powiększeń; bez nieciągłości i bez podwójnego rysowania na zakładce. Na P30 sprawdzony na zrzucie w poziomie, gdzie granica kafelków drogi jest w kadrze stale (okres 1240 przy widoku 1400): bez śladu. Dalekich warstw telefon nie przewinął do szwu, bo przy prędkości 5–12 j./s trwałoby to minuty
 - [x] P30 przez adb: zimny start z udostępnienia przy 8 scenach, mapa z kartą miejsca około 2,6 s od wysłania linku, bez minimum 3,5 s
 - [x] P30: płynność przy zimnym starcie, pomiar wyżej
+- [x] Po poprawce startu: `flutter analyze` 0 issues, `flutter test` 356/356
+- [x] P30 przez adb, `release`: serią zrzutów gradient tylko w rozwijanym oknie systemu, następny zrzut to już scena z kamperem; zrzuty mają około 0,45 s odstępu, więc pojedynczych klatek nie widać
+- [x] P30 przez adb: scena gotowa przed pierwszą klatką we wszystkich 12 mierzonych startach (6 `release`, 6 `profile`)
+- [x] P30 przez adb, `release`: mapa z kafelkami i pinezkami; na czystym commicie 0f78d2c błąd izolatu w logu i pusta mapa, po poprawce bez błędu i z pinezkami
+- [x] P30 przez adb, `release`: zimny start z udostępnienia kończy się mapą z kartą miejsca
+- [ ] Użytkownik: start z ikony na telefonie, czy nadal wygląda jak ekran ładowania
+- [ ] P30: płynność pierwszej sekundy po tej zmianie nie była mierzona osobno
+- [ ] Ścieżka limitu 1 s na telefonie: nie wystąpiła w pomiarach, sprawdzają ją testy `SplashStart` i przenikania
 
 ## Poprawki po teście
 - Chmury narysowane od nowa po uwadze „wyglądają jak bąble”.
@@ -124,9 +152,13 @@ Zimny start w prawdziwej aplikacji, z tymczasowym logiem `FrameTiming` usunięty
 - Tylne światło na czerwono w nocy (prośba użytkownika).
 - Noc: świeci przednia szyba, lusterko nie jest zasłonięte, podziałka szyby kabiny wróciła (uwaga użytkownika).
 - Kurz także za przednimi kołami, zawieszenie reagujące na przyspieszanie i hamowanie, kamyki na drodze (prośba użytkownika).
+- **Start od kliknięcia:** użytkownik zauważył, że różowy ekran wygląda jak ładowanie, a animacja jak dodatek po nim. Pomiar przyznał mu rację: gotowość przychodziła przed animacją, a Flutter sam rysował różowe klatki i jeszcze 0,4 s zanikania. Teraz scena wczytuje się od `main()`, pierwsza klatka na nią czeka, a zasłony nie ma. Na telefonie był też build `profile`, wolniejszy o około 0,5 s; teraz jest `release`.
+- **Regresja v24, pinezki znikały z mapy:** ekran powitalny czyta `manifest.json` i `palettes.json` przez `rootBundle.loadString`, a potem pinezka typu wysyłała `rootBundle` do izolatu. Wyjątek przerywał całą synchronizację, więc mapa była pusta. Sprawdzone na czystym 0f78d2c. Wykryte przy tej poprawce; zapisane pinezki nie były zagrożone.
 - Etap 3, własny przegląd arkusza przed pokazaniem: filary mostu i rzeka wisiały w powietrzu, fiord nie miał stromych ścian, pod wodą i u stóp gór prześwitywało niebo, wodospad na przełęczy zaczynał się w powietrzu, chmura zasłaniała słońce na łąkach.
 
 ## Otwarte
+- Okno Androida nadal ma gradient przez około 0,4 s (`release`), także w animacji rozwijania z ikony. Nie da się w nim losować sceny ani pory dnia; opcja w [[Backlog]].
+- Czy minimum 3,5 s zostaje, skoro aplikacja jest gotowa po około 0,35 s: decyzja użytkownika.
 - Kosmetyka rysunków w [[Backlog]].
 - Skała jest bardziej kanciasta niż na referencji; użytkownik zaakceptował styl z 2026-11-07.
 - `resorces/bgs.png` nie jest w repo: to cudza ilustracja, służy tylko jako referencja.

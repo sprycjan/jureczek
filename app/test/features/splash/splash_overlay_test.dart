@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jureczek/features/folders/application/folders_providers.dart';
 import 'package:jureczek/features/folders/domain/trip_folder.dart';
+import 'package:jureczek/features/home/domain/landscape.dart';
 import 'package:jureczek/features/share/application/shared_place_controller.dart';
 import 'package:jureczek/features/splash/data/splash_art_loader.dart';
 import 'package:jureczek/features/splash/domain/splash_config.dart';
@@ -67,6 +68,7 @@ void main() {
     SplashArtSource? loadArt,
     Completer<void>? header,
     bool disableAnimations = false,
+    VoidCallback? onArtSettled,
   }) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -78,6 +80,7 @@ void main() {
             child: SplashOverlay(
               loadArt: loadArt ?? (_) => Completer<SplashArt>().future,
               precacheHeader: (_, _) => header?.future ?? Future<void>.value(),
+              onArtSettled: onArtSettled,
               child: const _Home(),
             ),
           ),
@@ -191,6 +194,86 @@ void main() {
     await finishFade(tester);
     expect(_overlay, findsNothing);
     expect(find.text('ekran startowy'), findsOneWidget);
+  });
+
+  testWidgets('scena gotowa przed pierwszą klatką: bez zasłony z gradientu', (
+    tester,
+  ) async {
+    final art = await tester.runAsync(() async {
+      return loadSplashArt(
+        manifest: await loadSplashManifest(rootBundle),
+        sceneIndex: 0,
+        period: Landscape.day,
+        bundle: rootBundle,
+      );
+    });
+    addTearDown(tester.binding.allowFirstFrame);
+    tester.binding
+      ..resetFirstFrameSent()
+      ..deferFirstFrame();
+    var settled = 0;
+
+    await pump(
+      tester,
+      loadArt: (_) async => art!,
+      onArtSettled: () => settled++,
+    );
+
+    expect(settled, 1);
+    final curtain = tester.widget<FadeTransition>(
+      find
+          .ancestor(
+            of: find.byType(DecoratedBox),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
+    );
+    expect(curtain.opacity.value, 0);
+    expect(find.byType(CustomPaint), findsWidgets);
+  });
+
+  testWidgets('scena spóźniona na pierwszą klatkę: gradient przenika w scenę', (
+    tester,
+  ) async {
+    final art = await tester.runAsync(() async {
+      return loadSplashArt(
+        manifest: await loadSplashManifest(rootBundle),
+        sceneIndex: 0,
+        period: Landscape.day,
+        bundle: rootBundle,
+      );
+    });
+    final late_ = Completer<SplashArt>();
+    await pump(tester, loadArt: (_) => late_.future);
+    FadeTransition curtain() => tester.widget<FadeTransition>(
+      find
+          .ancestor(
+            of: find.byType(DecoratedBox),
+            matching: find.byType(FadeTransition),
+          )
+          .first,
+    );
+    expect(curtain().opacity.value, 1);
+
+    late_.complete(art);
+    // Pierwszy pump dostarcza scenę, drugi to pierwszy takt przenikania.
+    await tester.pump();
+    await tester.pump();
+    expect(curtain().opacity.value, 1);
+    await tester.pump(_config.launchFade ~/ 2);
+    expect(curtain().opacity.value, closeTo(0.5, 0.05));
+    await tester.pump(_config.launchFade);
+    expect(curtain().opacity.value, 0);
+  });
+
+  testWidgets('nieudane wczytanie też zwalnia pierwszą klatkę', (tester) async {
+    var settled = 0;
+    await pump(
+      tester,
+      loadArt: (_) async => throw StateError('brak pliku'),
+      onArtSettled: () => settled++,
+    );
+    expect(settled, 1);
   });
 
   testWidgets('przebudowa nie zaczyna minimum od nowa', (tester) async {

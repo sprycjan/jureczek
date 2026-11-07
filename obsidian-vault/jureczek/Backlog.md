@@ -85,11 +85,13 @@ Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
 - [x] Repozytorium git na GitHubie (sprycjan/jureczek) – [[ADR-004 Struktura repo (app)]]
 - [ ] iOS (`flutter create --platforms ios .`)
 - [ ] CI: `flutter analyze` + `flutter test`
-- [ ] Uprawnienie `INTERNET` w `android/app/src/main/AndroidManifest.xml`. Teraz jest tylko w `src/debug/` i `src/profile/`, więc build release prawdopodobnie nie ma sieci (kafelki mapy, wyszukiwarka). Wykryte 2026-10-26.
+- [x] Uprawnienie `INTERNET` w buildzie release: dokłada je zależność (`aapt dump permissions`), a kafelki mapy ładują się na P30. Własny wpis w głównym manifeście byłby tylko zabezpieczeniem. Sprawdzone 2026-11-07.
 - [ ] Eksport / kopia zapasowa bazy (po niewyjaśnionej utracie pinezek testowych na telefonie 2026-10-26 – [[v3 – nazwa i notatka]])
 - [ ] Zbadać znikanie pinezek: znowu 2026-11-01 między instalacją v9 i v10 (baza po migracji pusta, migracja 4 → 5 sama działa) – [[v10 – foldery i ekran startowy]]
 - [x] Snackbary mapy zostają widoczne po powrocie na ekran startowy – v14 (własny `ScaffoldMessenger`)
 - [ ] Android 12+ pokazuje przed Flutterem własny ekran z ikoną; P30 (Android 10) tego nie sprawdzi. Do obejrzenia na nowszym telefonie – [[v24 – ekran powitalny]]
+- [ ] Stały obrazek krajobrazu w oknie startowym Androida zamiast gradientu, z przenikaniem do wylosowanej sceny, jeśli około 0,4 s gradientu nadal będzie przeszkadzać. Koszt: obrazek w APK i widoczna zmiana krajobrazu – [[v24 – ekran powitalny]]
+- [ ] Ekran powitalny: czy zostawić minimum 3,5 s, skoro aplikacja jest gotowa po około 0,35 s – [[v24 – ekran powitalny]]
 - [ ] Zapis ostatniej sceny ekranu powitalnego, gdyby powtórki losowania przeszkadzały – [[v24 – ekran powitalny]]
 - [ ] Ekran powitalny, kosmetyka: jasna płyta na ścianach wąwozu wygląda jak przyklejony wielokąt, w poziomie ściany wąwozu czytają się jak dwie skalne wieże, jasne pasy stoliw odcinają się nocą – [[v24 – ekran powitalny]]
 - [ ] Ekran startowy w poziomie: nagłówek zajmuje prawie cały ekran, zauważone przy teście obrotu – [[v24 – ekran powitalny]]
