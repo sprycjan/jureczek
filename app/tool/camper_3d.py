@@ -238,19 +238,64 @@ def lathe(profile, axis, center, segs):
     return loft(rings)
 
 
-def sweep(path, hu, hv, y, r):
-    """Sweeps a rounded section along a (x, z) path, with bevelled ends."""
-    section = rounded_rect(hu, hv, r, corner=1)
+def sweep(path, hu, hv, y, r, corner=1, spans=None):
+    """Sweeps a rounded section along a (x, z) path, with bevelled ends.
+    spans optionally gives (centre y, half height) for each path point."""
     rings = []
     last = len(path) - 1
     for i, p in enumerate(path):
         a, b = path[max(i - 1, 0)], path[min(i + 1, last)]
-        tx, tz = unit((b[0] - a[0], 0, b[1] - a[1]))[0], unit((b[0] - a[0], 0, b[1] - a[1]))[2]
+        tx, _, tz = unit((b[0] - a[0], 0, b[1] - a[1]))
         nx, nz = tz, -tx
         scale = 0.55 if i in (0, last) else 1.0
+        cy, half = spans[i] if spans else (y, hv)
+        section = rounded_rect(hu, half, r, corner=corner)
         rings.append(
-            [(p[0] + nx * u * scale, y + v * scale, p[1] + nz * u * scale) for u, v in section]
+            [(p[0] + nx * u * scale, cy + v * scale, p[1] + nz * u * scale) for u, v in section]
         )
+    return loft(rings)
+
+
+def pipe(points, r, sides=8):
+    """Tube along a 3D path; the path must stay away from vertical."""
+    rings = []
+    last = len(points) - 1
+    for i, p in enumerate(points):
+        t = unit(sub(points[min(i + 1, last)], points[max(i - 1, 0)]))
+        u = unit(cross(t, (0.0, 1.0, 0.0)))
+        v = cross(t, u)
+        ring = []
+        for k in range(sides):
+            a = 2 * math.pi * k / sides
+            ring.append(add(p, add(mul(u, r * math.cos(a)), mul(v, r * math.sin(a)))))
+        rings.append(ring)
+    return loft(rings)
+
+
+def catmull(points, n):
+    """Smooths a path through its points, n segments per span; works in any dimension."""
+    out = []
+    m = len(points)
+    for i in range(m - 1):
+        p0, p1, p2, p3 = points[max(i - 1, 0)], points[i], points[i + 1], points[min(i + 2, m - 1)]
+        for k in range(n):
+            t = k / n
+            out.append(
+                tuple(
+                    0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t**2 + (3 * b - a - 3 * c + d) * t**3)
+                    for a, b, c, d in zip(p0, p1, p2, p3)
+                )
+            )
+    out.append(points[-1])
+    return out
+
+
+def mirror_head(center, hx, hy, r, t):
+    """Tall rounded rectangle, thin along Z: domed back towards +Z, flat face towards -Z."""
+    rings = []
+    for z, inset in ((t, 0.03), (t * 0.55, 0.008), (-t * 0.6, 0.0), (-t, 0.006)):
+        plan = rounded_rect(hx - inset, hy - inset, max(r - inset, 0.005), corner=3)
+        rings.append([(center[0] + u, center[1] + v, center[2] + z) for u, v in plan])
     return loft(rings)
 
 
@@ -959,9 +1004,24 @@ def add_front(part, proj):
         mid = proj.hit(s * 0.40, 1.645, (0.0, 1.7), 0.04)
         part.solid("guma", tube(blade_a, blade_b, 0.009, sides=5))
         part.solid("guma", tube(pivot, mid, 0.007, sides=5))
-        # Indicators above the headlights.
-        c = proj.hit(s * 0.6, 1.1, (0.0, 1.1), 0.0)
-        part.solid("reflektor", ellipsoid(c, 0.05, 0.028, 0.022, segs=10, rows=4), crease=80)
+        # Round indicators above the headlights, turned to follow the curved nose.
+        c = proj.hit(s * 0.6, 1.12, (0.0, 1.12), 0.0)
+        inner = proj.hit(s * 0.55, 1.12, (0.0, 1.12), 0.0)
+        outer = proj.hit(s * 0.65, 1.12, (0.0, 1.12), 0.0)
+        turn = s * min(math.atan((inner[2] - outer[2]) / 0.1), math.radians(35))
+        base = (c[0], c[1], c[2] - 0.025)
+        lamp = lathe(
+            [(0.066, 0.0), (0.066, 0.042), (0.052, 0.052), (0.05, 0.054), (0.03, 0.068), (0.0, 0.074)],
+            "z",
+            base,
+            16,
+        )
+        for t in shade(lamp, 40):
+            r = max(math.hypot(q[0][0] - base[0], q[0][1] - base[1]) for q in t)
+            part.prims["reflektor" if r <= 0.0505 else "metal"].append(
+                tuple((yaw([(q[0], q[0], q[0])], base, turn)[0][0], q[1]) for q in t)
+            )
+        part.prims["kontur"] += shade(inflate(yaw(lamp, base, turn), 0.009), 180)
     # Fresh-air grille between the windscreen and the V.
     louvres(part, proj, -0.34, 0.34, [1.28, 1.335, 1.39, 1.445], 0.032, "krem")
 
@@ -985,38 +1045,92 @@ def add_rear(part, proj):
     part.emboss(proj, "guma", plate, ((0.018, 0.004), (0.012, 0.016), (0.0, 0.012)), cap="krem")
 
 
-MIRROR_REACH = 0.15  # mirror head centre, measured out from the wall
+MIRROR_REACH = 0.17  # mirror head centre, measured out from the wall
+MIRROR_Y, MIRROR_Z = 1.74, 1.55
+MIRROR_FOOT_Y = 1.40
 BUMPER_OFFSET = 0.05  # bumper centreline outside the body outline
 BUMPER_HALF_THICK = 0.055  # so its inner face just touches the body
-BUMPER_Y0, BUMPER_Y1 = 0.31, 0.56  # overlaps the body's lower edge at 0.45
+BUMPER_Y0 = 0.33
+BUMPER_TOP = 0.47  # overlaps the body's lower edge at 0.45
+BUMPER_CORNER_RISE = 0.02
+BUMPER_FRONT_START, BUMPER_REAR_START = 1.66, -1.93  # both clear the fenders
+BUMPER_FRONT_ARC, BUMPER_REAR_ARC = 1.80, -2.0
+BAR_Y = 0.60  # the bar above the blade, at the middle of the car
+BAR_RISE = 0.04  # and how much it climbs towards the corners
+BAR_RADIUS = 0.021
+GUARD_X_FRONT, GUARD_X_REAR = 0.50, 0.34  # the rear pair clears the tail lights
+GUARD_TOP = 0.66
 
 
-def bumper_path(front, extra=0.0, tuck=True):
-    if front:
-        zs = [1.66, 1.8, 1.92, 2.02, 2.1, 2.16, 2.2, Z_MAX]
-    else:
-        zs = [-1.95, -2.03, -2.1, -2.15, -2.19, -2.215, Z_MIN]
-    outline = [(body_halfwidth(z), z) for z in zs]
+def bumper_plan(front, extra=0.0):
+    """Half of the bumper's plan, side to centre: straight, a clean arc, then across.
+    Returns the side points and the arc points; the arc clears the body's corner."""
     sign = 1 if front else -1
-    offset = BUMPER_OFFSET + extra
-    half = []
-    for i, (x, z) in enumerate(outline):
-        a, b = outline[max(i - 1, 0)], outline[min(i + 1, len(outline) - 1)]
-        tx, tz = b[0] - a[0], b[1] - a[1]
-        length = math.hypot(tx, tz)
-        nx, nz = sign * tz / length, -sign * tx / length
-        half.append((x + nx * offset, z + nz * offset))
-    if tuck:
-        # The free ends curve into the wall instead of standing off it.
-        first_z = outline[0][1]
-        half[:0] = [
-            (body_halfwidth(first_z) - 0.03, first_z - sign * 0.09),
-            (body_halfwidth(first_z) + 0.012, first_z - sign * 0.045),
-        ]
-    # Across the flat end of the car, on the offset line.
-    z_end = zs[-1] + sign * offset
-    half.append((outline[-1][0] * 0.55, z_end))
-    return half + [(-x, z) for x, z in reversed(half)]
+    first_z = BUMPER_FRONT_START if front else BUMPER_REAR_START
+    arc_z = BUMPER_FRONT_ARC if front else BUMPER_REAR_ARC
+    x_side = body_halfwidth(first_z) + BUMPER_OFFSET + extra
+    x_face = 0.5 if front else 0.55
+    z_face = (Z_MAX if front else Z_MIN) + sign * (BUMPER_OFFSET + extra)
+    side = [(x_side, first_z), (x_side, (first_z + arc_z) / 2)]
+    arc = []
+    for i in range(9):
+        a = math.pi / 2 * i / 8
+        arc.append((x_face + (x_side - x_face) * math.cos(a), arc_z + (z_face - arc_z) * math.sin(a)))
+    return side, arc
+
+
+def blade_top(x, z, first_z):
+    """Top edge of the blade: slightly higher at the corners, as in the reference photo."""
+    across = max(0.0, min(1.0, (abs(x) - 0.5) / 0.3))
+    along = max(0.0, min(1.0, (abs(z) - abs(first_z)) / 0.25))
+    return BUMPER_TOP + BUMPER_CORNER_RISE * across * across * (3 - 2 * across) * along
+
+
+def add_bumper(part, front):
+    sign = 1 if front else -1
+    first_z = BUMPER_FRONT_START if front else BUMPER_REAR_START
+    side, arc = bumper_plan(front)
+    # The free ends curve into the wall instead of standing off it.
+    tuck = [
+        (body_halfwidth(first_z) - 0.03, first_z - sign * 0.06),
+        (body_halfwidth(first_z) + 0.012, first_z - sign * 0.03),
+    ]
+    half = tuck + side + arc
+    path = half + [(-x, z) for x, z in reversed(half)]
+    tops = [blade_top(x, z, first_z) for x, z in path]
+    spans = [((t + BUMPER_Y0) / 2, (t - BUMPER_Y0) / 2) for t in tops]
+    blade = sweep(path, BUMPER_HALF_THICK, 0.0, 0.0, 0.05, corner=2, spans=spans)
+    part.solid("zderzak", blade, outline=0.014)
+    # Rubber insert along the blade.
+    strip_side, strip_arc = bumper_plan(front, extra=BUMPER_HALF_THICK - 0.004)
+    strip = strip_side + strip_arc
+    strip = strip + [(-x, z) for x, z in reversed(strip)]
+    part.solid("guma", sweep(strip, 0.012, 0.017, (BUMPER_Y0 + BUMPER_TOP) / 2 + 0.005, 0.01))
+
+    # The bar stands clear above the blade; on the corners it arcs down onto it.
+    _, bar_arc = bumper_plan(front, extra=0.02)
+    half_bar = []
+    for i, (x, z) in enumerate(bar_arc[2:]):
+        if i == 0:
+            y = BUMPER_TOP - 0.01
+        elif i == 1:
+            y = BAR_Y - 0.01
+        else:
+            y = BAR_Y + BAR_RISE * min(abs(x) / 0.9, 1.0) ** 2
+        half_bar.append((x, y, z))
+    points = half_bar + [(-x, y, z) for x, y, z in reversed(half_bar)]
+    part.solid("zderzak", pipe(catmull(points, 2), BAR_RADIUS), outline=0.01)
+
+    # Two tall guards tie the blade and the bar together.
+    face = (Z_MAX if front else Z_MIN) + sign * (BUMPER_OFFSET + BUMPER_HALF_THICK)
+    near, far = sorted((face - sign * 0.1, face + sign * 0.042))
+    gx = GUARD_X_FRONT if front else GUARD_X_REAR
+    for s in (1, -1):
+        part.solid(
+            "zderzak",
+            rbox(s * gx - 0.045, s * gx + 0.045, BUMPER_Y0 - 0.06, GUARD_TOP, near, far, r=0.04),
+            outline=0.012,
+        )
 
 
 def build_body():
@@ -1053,24 +1167,9 @@ def build_body():
 
     # Underbody: closes the wheel arches and carries the bumpers.
     part.solid("kontur", rbox(-0.6, 0.6, 0.37, 0.95, -2.0, 2.0, r=0.02, corner=1, rows=1))
-    part.solid("kontur", rbox(-0.5, 0.5, 0.33, 0.5, -2.31, 2.3, r=0.02, corner=1, rows=1))
-    y_bumper = (BUMPER_Y0 + BUMPER_Y1) / 2
-    h_bumper = (BUMPER_Y1 - BUMPER_Y0) / 2
-    for front in (True, False):
-        part.solid(
-            "zderzak", sweep(bumper_path(front), BUMPER_HALF_THICK, h_bumper, y_bumper, 0.05), outline=0.016
-        )
-        # Rubber insert along the bumper, and two guards.
-        strip = bumper_path(front, extra=BUMPER_HALF_THICK - 0.004, tuck=False)
-        part.solid("guma", sweep(strip, 0.012, 0.022, y_bumper + 0.012, 0.01))
-        face = (Z_MAX if front else Z_MIN) + (1 if front else -1) * (BUMPER_OFFSET + BUMPER_HALF_THICK)
-        for s in (1, -1):
-            part.solid(
-                "zderzak",
-                rbox(s * 0.4 - 0.032, s * 0.4 + 0.032, BUMPER_Y0 - 0.05, BUMPER_Y1 + 0.05, face - 0.05, face + 0.035,
-                     r=0.024, corner=1, rows=1),
-                outline=0.012,
-            )
+    part.solid("kontur", rbox(-0.5, 0.5, 0.35, 0.44, -2.31, 2.3, r=0.02, corner=1, rows=1))
+    add_bumper(part, front=True)
+    add_bumper(part, front=False)
 
     # Exhaust, below the rear bumper.
     part.solid("metal", tube((-0.42, 0.275, -2.0), (-0.42, 0.265, -2.43), 0.032, sides=8), outline=0.01)
@@ -1099,21 +1198,27 @@ def build_body():
             outline=0.012,
         )
 
-        # Mirror: the head is wide across the car and thin along it, its glass facing
-        # backwards and turned slightly towards the driver.
-        y_foot, z_foot = crop(1195, 595)[::-1]
-        y_head, z_head = crop(1155, 530)[::-1]
-        foot = (s * (body_side_x(y_foot, z_foot) - 0.01), y_foot, z_foot)
-        wall = body_side_x(y_head, z_head)
-        elbow = (s * (wall + 0.07), y_head - 0.1, z_head + 0.05)
-        head = (s * (wall + MIRROR_REACH), y_head, z_head)
-        part.solid("metal", tube(foot, elbow, 0.014), outline=0.007)
-        part.solid("metal", tube(elbow, (head[0] - s * 0.05, y_head - 0.05, z_head), 0.014), outline=0.007)
+        # Mirror: a tall rounded rectangle on a long thin arm from a small bracket on
+        # the body. The glass faces backwards, turned slightly towards the driver.
+        y_foot, z_foot = MIRROR_FOOT_Y, MIRROR_Z + 0.05
+        wall_foot = body_side_x(y_foot, z_foot)
+        wall_head = body_side_x(MIRROR_Y, MIRROR_Z)
+        part.solid(
+            "zderzak",
+            rbox(s * wall_foot - 0.04, s * wall_foot + 0.04, y_foot - 0.035, y_foot + 0.035, z_foot - 0.05, z_foot + 0.05,
+                 r=0.012, corner=1, rows=1),
+            outline=0.007,
+        )
+        head = (s * (wall_head + MIRROR_REACH), MIRROR_Y, MIRROR_Z)
+        foot = (s * (wall_foot + 0.03), y_foot, z_foot)
+        joint = (head[0], head[1] - 0.01, head[2] + 0.035)
+        part.solid("guma", tube(foot, joint, 0.011), outline=0.005)
+        part.solid("metal", ellipsoid(joint, 0.018, 0.018, 0.018, segs=8, rows=4), crease=80)
         turn = s * math.radians(22)
-        shell = ellipsoid(head, 0.09, 0.105, 0.03, segs=16, rows=12)
-        part.solid("metal", yaw(shell, head, turn), outline=0.01)
-        pane = ellipsoid((head[0], head[1], head[2] - 0.018), 0.076, 0.09, 0.016, segs=16, rows=10)
-        part.solid("lustro", yaw(pane, head, turn), crease=80)
+        shell = mirror_head(head, 0.078, 0.15, 0.06, 0.028)
+        part.solid("metal", yaw(shell, head, turn), outline=0.009)
+        pane = mirror_head((head[0], head[1], head[2] - 0.026), 0.064, 0.136, 0.05, 0.006)
+        part.solid("lustro", yaw(pane, head, turn), crease=60)
     return part
 
 
