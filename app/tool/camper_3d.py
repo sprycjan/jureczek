@@ -571,8 +571,11 @@ class Part:
 
 W = 0.88
 WHEEL_R = 0.36
-WHEEL_X = 0.78
-ARCH_R = 0.43
+WHEEL_X = 0.76
+ARCH_R = 0.41
+FENDER_IN = 0.405  # the fender lip hangs slightly over the wheel well
+FENDER_OUT = 0.478
+FENDER_PROUD = 0.032
 Z_REAR_WHEEL = crop(415, 0)[0]
 Z_FRONT_WHEEL = crop(1040, 0)[0]
 
@@ -598,7 +601,7 @@ TOP_PROFILE = [
     (2.18, 1.2),
     (Z_MAX, 0.952),
 ]
-BOTTOM_PROFILE = [(Z_MIN, 0.512), (-1.85, 0.41), (-1.82, 0.352), (1.54, 0.352), (1.632, 0.512), (Z_MAX, 0.512)]
+BOTTOM_PROFILE = [(Z_MIN, 0.45), (-1.85, 0.41), (-1.82, 0.352), (1.53, 0.352), (1.632, 0.45), (Z_MAX, 0.45)]
 
 
 def body_bottom(z):
@@ -628,21 +631,59 @@ def spow(v, e):
     return math.copysign(abs(v) ** e, v)
 
 
-def body_solid(ring_pts=24):
+def body_side_x(y, z):
+    return body_halfwidth(z) * taper(y)
+
+
+def body_ring(z):
+    """Half-section from bottom to top, mirrored: the wall stays flat down to the sill."""
+    top, bottom = interp(TOP_PROFILE, z), body_bottom(z)
+    height = top - bottom
+    w = body_halfwidth(z)
+    rb = min(0.05, height * 0.2, w * 0.3)
+    rt = min(0.2, height * 0.45, w * 0.5)
+    half = [(w * 0.5, bottom)]
+    for i in range(3):
+        a = math.pi / 2 * i / 2
+        half.append((w - rb * (1 - math.sin(a)), bottom + rb * (1 - math.cos(a))))
+    half.append((w, (bottom + rb + top - rt) / 2))
+    for i in range(5):
+        a = math.pi / 2 * i / 4
+        half.append((w - rt * (1 - math.cos(a)), top - rt * (1 - math.sin(a))))
+    half.append((w * 0.5, top))
+    right = [(u * taper(y), y, z) for u, y in half]
+    left = [(-x, y, zz) for x, y, zz in reversed(right)]
+    return [(0.0, bottom, z), *right, (0.0, top, z), *left]
+
+
+def body_solid():
     stations = {Z_MIN, -2.188, -2.13, -2.048, -1.95, -1.85, -0.75, -0.3, 0.15, 0.5}
     stations |= {1.632, 1.752, 1.86, 1.96, 2.072, 2.13, 2.18, Z_MAX}
     for zc in (Z_REAR_WHEEL, Z_FRONT_WHEEL):
         for i in range(11):
             stations.add(zc - ARCH_R * math.cos(math.pi * i / 10))
+    return loft([body_ring(z) for z in sorted(stations)])
+
+
+def fender(side, zc):
+    """Raised lip around a wheel arch; its back is buried in the wall."""
+    mid = (FENDER_IN + FENDER_OUT) / 2
+    steps = 14
     rings = []
-    for z in sorted(stations):
-        top, bottom = interp(TOP_PROFILE, z), body_bottom(z)
-        cy, h, w = (top + bottom) / 2, (top - bottom) / 2, body_halfwidth(z)
+    for i in range(steps + 1):
+        a = math.pi * i / steps
+        proud = FENDER_PROUD * (0.35 + 0.65 * min(1.0, min(i, steps - i) / 2))
         ring = []
-        for k in range(ring_pts):
-            a = 2 * math.pi * k / ring_pts
-            y = cy + h * spow(math.sin(a), 0.4)
-            ring.append((w * taper(y) * spow(math.cos(a), 0.4), y, z))
+        for radius, dx in (
+            (FENDER_IN, -0.04),
+            (FENDER_IN, proud * 0.75),
+            (mid, proud),
+            (FENDER_OUT, proud * 0.35),
+            (FENDER_OUT, -0.04),
+        ):
+            z = zc + radius * math.cos(a)
+            y = WHEEL_R + radius * math.sin(a)
+            ring.append((side * (body_side_x(y, z) + dx), y, z))
         rings.append(ring)
     return loft(rings)
 
@@ -650,7 +691,7 @@ def body_solid(ring_pts=24):
 BELT_TOP = [(-3.0, 1.512), (1.35, 1.512), (1.75, 1.40), (2.19, 1.03), (3.0, 0.95)]
 STRIPE = 0.08
 LINE = 0.018
-UNDERSIDE = 0.86  # the underside is dark inside this fraction of the half-width
+UNDERSIDE_INSET = 0.035  # the underside is dark up to this far from the wall
 
 
 def belt_top(x, z):
@@ -662,16 +703,16 @@ def belt_top(x, z):
 
 
 def add_body_paint(part, tris):
-    shaded = shade(tris, 60)
+    shaded = shade(tris, 40)  # keeps the walls flat next to the lower corner
     shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]))
     shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]) + STRIPE)
     shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]) + STRIPE + LINE)
-    shaded = clip(shaded, lambda p: abs(p[0]) - UNDERSIDE * body_halfwidth(p[2]))
+    shaded = clip(shaded, lambda p: abs(p[0]) - body_halfwidth(p[2]) + UNDERSIDE_INSET)
     for t in shaded:
         c = mul(add(add(t[0][0], t[1][0]), t[2][0]), 1 / 3)
         n = unit(face_normal((t[0][0], t[1][0], t[2][0])))
         d = c[1] - belt_top(c[0], c[2])
-        if n[1] < -0.3 and abs(c[0]) < UNDERSIDE * body_halfwidth(c[2]):
+        if n[1] < -0.3 and abs(c[0]) < body_halfwidth(c[2]) - UNDERSIDE_INSET:
             mat = "kontur"
         elif d >= 0:
             mat = "krem"
@@ -718,8 +759,14 @@ def add_side(part, proj, sliding_door):
         part.stroke(proj, "kontur", door, PANEL_LINE, LIFT_DARK)
     else:
         part.stroke(proj, "kontur", poly_crop((908, 408), (908, 720)), PANEL_LINE, LIFT_DARK)
-    wing = smooth_path(poly_crop((908, 720), (1050, 720), (1125, 750), (1172, 812)), 0.12)
-    part.stroke(proj, "kontur", wing, PANEL_LINE, LIFT_DARK)
+    part.stroke(proj, "kontur", poly_crop((908, 726), (1040, 726)), PANEL_LINE, LIFT_DARK)
+    for zc in (Z_REAR_WHEEL, Z_FRONT_WHEEL):
+        edge = [
+            (zc + (FENDER_OUT + 0.004) * math.cos(math.pi * i / 16),
+             WHEEL_R + (FENDER_OUT + 0.004) * math.sin(math.pi * i / 16))
+            for i in range(17)
+        ]
+        part.stroke(proj, "kontur", edge, PANEL_LINE, LIFT_DARK)
     part.stroke(proj, "kontur", poly_crop((1222, 595), (1240, 808)), PANEL_LINE, LIFT_DARK)
 
     for cy in (605, 626, 647, 668, 688):
@@ -762,20 +809,34 @@ def add_rear(part, proj):
     part.decal(proj, "krem", rrect2(-0.18, 0.76, 0.18, 0.86, 0.015), LIFT_FILL)
 
 
+BUMPER_OFFSET = 0.05  # bumper centreline outside the body outline
+BUMPER_HALF_THICK = 0.055  # so its inner face just touches the body
+BUMPER_Y0, BUMPER_Y1 = 0.31, 0.56  # overlaps the body's lower edge at 0.45
+
+
 def bumper_path(front):
     if front:
-        z_side, z_face, z_start = 1.86, crop(1345, 0)[0] - 0.05, crop(1160, 0)[0]
+        zs = [1.66, 1.8, 1.92, 2.02, 2.1, 2.16, 2.2, Z_MAX]
     else:
-        z_side, z_face, z_start = -2.0, crop(175, 0)[0] + 0.05, crop(275, 0)[0]
-    x_side, x_face = W + 0.05, 0.5
-    side = [(x_side, z_start), (x_side, z_start + (z_side - z_start) * 0.5), (x_side, z_side)]
-    arc = []
-    for i in range(1, 5):
-        a = math.pi / 2 * i / 4
-        arc.append(
-            (x_face + (x_side - x_face) * math.cos(a), z_side + (z_face - z_side) * math.sin(a))
-        )
-    half = side + arc
+        zs = [-1.95, -2.03, -2.1, -2.15, -2.19, -2.215, Z_MIN]
+    outline = [(body_halfwidth(z), z) for z in zs]
+    sign = 1 if front else -1
+    half = []
+    for i, (x, z) in enumerate(outline):
+        a, b = outline[max(i - 1, 0)], outline[min(i + 1, len(outline) - 1)]
+        tx, tz = b[0] - a[0], b[1] - a[1]
+        length = math.hypot(tx, tz)
+        nx, nz = sign * tz / length, -sign * tx / length
+        half.append((x + nx * BUMPER_OFFSET, z + nz * BUMPER_OFFSET))
+    # The free ends curve into the wall instead of standing off it.
+    first_z = outline[0][1]
+    half[:0] = [
+        (body_halfwidth(first_z) - 0.03, first_z - sign * 0.09),
+        (body_halfwidth(first_z) + 0.012, first_z - sign * 0.045),
+    ]
+    # Across the flat end of the car, on the offset line.
+    z_end = zs[-1] + sign * BUMPER_OFFSET
+    half.append((outline[-1][0] * 0.55, z_end))
     return half + [(-x, z) for x, z in reversed(half)]
 
 
@@ -805,13 +866,18 @@ def build_body():
         rim_rings.append([(u, y, cz + v) for u, v in rounded_rect(hx, hz, 0.34, corner=3)])
     part.solid("krem", loft(rim_rings), outline=0.024)
 
+    for side in (1, -1):
+        for zc in (Z_REAR_WHEEL, Z_FRONT_WHEEL):
+            part.solid("zielen", fender(side, zc), outline=0.016)
+
     # Underbody: closes the wheel arches and carries the bumpers.
     part.solid("kontur", rbox(-0.6, 0.6, 0.37, 0.95, -2.0, 2.0, r=0.02, corner=1, rows=1))
     part.solid("kontur", rbox(-0.5, 0.5, 0.33, 0.5, -2.31, 2.3, r=0.02, corner=1, rows=1))
-    y_bumper = (crop(0, 865)[1] + crop(0, 810)[1]) / 2
+    y_bumper = (BUMPER_Y0 + BUMPER_Y1) / 2
+    h_bumper = (BUMPER_Y1 - BUMPER_Y0) / 2
     for front in (True, False):
         part.solid(
-            "zderzak", sweep(bumper_path(front), 0.055, 0.105, y_bumper, 0.05), outline=0.022
+            "zderzak", sweep(bumper_path(front), BUMPER_HALF_THICK, h_bumper, y_bumper, 0.05), outline=0.022
         )
 
     # Headlights, tail lights, mirrors.
@@ -876,13 +942,13 @@ def build_wheel(name, x_side, z):
         (0.0, 0.184),
     ]
     profile = [(r, a * x_side) for r, a in profile]
-    solid = lathe(profile, "x", (0.0, 0.0, 0.0), 18)
+    solid = lathe(profile, "x", (0.0, 0.0, 0.0), 24)
     tyre_outline = inflate(
         lathe(
             [(0.25, -0.12 * x_side), (0.36, -0.07 * x_side), (0.36, 0.07 * x_side), (0.25, 0.12 * x_side)],
             "x",
             (0.0, 0.0, 0.0),
-            18,
+            24,
         ),
         0.016,
     )
