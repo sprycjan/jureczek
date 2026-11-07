@@ -91,6 +91,9 @@ Pomysły odłożone przy kartach podróży (bez wymogu liczenia postępu):
 - [x] Snackbary mapy zostają widoczne po powrocie na ekran startowy – v14 (własny `ScaffoldMessenger`)
 - [ ] Android 12+ pokazuje przed Flutterem własny ekran z ikoną; P30 (Android 10) tego nie sprawdzi. Do obejrzenia na nowszym telefonie – [[v24 – ekran powitalny]]
 - [ ] Zapis ostatniej sceny ekranu powitalnego, gdyby powtórki losowania przeszkadzały – [[v24 – ekran powitalny]]
+- [ ] Ekran powitalny, kosmetyka: jasna płyta na ścianach wąwozu wygląda jak przyklejony wielokąt, w poziomie ściany wąwozu czytają się jak dwie skalne wieże, jasne pasy stoliw odcinają się nocą – [[v24 – ekran powitalny]]
+- [ ] Ekran startowy w poziomie: nagłówek zajmuje prawie cały ekran, zauważone przy teście obrotu – [[v24 – ekran powitalny]]
+- [ ] Czarny pas przy wycięciu aparatu w poziomie, także na ekranie powitalnym: aplikacja nie rysuje w tym miejscu (`layoutInDisplayCutoutMode`) – [[v24 – ekran powitalny]]
 - [ ] Raster wolnych warstw ekranu powitalnego, gdyby pojawiły się przycięcia: zapas rastra na P30 jest mały – [[ADR-016 Ekran powitalny z warstw SVG]]
 
 ## Moje uwagi

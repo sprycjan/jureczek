@@ -1,14 +1,14 @@
 ---
 tags: [jureczek, wersja, ekran-powitalny, animacja, svg]
 wersja: v24
-status: etap 3 z 4 – 8 scen na telefonie, arkusz czeka na ocenę użytkownika
+status: zaimplementowana – działa na telefonie
 data: 2026-11-07
 ---
 # v24 – ekran powitalny
 
 Prośba użytkownika z 2026-11-07: zamiast ciemnego tła przy starcie animowany ekran powitalny. Wektorowy kamper z boku jedzie z lewej do prawej przez góry z paralaksą, jak początek ilustrowanej gry przygodowej. Decyzja: [[ADR-016 Ekran powitalny z warstw SVG]].
 
-Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (etap 2), pozostałe 7 scen (etap 3), dokończenie (etap 4). Ta notatka opisuje stan po etapie 3.
+Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (etap 2), pozostałe 7 scen (etap 3), dokończenie (etap 4). Ta notatka opisuje stan po etapie 4, czyli wersję skończoną.
 
 ## Zakres
 - **Fazy:** A wjazd kampera, B jazda z paralaksą, C przyspieszenie i odjazd, a na końcu przenikanie do ekranu startowego.
@@ -72,7 +72,13 @@ Pomiar po etapie 3, ze wszystkimi 8 scenami, zawieszeniem, kurzem i kamykami (po
 - modrzewie po przerzedzeniu, próba kontrolna z Alpami przed nimi i po nich: po pierwszym oknie 4–14 klatek ponad 16,7 ms, Alpy 5–21;
 - jeden przebieg tego samego dnia dał raster p50 20–27 ms w scenie modrzewi, a czas build wzrósł dwukrotnie. Nie powtórzył się przy kolejnym przebiegu i przyczyny nie ustaliłem; bateria miała wtedy 27–28 °C, ale temperatury nie mierzyłem w trakcie tamtego przebiegu.
 
-Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt prawdopodobnie wynika ze zmiany sceny w podglądzie, a nie z rysunku. Pomiar dotyczy podglądu, a nie zimnego startu aplikacji; ten trzeba zmierzyć w etapie 4.
+Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt prawdopodobnie wynika ze zmiany sceny w podglądzie, a nie z rysunku. Ten pomiar dotyczy podglądu, zimny start zmierzony jest niżej.
+
+Zimny start w prawdziwej aplikacji, z tymczasowym logiem `FrameTiming` usuniętym po pomiarze, pierwsze 4,7 s od pierwszej klatki:
+- 14 startów na losowych scenach i 10 z wymuszoną sceną (Alpy, modrzewie); 4 z nich to pierwsze starty po instalacji, opisane osobno;
+- pozostałe 20 startów: około 275 klatek, czyli około 58 na sekundę; raster p50 13,6–15,3 ms, a limit 16,7 ms przekracza 5–32 klatek z około 275;
+- przerwy ponad 25 ms przypadają na pierwszą sekundę, gdy wczytuje się scena; najdłuższa ma 99 ms. Po pierwszej sekundzie przerw nie ma, wyjątkiem jest jeden start z dwiema (łąki);
+- **pierwszy start po instalacji** (4 próby: Alpy trzy razy, modrzewie raz) ma przerwę około 900 ms i około 222 klatek, także w lżejszej scenie, więc wynika z instalacji, a nie z rysunku. Kolejne starty tej samej wersji jej nie mają.
 
 ## Pułapki
 - `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”). Bundle podajemy tylko w testach.
@@ -89,6 +95,7 @@ Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt praw
 - Tokeny kolorów numeruje kolejność pierwszego użycia, więc nowe kolory na poziomie modułu generatora zmieniają pliki wszystkich scen. Rysunek zostaje ten sam; sprawdzone porównaniem SVG po podstawieniu palety.
 - Warstwa daleka musi schodzić poniżej najwyższego punktu wzgórz, inaczej u stóp gór prześwituje niebo. Stąd woda rysowana 90 jednostek poniżej końca gradientu i niższa podstawa gór w stoliwach i na przełęczy.
 - Wolna warstwa przesuwa się w lewo, więc to, co leży na lewo od pierwszego kadru, nigdy się nie pokaże. Elementy dla oka trzeba kłaść w kadrze albo na prawo od niego.
+- Pierwszy start po instalacji jest o około 900 ms wolniejszy niezależnie od sceny; do pomiaru płynności trzeba go odrzucić.
 - Wodospad zaczyna się na `Massif.sky_y(x)`, a nie na stałej wysokości, bo inaczej spada z nieba.
 
 ## Checklista weryfikacji
@@ -99,15 +106,17 @@ Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt praw
 - [x] P30 przez adb: zimny start z udostępnienia, mapa z wynikiem po około 1,5 s (bez wcześniejszego zrzutu samej nakładki)
 - [x] P30 przez adb: „Usuń animacje” (`animator_duration_scale` 0) daje nieruchomą scenę i przenikanie; ustawienie przywrócone
 - [x] P30: 4 palety, tylna lampa, nocna przednia szyba, podziałka i lusterko
-- [ ] Użytkownik: płynność i tempo wyjścia na telefonie
+- [ ] Użytkownik: tempo wyjścia na telefonie (bez uwag przy przejściu do kolejnych etapów, bez wyraźnego potwierdzenia)
 - [x] P30 przez adb: przechył przy hamowaniu na wjeździe, kamyk na linii kół, kurz przy obu osiach (zrzuty; samego podskoku koła zrzuty nie złapały, sprawdzają go testy)
-- [ ] Użytkownik: czy kurz pasuje
-- [ ] Użytkownik: siła przechyłu i podskoku na kamyku
+- [ ] Użytkownik: kurz, przechył i podskok na kamyku (bez uwag przy przejściu do kolejnych etapów, bez wyraźnego potwierdzenia)
 - [x] Chrome: pierwszy kadr 8 scen w 4 porach (32 kombinacje), kadry po 4,6 s i 10 s jazdy, układ poziomy o zachodzie
 - [x] P30 przez adb: każda z 8 scen wczytuje się i jedzie (zrzuty o zachodzie), czasy klatek jak wyżej
 - [x] P30 przez adb: zwykła aplikacja po etapie 3, losowa scena, potem ekran startowy
-- [ ] Użytkownik: ocena arkusza 32 kombinacji
-- [ ] Etap 4: obrót ekranu w trakcie animacji, szew pętli przy dłuższej jeździe
+- [x] Użytkownik: arkusz 32 kombinacji przyjęty bez uwag („ok, przechodzimy do etapu 4”)
+- [x] P30 przez adb: obrót w trakcie jazdy, także kilkukrotny: ta sama scena, bez restartu, jedno wyjście, kamper w środku kadru. Ustawienia obrotu przywrócone
+- [x] Chrome: szew pętli wszystkich 56 warstw, pomiar różnicy kolumn na granicy kafelków i oględziny powiększeń; bez nieciągłości i bez podwójnego rysowania na zakładce. Na P30 sprawdzony na zrzucie w poziomie, gdzie granica kafelków drogi jest w kadrze stale (okres 1240 przy widoku 1400): bez śladu. Dalekich warstw telefon nie przewinął do szwu, bo przy prędkości 5–12 j./s trwałoby to minuty
+- [x] P30 przez adb: zimny start z udostępnienia przy 8 scenach, mapa z kartą miejsca około 2,6 s od wysłania linku, bez minimum 3,5 s
+- [x] P30: płynność przy zimnym starcie, pomiar wyżej
 
 ## Poprawki po teście
 - Chmury narysowane od nowa po uwadze „wyglądają jak bąble”.
@@ -118,9 +127,7 @@ Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt praw
 - Etap 3, własny przegląd arkusza przed pokazaniem: filary mostu i rzeka wisiały w powietrzu, fiord nie miał stromych ścian, pod wodą i u stóp gór prześwitywało niebo, wodospad na przełęczy zaczynał się w powietrzu, chmura zasłaniała słońce na łąkach.
 
 ## Otwarte
-- Etap 3: werdykt użytkownika do arkusza 32 kombinacji.
-- Na ścianach wąwozu jasna płyta skalna wygląda jak przyklejony wielokąt; czeka na ocenę arkusza.
-- Etap 4: obrót, szew pętli, udostępnienie z 8 scenami, płynność przy zimnym starcie w samej nakładce, `CLAUDE.md`.
+- Kosmetyka rysunków w [[Backlog]].
 - Skała jest bardziej kanciasta niż na referencji; użytkownik zaakceptował styl z 2026-11-07.
 - `resorces/bgs.png` nie jest w repo: to cudza ilustracja, służy tylko jako referencja.
 
