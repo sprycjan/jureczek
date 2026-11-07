@@ -93,43 +93,105 @@ class SplashScenePainter extends CustomPainter {
       canvas.restore();
     }
 
-    _paintDust(canvas, left + camper.wheels.first.dx * k, manifest.ground);
-    piece(art.camperUnder);
-    for (final wheel in camper.wheels) {
+    final rear = camper.wheels.first;
+    final front = camper.wheels.last;
+    final restFrontX = anchor + (front.dx - camper.centerX) * k;
+    for (final pebble in frame.pebbles) {
+      if (pebble.visible) {
+        _paintPebble(
+          canvas,
+          restFrontX + pebble.ahead,
+          pebble.scale,
+          viewWidth,
+        );
+      }
+    }
+    piece(art.camperShadow);
+    _paintDust(canvas, left + rear.dx * k, config.dustPuffs, 1, 0);
+    _paintDust(
+      canvas,
+      left + front.dx * k,
+      config.dustFrontPuffs,
+      config.dustFrontSize,
+      0.37,
+    );
+
+    // Nadwozie na zawieszeniu: obrót wokół środka między osiami, koła zostają na drodze.
+    void body(void Function() paint) {
       canvas.save();
-      canvas.translate(left + wheel.dx * k, top + wheel.dy * k);
+      canvas.translate(left + (rear.dx + front.dx) / 2 * k, top + rear.dy * k);
+      canvas.translate(0, -frame.bodyLift);
+      canvas.rotate(-frame.bodyPitch);
+      canvas.translate(
+        -(left + (rear.dx + front.dx) / 2 * k),
+        -(top + rear.dy * k),
+      );
+      paint();
+      canvas.restore();
+    }
+
+    body(() => piece(art.camperUnder));
+    for (var i = 0; i < camper.wheels.length; i++) {
+      final wheel = camper.wheels[i];
+      final lift = i == 0 ? frame.rearLift : frame.frontLift;
+      canvas.save();
+      canvas.translate(left + wheel.dx * k, top + wheel.dy * k - lift);
       canvas.rotate(frame.wheelAngle);
       canvas.scale(k);
       canvas.translate(-art.wheel.size.width / 2, -art.wheel.size.height / 2);
       canvas.drawPicture(art.wheel.picture);
       canvas.restore();
     }
-    piece(art.camperBody);
-    piece(art.camperNight, camper.nightPad);
+    body(() {
+      piece(art.camperBody);
+      piece(art.camperNight, camper.nightPad);
+    });
+  }
+
+  void _paintPebble(Canvas canvas, double x, double scale, double viewWidth) {
+    final picture = art.pebble;
+    final width = picture.size.width * scale;
+    if (x < -width || x > viewWidth + width) return;
+    canvas.save();
+    // Podstawa kamyka lekko poniżej linii styku kół: leży na drodze, a nie na jej krawędzi.
+    canvas.translate(
+      x - width / 2,
+      art.manifest.ground + 2 - picture.size.height * scale,
+    );
+    canvas.scale(scale);
+    canvas.drawPicture(picture.picture);
+    canvas.restore();
   }
 
   /// Obłoki bez przezroczystości: rosną i maleją do zera, bo każdy `saveLayer` w klatce
   /// kosztuje. Pozycję wyznacza sam czas, więc nie ma listy cząstek do utrzymywania.
-  void _paintDust(Canvas canvas, double wheelX, double ground) {
+  void _paintDust(
+    Canvas canvas,
+    double wheelX,
+    int count,
+    double size,
+    double phase,
+  ) {
     if (frame.dustTime < 0) return;
     final picture = art.dust;
+    final ground = art.manifest.ground;
     final k = art.manifest.camperScale;
     final life = config.dustLife.inMicroseconds / 1e6;
-    final count = config.dustPuffs;
     for (var i = 0; i < count; i++) {
-      final age = (frame.dustTime / life + i / count) % 1;
+      final age = (frame.dustTime / life + phase + i / count) % 1;
       // Złoty podział rozrzuca obłoki bez generatora losowego.
-      final variation = (i * 0.618) % 1;
+      final variation = (i * 0.618 + phase) % 1;
       final scale =
           config.dustSize *
+          size *
           k *
           (0.55 + 0.45 * variation) *
           math.sin(math.pi * age);
       if (scale <= 0) continue;
       canvas.save();
       canvas.translate(
-        wheelX - config.dustDrift * age * (0.8 + 0.4 * variation),
-        ground - config.dustRise * age,
+        wheelX - config.dustDrift * size * age * (0.8 + 0.4 * variation),
+        ground - config.dustRise * size * age,
       );
       canvas.scale(scale);
       canvas.translate(-picture.size.width / 2, -picture.size.height);

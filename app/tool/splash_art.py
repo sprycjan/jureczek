@@ -1,7 +1,8 @@
 """Grafika ekranu powitalnego (v24) – jedyne źródło rysunków; SVG się nie edytuje.
 
 Zapisuje do `assets/splash/`:
-  camper_under.svg, camper_wheel.svg, camper_body.svg, camper_night.svg, dust.svg
+  camper_shadow.svg, camper_under.svg, camper_wheel.svg, camper_body.svg, camper_night.svg,
+  dust.svg, pebble.svg
   sky_<pora>.svg                – niebo, słońce albo księżyc (nieruchome)
   scene_NN/<warstwa>.svg        – warstwy paralaksy, każda zawija się w swoim okresie
   palettes.json                 – token (#xxxxxx w SVG) → kolor dla każdej pory dnia
@@ -925,9 +926,14 @@ def camper_svgs():
     body_svg = ''.join(p)
 
     shadow = token({k: v for k, v in zip(PERIODS, ('#2A1E3A', '#1D3A2C', '#2A1630', '#05061A'))})
-    under = (
+    # Cień leży na drodze, a nadkola jadą z nadwoziem na zawieszeniu.
+    ground_shadow = (
         head(f'<defs><radialGradient id="sh" gradientUnits="userSpaceOnUse" cx="530" cy="690" r="330" gradientTransform="matrix(1 0 0 0.075 0 638)"><stop offset="0" stop-color="{shadow}" stop-opacity="0.72"/><stop offset="0.8" stop-color="{shadow}" stop-opacity="0.42"/><stop offset="1" stop-color="{shadow}" stop-opacity="0"/></radialGradient></defs>')
         + '<path d="M200 660H860V705H200Z" fill="url(#sh)"/>'
+        + '</svg>'
+    )
+    under = (
+        head('')
         + f'<path d="M304 628C306 612 318 607 331 607L388 607C403 607 413 626 420 643L304 643Z" fill="{well}"/>'
         + f'<path d="M620 643C622 612 645 592 671 592C700 592 722 605 731 624L731 640Z" fill="{well}"/>'
         + '</svg>'
@@ -990,7 +996,16 @@ def camper_svgs():
         f'<linearGradient id="d" gradientUnits="userSpaceOnUse" x1="0" y1="4" x2="0" y2="46"><stop offset="0" stop-color="{dust0}"/><stop offset="1" stop-color="{dust1}"/></linearGradient></defs>'
         f'<path d="M6 46C-2 46 -1 33 9 32C9 22 24 18 29 26C33 12 54 12 57 26C66 21 76 31 72 39C78 41 78 46 72 46Z" fill="url(#d)" stroke="{dust1}" stroke-width="2.5" stroke-linejoin="round"/></svg>'
     )
-    return dict(camper_under=under, camper_wheel=wheel, camper_body=body_svg, camper_night=night, dust=dust)
+    # Kamyk na drodze: rysowany w jednostkach sceny, koła przejeżdżają po nim w `SplashMotion`.
+    stone0, stone1, stone2 = camper('#CFC8B8'), camper('#9A9385'), camper('#6E685D')
+    pebble = (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="10" viewBox="0 0 18 10">'
+        f'<path d="M1 9.5C1.5 6 4 3 8 2C12 1 15.5 3.5 17 9.5Z" fill="{stone1}"/>'
+        f'<path d="M1 9.5C3 8 6 7.6 9 7.8C12 8 15 8.4 17 9.5Z" fill="{stone2}"/>'
+        f'<path d="M7 2.6C9.5 2 11.5 2.6 13 4C10.5 3.8 8.5 4.2 6 5.5C6 4.4 6.4 3.4 7 2.6Z" fill="{stone0}"/>'
+        f'</svg>'
+    )
+    return dict(camper_shadow=ground_shadow, camper_under=under, pebble=pebble, camper_wheel=wheel, camper_body=body_svg, camper_night=night, dust=dust)
 
 
 NIGHT_PAD = 100  # o tyle obraz nocny wystaje za kampera z lewej: poświata tylnej lampy
@@ -1263,6 +1278,7 @@ def frame(files, palette, period, scene_idx, view_w, scroll=0.0):
         vw = float(head.split('width="')[1].split('"')[0])
         vh = float(head.split('height="')[1].split('"')[0])
         return embed(svg, cx + box['x'] * s, cy + box['y'] * s, vw * s, vh * s)
+    parts.append(piece('camper_shadow'))
     parts.append(piece('camper_under'))
     wheel = recolor(files['camper_wheel.svg'], palette, period)
     for wx, wy in box['wheels']:
@@ -1304,7 +1320,7 @@ def preview(files, palette, folder):
     render_png(parts, 1802, 831, 917, 423, folder / 'scene01_sunset_wide.png')
     # Sam kamper na neutralnym tle, do porównania z referencją.
     svg = ''.join(
-        [embed(files['camper_under.svg'], 215, 225, 620, 480)]
+        [embed(files['camper_shadow.svg'], 215, 225, 620, 480), embed(files['camper_under.svg'], 215, 225, 620, 480)]
         + [embed(files['camper_wheel.svg'], x - 50, y - 50, 100, 100) for x, y in CAMPER_BOX['wheels']]
         + [embed(files['camper_body.svg'], 215, 225, 620, 480)]
     )

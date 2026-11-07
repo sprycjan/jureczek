@@ -23,7 +23,9 @@ void main() {
 
   List<String> svgs() => [
     for (final file in [
+      'camper_shadow',
       'camper_under',
+      'pebble',
       'camper_body',
       'camper_wheel',
       'camper_night',

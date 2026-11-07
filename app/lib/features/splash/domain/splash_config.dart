@@ -6,7 +6,7 @@ class SplashConfig {
     this.minimumDuration = const Duration(milliseconds: 3500),
     this.readinessLimit = const Duration(seconds: 10),
     this.launchFade = const Duration(milliseconds: 400),
-    this.enterDuration = const Duration(milliseconds: 1100),
+    this.enterDuration = const Duration(milliseconds: 1300),
     this.driveOffDuration = const Duration(milliseconds: 700),
     this.fadeDelay = const Duration(milliseconds: 600),
     this.fadeDuration = const Duration(milliseconds: 500),
@@ -18,6 +18,18 @@ class SplashConfig {
     this.dustDrift = 170,
     this.dustRise = 26,
     this.dustSize = 0.62,
+    this.dustFrontPuffs = 3,
+    this.dustFrontSize = 0.72,
+    this.suspensionHz = 1.6,
+    this.suspensionDamping = 0.3,
+    this.suspensionCoupling = 0.18,
+    this.squat = 2.6,
+    this.wheelHz = 7,
+    this.wheelDamping = 0.35,
+    this.pebbleFirst = (1.7, 2.2),
+    this.pebbleEvery = (3.0, 5.0),
+    this.pebbleLift = 5,
+    this.pebbleContact = 30,
   });
 
   /// Najkrótszy czas ekranu; udostępnienie, stuknięcie i błąd grafik go pomijają.
@@ -55,6 +67,31 @@ class SplashConfig {
   final double dustDrift;
   final double dustRise;
   final double dustSize;
+
+  /// Kurz spod przedniego koła: liczba obłoków i skala względem tylnego.
+  final int dustFrontPuffs;
+  final double dustFrontSize;
+
+  /// Zawieszenie: częstotliwość własna nadwozia i tłumienie (1 = bez kołysania).
+  final double suspensionHz;
+  final double suspensionDamping;
+
+  /// Jak mocno uderzenie w jedną oś przechyla drugi koniec nadwozia w przeciwną stronę.
+  final double suspensionCoupling;
+
+  /// O tyle jednostek sceny siada oś przy pełnym przyspieszeniu albo hamowaniu.
+  final double squat;
+
+  /// Koło na oponie: sztywniejsze od nadwozia, dlatego podskakuje szybko i krótko.
+  final double wheelHz;
+  final double wheelDamping;
+
+  /// Kamyk: pierwszy najazd przedniego koła (od–do, w sekundach od startu), odstęp
+  /// między kolejnymi, wysokość uniesienia koła i długość kontaktu w jednostkach sceny.
+  final (double, double) pebbleFirst;
+  final (double, double) pebbleEvery;
+  final double pebbleLift;
+  final double pebbleContact;
 
   /// Neutralny zmierzch: ten sam w `launch_background.xml` i w pierwszej klatce Fluttera.
   /// Natywne tło nie zależy od godziny, więc nie może mieć koloru pory dnia.

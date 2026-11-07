@@ -16,13 +16,14 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 - **Gotowość:** pierwszy wynik `foldersProvider` (dane albo błąd) i obraz nagłówka. Limit 10 s.
 - **Pory dnia:** 4 palety wg `Landscape.at()`. W nocy świecą okna, przednia szyba, namiot i reflektor, a tylna lampa ma czerwoną poświatę.
 - **Natywne tło:** neutralny gradient zmierzchu, ten sam w pierwszej klatce Fluttera, potem 0,4 s przejścia w niebo pory dnia.
-- **Rysunki:** `tool/splash_art.py` generuje kampera, 4 nieba i 7 warstw sceny „Alpy”.
+- **Rysunki:** `tool/splash_art.py` generuje kampera, kamyk, 4 nieba i 7 warstw sceny „Alpy”.
+- **Zawieszenie:** dwa końce nadwozia na sprężynach, oparte o koła na własnych, sztywniejszych sprężynach. Nadwozie i nadkola się przechylają, a koła i cień zostają na drodze.
 
 ## Decyzje
 | # | Decyzja | Wybór |
 |---|---|---|
 | 1 | Użycie `bgs.png` | tylko styl i paleta; własna kompozycja, bez logo i odrysowywania |
-| 2 | Wierność kampera | wszystko z `screen.png` (dach, deska, bagaże, lusterko) + kurz; bez podskoków |
+| 2 | Wierność kampera | wszystko z `screen.png` (dach, deska, bagaże, lusterko) + kurz spod obu osi; najpierw bez podskoków, potem zawieszenie i kamyki na prośbę użytkownika (decyzja 14) |
 | 3 | Zimny start z udostępnienia | bez minimum, faza C od razu po gotowości |
 | 4 | Pominięcie stuknięciem | tak; przed gotowością zapamiętane, w fazie C ignorowane, w fazie A kamper rusza z bieżącego miejsca |
 | 5 | Zawieszona gotowość | limit 10 s, potem ekran startowy z własnym stanem ładowania |
@@ -34,16 +35,18 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 | 11 | Chmury | wspólny kłębiasty kontur z pasami światła; świadome odejście od referencji (brązowe kopuły, grube pasy, drobiny), która w pionowym kadrze wyglądała jak bąble |
 | 12 | Góry | różne sylwetki; pierwszy kadr ułożony tak, by w pionie było widać różne kształty, bo dalekie warstwy prawie się nie przesuwają |
 | 13 | Rysowanie | same `Picture`, bez rasteryzacji warstw, zob. pomiar niżej |
+| 14 | Życie kampera | fizyka zamiast ręcznych klatek: hamowanie na wjeździe siada na przód, przyspieszanie na odjeździe na tył, po zatrzymaniu nadwozie odbija; kamyk unosi kolejno przednie i tylne koło |
+| 15 | Kamyki | pierwszy najazd 1,7–2,2 s, kolejne co 3–5 s, różna wielkość; podczas odjazdu bez najazdów, bo kamper zmienia prędkość |
 
 ## Pliki
 - `tool/splash_art.py`: generator SVG, palet i manifestu. SVG się nie edytuje.
-- `assets/splash/`: wyjście generatora (16 SVG, około 780 KB, 125 tokenów kolorów).
+- `assets/splash/`: wyjście generatora (18 SVG, około 780 KB, 128 tokenów kolorów).
 - `lib/features/splash/domain/splash_config.dart`: wszystkie parametry w jednym miejscu.
 - `lib/features/splash/domain/splash_gate.dart`: czysta bramka gotowości, jedno wyzwolenie.
 - `lib/features/splash/domain/splash_manifest.dart`: opis grafik.
-- `lib/features/splash/application/splash_motion.dart`: `SplashFrame` i fazy A/B/C bez zegara.
+- `lib/features/splash/application/splash_motion.dart`: `SplashFrame`, fazy A/B/C, zawieszenie i kamyki, bez zegara.
 - `lib/features/splash/data/splash_art_loader.dart`: `ColorMapper` palety, wczytanie tylko wybranej sceny.
-- `lib/features/splash/presentation/splash_scene_painter.dart`: paralaksa, kamper, kurz.
+- `lib/features/splash/presentation/splash_scene_painter.dart`: paralaksa, kamper na zawieszeniu, kurz, kamyki.
 - `lib/features/splash/presentation/splash_overlay.dart`: nakładka, gotowość, cykl życia.
 - `lib/app.dart`: `MaterialApp.builder` z nakładką, parametr `showSplash`.
 - `lib/dev/splash_main.dart`: podgląd z pomiarem klatek, poza aplikacją.
@@ -58,11 +61,13 @@ Tryb `--profile`, rysowanie przez Impeller na OpenGLES, 7 warstw na scenie:
 - 3–15% klatek przekracza 16,7 ms rastra;
 - wczytanie sceny około 140 ms.
 
-Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynności w samej aplikacji nie zmierzyłem osobno, ten sam malarz działał w podglądzie.
+Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynności w samej aplikacji nie zmierzyłem osobno, ten sam malarz działał w podglądzie. Pomiar jest sprzed zawieszenia, kurzu spod przedniej osi i kamyków.
 
 ## Pułapki
 - `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”). Bundle podajemy tylko w testach.
 - Nocna nakładka leży nad całym nadwoziem, więc przykrywa wszystko, co w dzień jest nad szybą. Podziałka i lusterko są wspólnymi elementami i są rysowane w obu wersjach.
+- Cień kampera leży na drodze, a nadkola należą do nadwozia, dlatego `camper_under.svg` rozdzielono na cień i nadkola.
+- Fizyka liczy się krokiem 1/240 s: sprężyna koła jest sztywna, a krok równy klatce mógłby ją rozhuśtać.
 - Przezroczystość na `Picture` wymaga `saveLayer`, dlatego kurz rośnie i maleje do zera zamiast wygasać.
 - Nakładka musi być zawsze drugim dzieckiem tego samego `Stack`, inaczej zniknięcie przebudowałoby ekran startowy.
 - `AnnotatedRegion` po zniknięciu nie przywraca paska stanu, więc robi to `SystemChrome.setSystemUIOverlayStyle`.
@@ -73,14 +78,16 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 
 ## Checklista weryfikacji
 - [x] `flutter analyze`: 0 issues
-- [x] `flutter test`: 338/338
+- [x] `flutter test`: 349/349
 - [x] P30 przez adb: natywny gradient, przejście w niebo, wjazd, jazda z paralaksą, odjazd, ekran startowy
 - [x] P30 przez adb: stuknięcie po gotowości daje odjazd i przenikanie
 - [x] P30 przez adb: zimny start z udostępnienia, mapa z wynikiem po około 1,5 s (bez wcześniejszego zrzutu samej nakładki)
 - [x] P30 przez adb: „Usuń animacje” (`animator_duration_scale` 0) daje nieruchomą scenę i przenikanie; ustawienie przywrócone
 - [x] P30: 4 palety, tylna lampa, nocna przednia szyba, podziałka i lusterko
 - [ ] Użytkownik: płynność i tempo wyjścia na telefonie
+- [x] P30 przez adb: przechył przy hamowaniu na wjeździe, kamyk na linii kół, kurz przy obu osiach (zrzuty; samego podskoku koła zrzuty nie złapały, sprawdzają go testy)
 - [ ] Użytkownik: czy kurz pasuje
+- [ ] Użytkownik: siła przechyłu i podskoku na kamyku
 - [ ] Etap 4: obrót ekranu w trakcie animacji, szew pętli przy dłuższej jeździe
 
 ## Poprawki po teście
@@ -88,6 +95,7 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 - Różne sylwetki gór po uwadze „nie muszą być wszystkie spiczaste”.
 - Tylne światło na czerwono w nocy (prośba użytkownika).
 - Noc: świeci przednia szyba, lusterko nie jest zasłonięte, podziałka szyby kabiny wróciła (uwaga użytkownika).
+- Kurz także za przednimi kołami, zawieszenie reagujące na przyspieszanie i hamowanie, kamyki na drodze (prośba użytkownika).
 
 ## Otwarte
 - Etap 3: 7 pozostałych scen i arkusz 32 kombinacji do oceny.

@@ -94,9 +94,7 @@ class _PreviewState extends State<_Preview>
     debugPrint('Scena wczytana w ${stopwatch.elapsedMilliseconds} ms');
     if (!mounted) return;
     setState(() => _art = art);
-    _motion.wheelRate =
-        art.layers[art.layers.length - 2].spec.speed /
-        (manifest.camper.radius * manifest.camperScale);
+    _motion.attach(art);
     if (!_ticker.isActive) {
       _motion.begin();
       _ticker.start();

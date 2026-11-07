@@ -148,12 +148,8 @@ class _SplashOverlayState extends ConsumerState<SplashOverlay>
       if (_leaving) return;
       _launch.reverse();
       if (!_still) {
-        final manifest = art.manifest;
-        // Koła toczą się po drodze: to przedostatnia warstwa, ostatnia to pierwszy plan.
         _motion
-          ..wheelRate =
-              art.layers[art.layers.length - 2].spec.speed /
-              (manifest.camper.radius * manifest.camperScale)
+          ..attach(art)
           ..begin();
         _frame.update();
         _ticker.start();

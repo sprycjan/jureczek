@@ -58,20 +58,24 @@ class SplashArt {
     required this.manifest,
     required this.sky,
     required this.layers,
+    required this.camperShadow,
     required this.camperUnder,
     required this.camperBody,
     required this.wheel,
     required this.dust,
+    required this.pebble,
     required this.camperNight,
   });
 
   final SplashManifest manifest;
   final PictureInfo sky;
   final List<SplashLayerArt> layers;
+  final PictureInfo camperShadow;
   final PictureInfo camperUnder;
   final PictureInfo camperBody;
   final PictureInfo wheel;
   final PictureInfo dust;
+  final PictureInfo pebble;
 
   /// Świecące okna i reflektor, tylko w nocy.
   final PictureInfo? camperNight;
@@ -79,10 +83,12 @@ class SplashArt {
   void dispose() {
     for (final info in [
       sky,
+      camperShadow,
       camperUnder,
       camperBody,
       wheel,
       dust,
+      pebble,
       ?camperNight,
       for (final layer in layers) layer.picture,
     ]) {
@@ -124,6 +130,8 @@ Future<SplashArt> loadSplashArt({
     load('camper_body.svg'),
     load('camper_wheel.svg'),
     load('dust.svg'),
+    load('camper_shadow.svg'),
+    load('pebble.svg'),
     if (night) load('camper_night.svg'),
   ]);
   final layers = await Future.wait(scene.layers.map((l) => load(l.file)));
@@ -134,7 +142,9 @@ Future<SplashArt> loadSplashArt({
     camperBody: common[2],
     wheel: common[3],
     dust: common[4],
-    camperNight: night ? common[5] : null,
+    camperShadow: common[5],
+    pebble: common[6],
+    camperNight: night ? common[7] : null,
     layers: [
       for (final (i, spec) in scene.layers.indexed)
         SplashLayerArt(spec, layers[i]),
