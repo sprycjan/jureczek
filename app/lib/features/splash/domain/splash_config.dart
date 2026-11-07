@@ -97,8 +97,8 @@ class SplashConfig {
   final double pebbleLift;
   final double pebbleContact;
 
-  /// Neutralny zmierzch z `launch_background.xml`, a we Flutterze zapas na spóźnioną albo
-  /// niewczytaną scenę. Natywne tło nie zależy od godziny, więc nie ma koloru pory dnia.
+  /// Zapas na spóźnioną albo niewczytaną scenę, ten sam co w `launch_background.xml`.
+  /// Przy normalnym starcie go nie widać: okno startowe jest wyłączone, a scena zdąża.
   static const launchSky = [
     Color(0xFF7D74B4),
     Color(0xFFB884AE),

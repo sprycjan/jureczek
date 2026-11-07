@@ -44,7 +44,7 @@ class JureczekApp extends StatelessWidget {
       // udostępnienie przy zimnym starcie nie przykryje animacji.
       builder: showSplash && accessToken.isNotEmpty
           ? (context, child) => SplashOverlay(
-              loadArt: start == null ? loadRandomSplashArt : (_) => start.art,
+              loadArt: start == null ? loadNextSplashArt : (_) => start.art,
               onArtSettled: start?.releaseFirstFrame,
               child: child!,
             )

@@ -94,19 +94,16 @@ void main() {
     }
   });
 
-  test(
-    'natywne tło startowe i pierwsza klatka Fluttera mają ten sam gradient',
-    () {
-      final colors = SplashConfig.launchSky.map(_hex).toList();
-      expect(json['launchSky'], colors);
-      for (final folder in ['drawable', 'drawable-v21']) {
-        final xml = File(
-          'android/app/src/main/res/$folder/launch_background.xml',
-        ).readAsStringSync();
-        expect(xml, contains('android:startColor="${colors[0]}"'));
-        expect(xml, contains('android:centerColor="${colors[1]}"'));
-        expect(xml, contains('android:endColor="${colors[2]}"'));
-      }
-    },
-  );
+  test('zapasowe tło okna i nakładki Fluttera to ten sam gradient', () {
+    final colors = SplashConfig.launchSky.map(_hex).toList();
+    expect(json['launchSky'], colors);
+    for (final folder in ['drawable', 'drawable-v21']) {
+      final xml = File(
+        'android/app/src/main/res/$folder/launch_background.xml',
+      ).readAsStringSync();
+      expect(xml, contains('android:startColor="${colors[0]}"'));
+      expect(xml, contains('android:centerColor="${colors[1]}"'));
+      expect(xml, contains('android:endColor="${colors[2]}"'));
+    }
+  });
 }

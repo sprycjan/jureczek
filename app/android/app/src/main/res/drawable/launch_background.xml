@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tło przy starcie aplikacji: neutralny zmierzch, ten sam co w pierwszej klatce ekranu
-     powitalnego (SplashConfig.launchSky, v24). Nie zależy od godziny, bo to zasób Androida. -->
+<!-- Tło okna pod Flutterem: neutralny zmierzch jak SplashConfig.launchSky. Okno startowe jest
+     wyłączone (windowDisablePreview, v24), więc normalnie tego tła nie widać. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">

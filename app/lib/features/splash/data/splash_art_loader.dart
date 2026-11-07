@@ -52,7 +52,7 @@ class SplashLayerArt {
   final PictureInfo picture;
 }
 
-/// Gotowe obrazy wylosowanej sceny w jednej porze dnia.
+/// Gotowe obrazy jednej sceny w jednej porze dnia.
 class SplashArt {
   SplashArt({
     required this.manifest,

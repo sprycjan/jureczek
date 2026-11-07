@@ -11,6 +11,7 @@ import '../../home/domain/landscape.dart';
 import '../../share/application/shared_place_controller.dart';
 import '../application/splash_motion.dart';
 import '../data/splash_art_loader.dart';
+import '../data/splash_scene_turn.dart';
 import '../domain/splash_config.dart';
 import '../domain/splash_gate.dart';
 import 'splash_scene_painter.dart';
@@ -27,12 +28,12 @@ Future<void> _precacheHeader(BuildContext context, Landscape period) =>
     // `precacheImage` nie rzuca: brak obrazu nie może zatrzymać startu.
     precacheImage(AssetImage(period.asset), context);
 
-/// Losuje jedną scenę z manifestu; wczytywana jest tylko ona.
-Future<SplashArt> loadRandomSplashArt(Landscape period) async {
+/// Następna scena z manifestu, po kolei; wczytywana jest tylko ona.
+Future<SplashArt> loadNextSplashArt(Landscape period) async {
   final manifest = await loadSplashManifest();
   return loadSplashArt(
     manifest: manifest,
-    sceneIndex: math.Random().nextInt(manifest.scenes.length),
+    sceneIndex: await nextSplashScene(manifest.scenes.length),
     period: period,
   );
 }
@@ -44,7 +45,7 @@ class SplashOverlay extends ConsumerStatefulWidget {
     super.key,
     required this.child,
     this.config = const SplashConfig(),
-    this.loadArt = loadRandomSplashArt,
+    this.loadArt = loadNextSplashArt,
     this.precacheHeader = _precacheHeader,
     this.onArtSettled,
   });

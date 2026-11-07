@@ -24,7 +24,7 @@ void main() {
         splashStart: mapboxAccessToken.isEmpty
             ? null
             : SplashStart(
-                art: loadRandomSplashArt(Landscape.at(DateTime.now())),
+                art: loadNextSplashArt(Landscape.at(DateTime.now())),
                 deferFirstFrame: binding.deferFirstFrame,
                 allowFirstFrame: binding.allowFirstFrame,
                 limit: const SplashConfig().firstFrameLimit,

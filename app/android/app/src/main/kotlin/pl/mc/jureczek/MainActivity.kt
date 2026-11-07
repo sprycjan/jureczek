@@ -31,6 +31,13 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SPLASH_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "nextSceneTurn" -> result.success(nextSceneTurn())
+                    else -> result.notImplemented()
+                }
+            }
         // HapticFeedback z Fluttera milczy, gdy wibracje dotykowe w systemie są wyłączone.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, HAPTICS_CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -42,6 +49,14 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    /// Numer tego uruchomienia; ekran powitalny bierze z niego kolejną scenę.
+    private fun nextSceneTurn(): Int {
+        val prefs = getSharedPreferences(SPLASH_PREFS, Context.MODE_PRIVATE)
+        val turn = prefs.getInt(SCENE_TURN, 0)
+        prefs.edit().putInt(SCENE_TURN, turn + 1).apply()
+        return turn
     }
 
     private fun tap() {
@@ -70,6 +85,9 @@ class MainActivity : FlutterActivity() {
     private companion object {
         const val CHANNEL = "pl.mc.jureczek/share"
         const val HAPTICS_CHANNEL = "pl.mc.jureczek/haptics"
+        const val SPLASH_CHANNEL = "pl.mc.jureczek/splash"
+        const val SPLASH_PREFS = "splash"
+        const val SCENE_TURN = "scene_turn"
         const val TAP_MS = 40L
     }
 }

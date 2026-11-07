@@ -2,8 +2,9 @@
 <resources>
     <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
-        <!-- Show a splash screen on the activity. Automatically removed when
-             the Flutter engine draws its first frame -->
+        <!-- Bez okna startowego: system nie zna sceny ani pory dnia, więc pierwszym obrazem
+             po kliknięciu jest od razu scena z Fluttera (v24). -->
+        <item name="android:windowDisablePreview">true</item>
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
