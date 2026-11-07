@@ -42,7 +42,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 
 ## Pliki
 - `tool/splash_art.py`: generator SVG, palet i manifestu. SVG się nie edytuje.
-- `assets/splash/`: wyjście generatora (67 SVG, około 3,5 MB, 406 tokenów kolorów).
+- `assets/splash/`: wyjście generatora (67 SVG, 3,5 MB, 406 tokenów kolorów).
 - `lib/features/splash/domain/splash_config.dart`: wszystkie parametry w jednym miejscu.
 - `lib/features/splash/domain/splash_gate.dart`: czysta bramka gotowości, jedno wyzwolenie.
 - `lib/features/splash/domain/splash_manifest.dart`: opis grafik.
@@ -68,9 +68,11 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 Pomiar po etapie 3, ze wszystkimi 8 scenami, zawieszeniem, kurzem i kamykami (podgląd, `--profile`, pora zachodu, okna po około 3 s):
 - około 60 klatek/s w każdej scenie, raster p50 13,8–16,0 ms, wczytanie sceny 69–145 ms;
 - **pierwsze okno po wczytaniu sceny jest najgorsze:** 8–42 ze 180 klatek ponad 16,7 ms rastra, p99 do około 36 ms; to właśnie okno widać przy starcie, a kolejne mają 1–26 takich klatek;
-- budżet: najcięższe są modrzewie (1664 ścieżki, 39 244 odcinki) i Alpy (1657, 44 933); ścieżek modrzewie mają o 7 więcej, odcinków mniej.
+- budżet: Alpy pozostają najcięższe (1657 ścieżek, 44 933 odcinki). Modrzewie miały 1664 ścieżki i wypadały najsłabiej, więc po przerzedzeniu lasu w warstwie bliskiej mają 1430 ścieżek i 36 574 odcinki;
+- modrzewie po przerzedzeniu, próba kontrolna z Alpami przed nimi i po nich: po pierwszym oknie 4–14 klatek ponad 16,7 ms, Alpy 5–21;
+- jeden przebieg tego samego dnia dał raster p50 20–27 ms w scenie modrzewi, a czas build wzrósł dwukrotnie. Nie powtórzył się przy kolejnym przebiegu i przyczyny nie ustaliłem; bateria miała wtedy 27–28 °C, ale temperatury nie mierzyłem w trakcie tamtego przebiegu.
 
-Pomiar dotyczy podglądu, gdzie scena zmieniana jest po długim przytrzymaniu, a nie zimnego startu aplikacji.
+Najgorsze pierwsze okno miały łąki, jedna z lżejszych scen, więc koszt prawdopodobnie wynika ze zmiany sceny w podglądzie, a nie z rysunku. Pomiar dotyczy podglądu, a nie zimnego startu aplikacji; ten trzeba zmierzyć w etapie 4.
 
 ## Pułapki
 - `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”). Bundle podajemy tylko w testach.
@@ -118,7 +120,7 @@ Pomiar dotyczy podglądu, gdzie scena zmieniana jest po długim przytrzymaniu, a
 ## Otwarte
 - Etap 3: werdykt użytkownika do arkusza 32 kombinacji.
 - Na ścianach wąwozu jasna płyta skalna wygląda jak przyklejony wielokąt; czeka na ocenę arkusza.
-- Etap 4: obrót, szew pętli, udostępnienie z 8 scenami, `CLAUDE.md`.
+- Etap 4: obrót, szew pętli, udostępnienie z 8 scenami, płynność przy zimnym starcie w samej nakładce, `CLAUDE.md`.
 - Skała jest bardziej kanciasta niż na referencji; użytkownik zaakceptował styl z 2026-11-07.
 - `resorces/bgs.png` nie jest w repo: to cudza ilustracja, służy tylko jako referencja.
 

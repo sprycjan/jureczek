@@ -1547,9 +1547,9 @@ def scene_larch():
     H = 950
     f = wave(1900, 716, [(22, 2, .9), (10, 5, 2.1), (5, 9, .3)])
     band(near, f, 832, near.vgrad(696, 822, [(0, mat('#B97A24', .55, .18)), (1, mat('#8E5E22', .5, .08))]), step=14)
-    forest_band(near, f, 0, 1900, 10, 26, 46, rng, *LARCH_FAR)
+    forest_band(near, f, 0, 1900, 13, 26, 46, rng, *LARCH_FAR)
     g = wave(1900, 774, [(9, 3, 1.1), (5, 7, 2.4)])
-    forest_band(near, g, 0, 1900, 15, 28, 50, rng, *NEAR_TREES)
+    forest_band(near, g, 0, 1900, 21, 28, 50, rng, *NEAR_TREES)
 
     hills, f3, rng = meadow_layer(2500, 'larch-hills', 806, [(10, 2, .5), (7, 3, 2.1), (4, 7, 1.2)], '#B8A23A', '#EFCF58', LARCH_FAR,
                                   ((60, 300), (600, 850), (1250, 1420), (1760, 1990), (2270, 2440)), tree=(30, 60), density=13)
