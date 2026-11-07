@@ -15,8 +15,9 @@ Geometry is read off the illustration through crop(): cx, cy are pixels of a 2x
 crop of screen.png with its corner at (150, 220).
 
 Dark outlines are inverted hulls: an inflated copy with flipped faces, which
-back-face culling shows only around the silhouette. Windows and lines are
-decals projected onto the body and lifted slightly along the surface normal.
+back-face culling shows only around the silhouette. Details are projected onto
+the body: flat ones as decals lifted along the surface normal, raised ones
+(window seals, louvres, handles) with Part.emboss.
 
 Animations: "Jazda" spins the wheels in a loop, "Namiot" folds and raises the
 tent once. The tent walls scale in Y by tan(angle) / tan(open angle), which keeps
@@ -47,21 +48,24 @@ def srgb(hex_colour):
     return [round(channel(int(h[i : i + 2], 16)), 5) for i in (0, 2, 4)] + [1.0]
 
 
-MATERIALS = {
-    "zielen": ("#547C65", 0.85),
-    "krem": ("#F4E5C5", 0.85),
-    "koral": ("#EC896C", 0.85),
-    "brzoskwinia": ("#F2CFA4", 0.6),
-    "kontur": ("#1B1A18", 0.9),
-    "opona": ("#3E5247", 0.95),
-    "felga": ("#EBD5BE", 0.6),
-    "kolpak": ("#BCC9CF", 0.35),
-    "zderzak": ("#F1DFBE", 0.7),
-    "reflektor": ("#E5BD82", 0.4),
-    "swiatlo_tyl": ("#C28273", 0.6),
-    "zielen_bagaz": ("#61816C", 0.85),
-    "walizka_jasna": ("#D5BFA8", 0.85),
-    "walizka_braz": ("#AA7D6A", 0.85),
+MATERIALS = {  # colour, roughness, metallic
+    "zielen": ("#547C65", 0.42, 0.0),
+    "krem": ("#F4E5C5", 0.45, 0.0),
+    "koral": ("#EC896C", 0.5, 0.0),
+    "plotno": ("#EC896C", 0.95, 0.0),
+    "brzoskwinia": ("#F2CFA4", 0.16, 0.0),
+    "kontur": ("#1B1A18", 0.9, 0.0),
+    "guma": ("#232B27", 0.7, 0.0),
+    "opona": ("#3E5247", 0.95, 0.0),
+    "felga": ("#EBD5BE", 0.4, 0.0),
+    "kolpak": ("#BCC9CF", 0.25, 0.85),
+    "chrom": ("#D5DCE0", 0.22, 1.0),
+    "zderzak": ("#F1DFBE", 0.45, 0.0),
+    "reflektor": ("#E5BD82", 0.15, 0.0),
+    "swiatlo_tyl": ("#C28273", 0.25, 0.0),
+    "zielen_bagaz": ("#61816C", 0.9, 0.0),
+    "walizka_jasna": ("#D5BFA8", 0.8, 0.0),
+    "walizka_braz": ("#AA7D6A", 0.8, 0.0),
 }
 UNLIT = {"kontur"}
 
@@ -430,6 +434,17 @@ def stroke_tris(path, width, closed=False):
     return tris
 
 
+def densify(poly, limit):
+    """Adds points along long edges, so a relief follows the surface under it."""
+    out = []
+    for i, a in enumerate(poly):
+        b = poly[(i + 1) % len(poly)]
+        steps = max(1, math.ceil(math.dist(a, b) / limit))
+        for k in range(steps):
+            out.append((a[0] + (b[0] - a[0]) * k / steps, a[1] + (b[1] - a[1]) * k / steps))
+    return out
+
+
 def subdivide(tri, limit):
     a, b, c = tri
     ab = math.dist(a, b) > limit
@@ -530,6 +545,7 @@ class Part:
         self.rotation = rotation
         self.parent = parent
         self.prims = defaultdict(list)
+        self.shading = None  # optional p -> brightness, stored as vertex colours
 
     def solid(self, mat, tris, outline=0.0, crease=50):
         self.prims[mat] += shade(tris, crease)
@@ -542,6 +558,31 @@ class Part:
 
     def stroke(self, proj, mat, path, width, lift, closed=False):
         self.decal_tris(proj, mat, stroke_tris(path, width, closed), lift)
+
+    def emboss(self, proj, mat, poly, profile, cap=None):
+        """Real relief: bands between offsets of poly. profile is (grow, lift) pairs,
+        outermost first; cap fills the innermost ring with that material."""
+        base = densify(ccw(poly), proj.limit)
+        rings = [grow(base, d) for d, _ in profile]
+        center = (sum(q[0] for q in base) / len(base), sum(q[1] for q in base) / len(base))
+        # Counter-clockwise in (u, v) faces -x on the sides and +z on the front.
+        flip = (proj.axis == 0 and proj.sign == 1) or (proj.axis == 2 and proj.sign == -1)
+        out = []
+        for k in range(len(profile) - 1):
+            r0, r1 = rings[k], rings[k + 1]
+            l0, l1 = profile[k][1], profile[k + 1][1]
+            for i in range(len(base)):
+                j = (i + 1) % len(base)
+                a = proj.hit(*r0[i], center, l0)
+                b = proj.hit(*r0[j], center, l0)
+                c = proj.hit(*r1[j], center, l1)
+                d = proj.hit(*r1[i], center, l1)
+                for f in ((a, b, c), (a, c, d)):
+                    if dot(face_normal(f), face_normal(f)) > 1e-14:
+                        out.append((f[0], f[2], f[1]) if flip else f)
+        self.prims[mat] += shade(out, 50)
+        if cap:
+            self.decal(proj, cap, rings[-1], profile[-1][1])
 
     def decal_tris(self, proj, mat, tris2, lift):
         pts = [p for t in tris2 for p in t]
@@ -613,18 +654,25 @@ def body_bottom(z):
     return y
 
 
+def barrel(z):
+    return 1 - 0.02 * (z / 2.2) ** 2
+
+
 def body_halfwidth(z):
     if z > 1.35:
         t = min((z - 1.35) / (Z_MAX - 1.35), 1.0)
-        return W * (0.62 + 0.38 * (1 - t**3.2) ** (1 / 3.2))
+        return W * (0.62 + 0.38 * (1 - t**3.2) ** (1 / 3.2)) * barrel(z)
     if z < -1.9:
         t = min((-1.9 - z) / (-1.9 - Z_MIN), 1.0)
-        return W * (0.72 + 0.28 * (1 - t**3) ** (1 / 3))
-    return W
+        return W * (0.72 + 0.28 * (1 - t**3) ** (1 / 3)) * barrel(z)
+    return W * barrel(z)
 
 
 def taper(y):
-    return 1.0 if y < 0.9 else 1 - 0.12 * ((y - 0.9) / (BODY_TOP - 0.9)) ** 2
+    """Widest at the door handles: tucked in at the sill, leaning in towards the roof."""
+    if y < 1.0:
+        return 1 - 0.025 * ((1.0 - y) / 0.6) ** 2
+    return 1 - 0.12 * ((y - 1.0) / (BODY_TOP - 1.0)) ** 2
 
 
 def spow(v, e):
@@ -646,7 +694,8 @@ def body_ring(z):
     for i in range(3):
         a = math.pi / 2 * i / 2
         half.append((w - rb * (1 - math.sin(a)), bottom + rb * (1 - math.cos(a))))
-    half.append((w, (bottom + rb + top - rt) / 2))
+    for f in (0.25, 0.5, 0.75):
+        half.append((w, bottom + rb + (top - rt - bottom - rb) * f))
     for i in range(5):
         a = math.pi / 2 * i / 4
         half.append((w - rt * (1 - math.cos(a)), top - rt * (1 - math.sin(a))))
@@ -656,13 +705,32 @@ def body_ring(z):
     return [(0.0, bottom, z), *right, (0.0, top, z), *left]
 
 
-def body_solid():
+def body_rings():
     stations = {Z_MIN, -2.188, -2.13, -2.048, -1.95, -1.85, -0.75, -0.3, 0.15, 0.5}
     stations |= {1.632, 1.752, 1.86, 1.96, 2.072, 2.13, 2.18, Z_MAX}
     for zc in (Z_REAR_WHEEL, Z_FRONT_WHEEL):
         for i in range(11):
             stations.add(zc - ARCH_R * math.cos(math.pi * i / 10))
-    return loft([body_ring(z) for z in sorted(stations)])
+    return [body_ring(z) for z in sorted(stations)]
+
+
+def grid_normals(rings):
+    """Normals from the grid of stations and rings. Face-based ones streak on long,
+    uneven triangles, which a glossy paint shows as crumpled metal."""
+    normals = {}
+    last = len(rings) - 1
+    count = len(rings[0])
+    for i, ring in enumerate(rings):
+        cx = sum(q[0] for q in ring) / count
+        cy = sum(q[1] for q in ring) / count
+        for j, q in enumerate(ring):
+            along = sub(rings[min(i + 1, last)][j], rings[max(i - 1, 0)][j])
+            around = sub(ring[(j + 1) % count], ring[j - 1])
+            n = unit(cross(around, along))
+            if dot(n, (q[0] - cx, q[1] - cy, 0.0)) < 0:
+                n = mul(n, -1)
+            normals[key(q)] = n
+    return normals
 
 
 def fender(side, zc):
@@ -692,6 +760,8 @@ BELT_TOP = [(-3.0, 1.512), (1.35, 1.512), (1.75, 1.40), (2.19, 1.03), (3.0, 0.95
 STRIPE = 0.08
 LINE = 0.018
 UNDERSIDE_INSET = 0.035  # the underside is dark up to this far from the wall
+TRIM = 0.010  # height of the raised belt moulding
+TRIM_SLOPE = 0.012
 
 
 def belt_top(x, z):
@@ -702,27 +772,70 @@ def belt_top(x, z):
     return y
 
 
-def add_body_paint(part, tris):
-    shaded = shade(tris, 40)  # keeps the walls flat next to the lower corner
-    shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]))
-    shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]) + STRIPE)
-    shaded = clip(shaded, lambda p: p[1] - belt_top(p[0], p[2]) + STRIPE + LINE)
+def add_body_paint(part, tris, normals):
+    def belt(p):
+        return p[1] - belt_top(p[0], p[2])
+
+    low = -STRIPE - LINE
+    shaded = []
+    for t in shade(tris, 40):
+        # Caps keep their face normal; everything on the grid gets the clean one.
+        face = unit(face_normal((t[0][0], t[1][0], t[2][0])))
+        corners = []
+        for q, n in t:
+            grid = normals.get(key(q))
+            corners.append((q, grid if grid and dot(grid, face) > 0.55 else n))
+        shaded.append(tuple(corners))
+    for level in (TRIM_SLOPE, 0.0, -STRIPE, low, low - TRIM_SLOPE):
+        shaded = clip(shaded, lambda p, lv=level: belt(p) - lv)
     shaded = clip(shaded, lambda p: abs(p[0]) - body_halfwidth(p[2]) + UNDERSIDE_INSET)
+
+    def raised(corner):
+        p, n = corner
+        d = belt(p)
+        if d > TRIM_SLOPE or d < low - TRIM_SLOPE or n[1] < -0.5:
+            return 0.0
+        if d > 0:
+            return TRIM * (1 - d / TRIM_SLOPE)
+        if d < low:
+            return TRIM * (1 - (low - d) / TRIM_SLOPE)
+        return TRIM
+
     for t in shaded:
         c = mul(add(add(t[0][0], t[1][0]), t[2][0]), 1 / 3)
         n = unit(face_normal((t[0][0], t[1][0], t[2][0])))
-        d = c[1] - belt_top(c[0], c[2])
+        d = belt(c)
         if n[1] < -0.3 and abs(c[0]) < body_halfwidth(c[2]) - UNDERSIDE_INSET:
             mat = "kontur"
         elif d >= 0:
             mat = "krem"
         elif d >= -STRIPE:
             mat = "koral"
-        elif d >= -STRIPE - LINE:
+        elif d >= low:
             mat = "kontur"
         else:
             mat = "zielen"
-        part.prims[mat].append(t)
+        amounts = [raised(q) for q in t]
+        moved = tuple(add(q[0], mul(q[1], h)) for q, h in zip(t, amounts))
+        if max(amounts) - min(amounts) < 1e-6:
+            part.prims[mat].append(tuple((m, q[1]) for m, q in zip(moved, t)))
+        else:
+            # The moulding's sloped edge is a flat facet, so it catches the light.
+            flat = unit(face_normal(moved))
+            part.prims[mat].append(tuple((m, flat) for m in moved))
+
+
+def body_shading(p):
+    """Soft contact shading: under the roof overhang and towards the sill."""
+    y = p[1]
+    a = 1.0
+    if 1.9 < y < 2.125:
+        a -= 0.2 * ((y - 1.9) / 0.225) ** 2
+    if 2.105 <= y < 2.18:
+        a -= 0.2 * (1 - (y - 2.105) / 0.075)
+    if y < 0.75:
+        a -= 0.16 * (0.75 - y) / 0.4
+    return max(a, 0.6)
 
 
 def poly_crop(*pts):
@@ -741,22 +854,58 @@ WINDOWS = [
     round_poly(poly_crop((930, 430), (1096, 430), (1136, 548), (930, 548)), 0.06),
     round_poly(poly_crop((1110, 432), (1145, 432), (1203, 548), (1150, 548)), 0.05),
 ]
-PANEL_LINE = 0.024
-LIFT_DARK, LIFT_FILL, LIFT_TOP = 0.010, 0.016, 0.022
+PANEL_LINE = 0.018
+LIFT_DARK, LIFT_FILL, LIFT_TOP = 0.014, 0.020, 0.026
+GLASS_LIFT, CURTAIN_LIFT = 0.009, 0.014
+# Rubber seal standing proud of the wall, with the glass set back inside it.
+SEAL = ((0.030, 0.002), (0.022, 0.026), (0.008, 0.026), (0.0, GLASS_LIFT))
+
+
+def glazed(part, proj, poly, curtains=()):
+    part.emboss(proj, "guma", poly, SEAL)
+    part.decal(proj, "brzoskwinia", poly, GLASS_LIFT)
+    for c in curtains:
+        part.decal(proj, "plotno", c, CURTAIN_LIFT)
+
+
+def bar_handle(part, proj, u0, u1, v):
+    """Chrome grab handle on two posts, standing off the surface."""
+    center = ((u0 + u1) / 2, v)
+    part.emboss(proj, "guma", rrect2(u0 - 0.02, v - 0.03, u1 + 0.02, v + 0.03, 0.025),
+                ((0.004, 0.002), (0.0, 0.009)), cap="guma")
+    a = proj.hit(u0, v, center, 0.042)
+    b = proj.hit(u1, v, center, 0.042)
+    part.solid("chrom", tube(a, b, 0.012), outline=0.006)
+    for u in (u0 + 0.012, u1 - 0.012):
+        part.solid("chrom", tube(proj.hit(u, v, center, 0.0), proj.hit(u, v, center, 0.042), 0.009, sides=5))
+
+
+def louvres(part, proj, u0, u1, vs, height, mat):
+    """Dark opening with raised slats across it."""
+    gap = 0.012
+    part.decal(proj, "kontur", rrect2(u0 - gap, min(vs) - height / 2 - gap, u1 + gap, max(vs) + height / 2 + gap, 0.02), 0.005)
+    for v in vs:
+        part.emboss(proj, mat, rrect2(u0, v - height / 2, u1, v + height / 2, 0.008),
+                    ((0.003, 0.006), (0.0, 0.024)), cap=mat)
 
 
 def add_side(part, proj, sliding_door):
-    for w in WINDOWS:
-        part.decal(proj, "kontur", grow(w, 0.018), LIFT_DARK)
-        part.decal(proj, "brzoskwinia", w, LIFT_FILL)
-    for c in CURTAINS:
-        part.decal(proj, "koral", round_poly(c, 0.045), LIFT_TOP)
+    curtains = {1: [CURTAINS[0], CURTAINS[1]], 0: [CURTAINS[2]], 2: [CURTAINS[3]]}
+    for i, w in enumerate(WINDOWS):
+        glazed(part, proj, w, [round_poly(c, 0.045) for c in curtains.get(i, ())])
 
     if sliding_door:
         door = smooth_path(
             poly_crop((612, 408), (612, 825), (908, 825), (908, 408)), 0.1
         )
         part.stroke(proj, "kontur", door, PANEL_LINE, LIFT_DARK)
+        # The sliding door's handle and rail.
+        z, y = crop(635, 655)
+        bar_handle(part, proj, z, z + 0.16, y)
+        z0, y_rail = crop(400, 700)
+        z1, _ = crop(612, 700)
+        part.emboss(proj, "guma", rrect2(z0, y_rail - 0.016, z1, y_rail + 0.016, 0.01),
+                    ((0.004, 0.003), (0.0, 0.016)), cap="guma")
     else:
         part.stroke(proj, "kontur", poly_crop((908, 408), (908, 720)), PANEL_LINE, LIFT_DARK)
     part.stroke(proj, "kontur", poly_crop((908, 726), (1040, 726)), PANEL_LINE, LIFT_DARK)
@@ -769,44 +918,59 @@ def add_side(part, proj, sliding_door):
         part.stroke(proj, "kontur", edge, PANEL_LINE, LIFT_DARK)
     part.stroke(proj, "kontur", poly_crop((1222, 595), (1240, 808)), PANEL_LINE, LIFT_DARK)
 
-    for cy in (605, 626, 647, 668, 688):
-        part.stroke(proj, "kontur", poly_crop((292, cy), (380, cy)), 0.03, LIFT_DARK)
-    part.decal(proj, "kontur", rrect2(*crop(392, 612), *crop(452, 674), 0.05), LIFT_DARK)
-    part.decal(proj, "zielen", rrect2(*crop(402, 622), *crop(442, 664), 0.035), LIFT_FILL)
-    part.decal(proj, "kontur", rrect2(*crop(928, 618), *crop(1006, 644), 0.045), LIFT_DARK)
-    part.decal(proj, "krem", rrect2(*crop(937, 625), *crop(997, 637), 0.02), LIFT_FILL)
+    z0, z1 = crop(292, 0)[0], crop(380, 0)[0]
+    louvres(part, proj, z0, z1, [crop(0, cy)[1] for cy in (605, 626, 647, 668, 688)], 0.05, "zielen")
+    # Filler flap, standing slightly proud.
+    flap = rrect2(*crop(402, 622), *crop(442, 664), 0.03)
+    part.decal(proj, "kontur", grow(flap, 0.012), 0.006)
+    part.emboss(proj, "zielen", flap, ((0.006, 0.008), (0.0, 0.018)), cap="zielen")
+
+    z0, y = crop(937, 631)
+    z1, _ = crop(997, 631)
+    bar_handle(part, proj, z0, z1, y)
+    # Side marker: a small dome in a dark ring.
     cz, cy = crop(1260, 658)
-    part.decal(proj, "kontur", circle2(cz, cy, 0.065), LIFT_DARK)
-    part.decal(proj, "krem", circle2(cz, cy, 0.04), LIFT_FILL)
+    part.decal(proj, "guma", circle2(cz, cy, 0.056), LIFT_DARK)
+    c = proj.hit(cz, cy, (cz, cy), 0.0)
+    part.solid("reflektor", ellipsoid(c, 0.022, 0.04, 0.04, segs=10, rows=4), crease=80)
 
 
 def add_front(part, proj):
     for s in (1, -1):
-        shield = round_poly(
+        glazed(part, proj, round_poly(
             [(s * 0.035, 1.6), (s * 0.70, 1.6), (s * 0.64, 2.06), (s * 0.035, 2.06)], 0.07
-        )
-        part.decal(proj, "kontur", grow(shield, 0.022), LIFT_DARK)
-        part.decal(proj, "brzoskwinia", shield, LIFT_FILL)
+        ))
+        # Wipers parked along the bottom of the glass, on short arms.
+        blade_a = proj.hit(s * 0.09, 1.645, (0.0, 1.7), 0.04)
+        blade_b = proj.hit(s * 0.58, 1.645, (0.0, 1.7), 0.04)
+        pivot = proj.hit(s * 0.30, 1.545, (0.0, 1.7), 0.03)
+        mid = proj.hit(s * 0.40, 1.645, (0.0, 1.7), 0.04)
+        part.solid("guma", tube(blade_a, blade_b, 0.009, sides=5))
+        part.solid("guma", tube(pivot, mid, 0.007, sides=5))
+        # Indicators above the headlights.
+        c = proj.hit(s * 0.6, 1.1, (0.0, 1.1), 0.0)
+        part.solid("reflektor", ellipsoid(c, 0.05, 0.028, 0.022, segs=10, rows=4), crease=80)
+    # Fresh-air grille between the windscreen and the V.
+    louvres(part, proj, -0.34, 0.34, [1.28, 1.335, 1.39, 1.445], 0.032, "krem")
 
 
 def add_rear(part, proj):
     hatch = rrect2(-0.52, 1.56, 0.52, 2.0, 0.08)
     part.stroke(proj, "kontur", hatch, PANEL_LINE, LIFT_DARK, closed=True)
     win = rrect2(-0.42, 1.64, 0.42, 1.92, 0.06)
-    part.decal(proj, "kontur", grow(win, 0.018), LIFT_DARK)
-    part.decal(proj, "brzoskwinia", win, LIFT_FILL)
+    curtains = []
     for s in (1, -1):
-        curtain = round_poly(
+        curtains.append(round_poly(
             [(s * 0.40, 1.655), (s * 0.28, 1.655), (s * 0.31, 1.78), (s * 0.26, 1.905), (s * 0.40, 1.905)],
             0.035,
-        )
-        part.decal(proj, "koral", curtain, LIFT_TOP)
+        ))
+    glazed(part, proj, win, curtains)
     engine = rrect2(-0.50, 0.66, 0.50, 1.34, 0.08)
     part.stroke(proj, "kontur", engine, PANEL_LINE, LIFT_DARK, closed=True)
-    part.decal(proj, "kontur", rrect2(-0.1, 1.17, 0.1, 1.23, 0.025), LIFT_DARK)
-    part.decal(proj, "krem", rrect2(-0.07, 1.185, 0.07, 1.215, 0.012), LIFT_FILL)
-    part.decal(proj, "kontur", rrect2(-0.2, 0.74, 0.2, 0.88, 0.025), LIFT_DARK)
-    part.decal(proj, "krem", rrect2(-0.18, 0.76, 0.18, 0.86, 0.015), LIFT_FILL)
+    bar_handle(part, proj, -0.07, 0.07, 1.2)
+    louvres(part, proj, -0.26, 0.26, [0.985, 1.03, 1.075], 0.028, "zielen")
+    plate = rrect2(-0.18, 0.76, 0.18, 0.86, 0.015)
+    part.emboss(proj, "guma", plate, ((0.018, 0.004), (0.012, 0.016), (0.0, 0.012)), cap="krem")
 
 
 BUMPER_OFFSET = 0.05  # bumper centreline outside the body outline
@@ -814,37 +978,41 @@ BUMPER_HALF_THICK = 0.055  # so its inner face just touches the body
 BUMPER_Y0, BUMPER_Y1 = 0.31, 0.56  # overlaps the body's lower edge at 0.45
 
 
-def bumper_path(front):
+def bumper_path(front, extra=0.0, tuck=True):
     if front:
         zs = [1.66, 1.8, 1.92, 2.02, 2.1, 2.16, 2.2, Z_MAX]
     else:
         zs = [-1.95, -2.03, -2.1, -2.15, -2.19, -2.215, Z_MIN]
     outline = [(body_halfwidth(z), z) for z in zs]
     sign = 1 if front else -1
+    offset = BUMPER_OFFSET + extra
     half = []
     for i, (x, z) in enumerate(outline):
         a, b = outline[max(i - 1, 0)], outline[min(i + 1, len(outline) - 1)]
         tx, tz = b[0] - a[0], b[1] - a[1]
         length = math.hypot(tx, tz)
         nx, nz = sign * tz / length, -sign * tx / length
-        half.append((x + nx * BUMPER_OFFSET, z + nz * BUMPER_OFFSET))
-    # The free ends curve into the wall instead of standing off it.
-    first_z = outline[0][1]
-    half[:0] = [
-        (body_halfwidth(first_z) - 0.03, first_z - sign * 0.09),
-        (body_halfwidth(first_z) + 0.012, first_z - sign * 0.045),
-    ]
+        half.append((x + nx * offset, z + nz * offset))
+    if tuck:
+        # The free ends curve into the wall instead of standing off it.
+        first_z = outline[0][1]
+        half[:0] = [
+            (body_halfwidth(first_z) - 0.03, first_z - sign * 0.09),
+            (body_halfwidth(first_z) + 0.012, first_z - sign * 0.045),
+        ]
     # Across the flat end of the car, on the offset line.
-    z_end = zs[-1] + sign * BUMPER_OFFSET
+    z_end = zs[-1] + sign * offset
     half.append((outline[-1][0] * 0.55, z_end))
     return half + [(-x, z) for x, z in reversed(half)]
 
 
 def build_body():
     part = Part("nadwozie")
-    tris = body_solid()
-    add_body_paint(part, tris)
-    part.prims["kontur"] += shade(inflate(tris, 0.024), 180)
+    part.shading = body_shading
+    rings = body_rings()
+    tris = loft(rings)
+    add_body_paint(part, tris, grid_normals(rings))
+    part.prims["kontur"] += shade(inflate(tris, 0.016), 180)
 
     add_side(part, Projector(tris, 0, -1, limit=0.17), sliding_door=True)
     add_side(part, Projector(tris, 0, 1, limit=0.17), sliding_door=False)
@@ -864,11 +1032,11 @@ def build_body():
     ):
         cz, hz = (z0 + z1) / 2, (z1 - z0) / 2
         rim_rings.append([(u, y, cz + v) for u, v in rounded_rect(hx, hz, 0.34, corner=3)])
-    part.solid("krem", loft(rim_rings), outline=0.024)
+    part.solid("krem", loft(rim_rings), outline=0.016)
 
     for side in (1, -1):
         for zc in (Z_REAR_WHEEL, Z_FRONT_WHEEL):
-            part.solid("zielen", fender(side, zc), outline=0.016)
+            part.solid("zielen", fender(side, zc), outline=0.012)
 
     # Underbody: closes the wheel arches and carries the bumpers.
     part.solid("kontur", rbox(-0.6, 0.6, 0.37, 0.95, -2.0, 2.0, r=0.02, corner=1, rows=1))
@@ -877,8 +1045,22 @@ def build_body():
     h_bumper = (BUMPER_Y1 - BUMPER_Y0) / 2
     for front in (True, False):
         part.solid(
-            "zderzak", sweep(bumper_path(front), BUMPER_HALF_THICK, h_bumper, y_bumper, 0.05), outline=0.022
+            "zderzak", sweep(bumper_path(front), BUMPER_HALF_THICK, h_bumper, y_bumper, 0.05), outline=0.016
         )
+        # Rubber insert along the bumper, and two guards.
+        strip = bumper_path(front, extra=BUMPER_HALF_THICK - 0.004, tuck=False)
+        part.solid("guma", sweep(strip, 0.012, 0.022, y_bumper + 0.012, 0.01))
+        face = (Z_MAX if front else Z_MIN) + (1 if front else -1) * (BUMPER_OFFSET + BUMPER_HALF_THICK)
+        for s in (1, -1):
+            part.solid(
+                "zderzak",
+                rbox(s * 0.4 - 0.032, s * 0.4 + 0.032, BUMPER_Y0 - 0.05, BUMPER_Y1 + 0.05, face - 0.05, face + 0.035,
+                     r=0.024, corner=1, rows=1),
+                outline=0.012,
+            )
+
+    # Exhaust, below the rear bumper.
+    part.solid("chrom", tube((-0.42, 0.275, -2.0), (-0.42, 0.265, -2.43), 0.032, sides=8), outline=0.01)
 
     # Headlights, tail lights, mirrors.
     for s in (1, -1):
@@ -895,34 +1077,26 @@ def build_body():
             pts = [q[0] for q in t]
             r = max(math.hypot(p[0] - c[0], p[1] - c[1]) for p in pts)
             part.prims["reflektor" if r <= 0.104 else "kolpak"].append(t)
-        part.prims["kontur"] += shade(inflate(lamp, 0.018), 180)
+        part.prims["kontur"] += shade(inflate(lamp, 0.012), 180)
 
         rear = rear_proj.hit(s * 0.5, 0.78, (0.0, 0.78), 0.0)
         part.solid(
             "swiatlo_tyl",
             rbox(rear[0] - 0.075, rear[0] + 0.075, 0.63, 0.92, rear[2] - 0.075, rear[2] + 0.05, r=0.03),
-            outline=0.018,
+            outline=0.012,
         )
 
         x_out = s * (W * taper(1.5) + 0.04)
         arm0 = (s * W * 0.82, *crop(1195, 595)[::-1])
         elbow = (x_out, *crop(1190, 560)[::-1])
         glass = (x_out + s * 0.02, *crop(1155, 530)[::-1])
-        part.solid("kolpak", tube(arm0, elbow, 0.014), outline=0.01)
-        part.solid("kolpak", tube(elbow, glass, 0.014), outline=0.01)
-        part.solid("kolpak", ellipsoid(glass, 0.03, 0.095, 0.058), outline=0.014)
+        part.solid("chrom", tube(arm0, elbow, 0.014), outline=0.007)
+        part.solid("chrom", tube(elbow, glass, 0.014), outline=0.007)
+        part.solid("chrom", ellipsoid(glass, 0.03, 0.095, 0.058), outline=0.01)
     return part
 
 
 # Wheels --------------------------------------------------------------------
-
-BANDS = (
-    (0.15, "kolpak"),
-    (0.165, "kontur"),
-    (0.235, "felga"),
-    (0.25, "kontur"),
-)
-
 
 def build_wheel(name, x_side, z):
     """Local X points away from the car on the outer face, multiplied by x_side."""
@@ -930,46 +1104,64 @@ def build_wheel(name, x_side, z):
     profile = [
         (0.0, -0.12),
         (0.30, -0.12),
-        (0.36, -0.07),
-        (0.36, 0.07),
+        (0.35, -0.095),
+        (0.36, -0.085),
+        (0.36, -0.045),
+        (0.35, -0.04),
+        (0.35, -0.03),
+        (0.36, -0.025),
+        (0.36, 0.025),
+        (0.35, 0.03),
+        (0.35, 0.04),
+        (0.36, 0.045),
+        (0.36, 0.085),
+        (0.35, 0.095),
         (0.30, 0.12),
-        (0.25, 0.122),
-        (0.235, 0.135),
-        (0.20, 0.142),
-        (0.165, 0.132),
-        (0.15, 0.135),
-        (0.10, 0.168),
+        (0.255, 0.123),
+        (0.248, 0.134),  # rim lip
+        (0.235, 0.14),
+        (0.225, 0.126),
+        (0.17, 0.11),  # dished rim, set back from the lip
+        (0.16, 0.124),
+        (0.15, 0.138),  # hubcap
+        (0.12, 0.165),
+        (0.06, 0.18),
         (0.0, 0.184),
     ]
     profile = [(r, a * x_side) for r, a in profile]
     solid = lathe(profile, "x", (0.0, 0.0, 0.0), 24)
     tyre_outline = inflate(
         lathe(
-            [(0.25, -0.12 * x_side), (0.36, -0.07 * x_side), (0.36, 0.07 * x_side), (0.25, 0.12 * x_side)],
+            [(0.25, -0.12 * x_side), (0.36, -0.08 * x_side), (0.36, 0.08 * x_side), (0.25, 0.12 * x_side)],
             "x",
             (0.0, 0.0, 0.0),
             24,
         ),
-        0.016,
+        0.012,
     )
     part.prims["kontur"] += shade(tyre_outline, 180)
     for t in shade(solid, 35):
         pts = [q[0] for q in t]
-        r = max(math.hypot(p[1], p[2]) for p in pts)
+        radii = [math.hypot(p[1], p[2]) for p in pts]
+        r, r_min = max(radii), min(radii)
         outer = min(p[0] * x_side for p in pts) > 0.1
         mat = "opona"
-        if outer:
-            for limit, band in BANDS:
-                if r <= limit + 1e-4:
-                    mat = band
-                    break
+        if r < 0.351 and r_min > 0.349:
+            mat = "guma"  # tread grooves
+        elif outer:
+            if r <= 0.1501:
+                mat = "kolpak"
+            elif r <= 0.1701:
+                mat = "guma"
+            elif r <= 0.256:
+                mat = "felga"
         part.prims[mat].append(t)
-    # Bolts: a plain hubcap would show no rotation at all.
+    # Lug nuts: a plain rim would show no rotation at all.
     for i in range(5):
         a = 2 * math.pi * i / 5
-        y, zz = 0.092 * math.cos(a), 0.092 * math.sin(a)
-        bolt = ellipsoid((0.17 * x_side, y, zz), 0.016, 0.018, 0.018, segs=5, rows=3)
-        part.solid("kontur", bolt, crease=70)
+        y, zz = 0.197 * math.cos(a), 0.197 * math.sin(a)
+        nut = ellipsoid((0.122 * x_side, y, zz), 0.012, 0.016, 0.016, segs=6, rows=3)
+        part.solid("guma", nut, crease=70)
     return part
 
 
@@ -988,6 +1180,32 @@ def to_hinge(z_y):
     return (z_y[0] - HINGE_Z, z_y[1] - HINGE_Y)
 
 
+def tent_wall(side, base_z, top_z, cols=18, rows=5):
+    """Triangular wall. Fabric pulls in between the edges and bunches near the hinge."""
+
+    def point(u, v):
+        z = u * (base_z + (top_z - base_z) * v)
+        y = u * top_z * LID_SLOPE * v
+        sag = 0.03 * math.sin(math.pi * v) * math.sin(math.pi * u) ** 0.5
+        bunch = max(0.0, min(1.0, (0.36 - u) / 0.08))
+        folds = 0.018 * bunch * (0.5 + 0.5 * math.sin(2 * math.pi * 7 * u)) * math.sin(math.pi * v) ** 0.5
+        return (side * (TENT_X - sag - folds), y, z)
+
+    tris = []
+    for i in range(cols):
+        for j in range(rows):
+            a = point(i / cols, j / rows)
+            b = point((i + 1) / cols, j / rows)
+            c = point((i + 1) / cols, (j + 1) / rows)
+            d = point(i / cols, (j + 1) / rows)
+            for f in ((a, b, c), (a, c, d)):
+                n = face_normal(f)
+                if dot(n, n) < 1e-14:
+                    continue
+                tris.append(f if n[0] * side > 0 else (f[0], f[2], f[1]))
+    return tris
+
+
 def build_tent():
     part = Part("namiot_scianki", translation=(0.0, HINGE_Y, HINGE_Z))
     front_top_z = crop(860, 0)[0] - HINGE_Z
@@ -995,21 +1213,27 @@ def build_tent():
     # The top edge lies exactly on the lid's underside line through the hinge.
     wall = [(0.0, 0.0), (front_base_z, 0.0), (front_top_z, front_top_z * LID_SLOPE)]
     prism = extrude_x(wall, -TENT_X, TENT_X)
-    part.solid("koral", prism, outline=0.02, crease=30)
+    part.prims["kontur"] += shade(inflate(prism, 0.016), 180)
+    # Hard faces on the front and base; the two side walls are fabric.
+    part.solid("plotno", [t for t in prism if abs(unit(face_normal(t))[0]) < 0.5], crease=30)
 
     win = round_poly([to_hinge(p) for p in poly_crop((520, 310), (785, 195), (815, 312))], 0.055)
     strut = [to_hinge(p) for p in poly_crop((345, 358), (385, 305), (438, 358))]
+    # Zipped vinyl window: a low seam, not a car's rubber seal.
+    seam = ((0.022, 0.002), (0.014, 0.012), (0.006, 0.012), (0.0, 0.005))
     for sign in (-1, 1):
-        proj = Projector(prism, 0, sign, limit=5.0)
-        part.decal(proj, "kontur", grow(win, 0.018), LIFT_DARK)
-        part.decal(proj, "brzoskwinia", win, LIFT_FILL)
-        part.stroke(proj, "kontur", strut, 0.018, LIFT_DARK)
+        fabric = tent_wall(sign, front_base_z, front_top_z)
+        part.solid("plotno", fabric, crease=60)
+        proj = Projector(fabric, 0, sign, limit=0.22)
+        part.emboss(proj, "guma", win, seam)
+        part.decal(proj, "brzoskwinia", win, 0.005)
+        part.stroke(proj, "kontur", strut, 0.016, 0.012)
     # Front wall: a small rounded window, invented for the unseen side.
     proj = Projector(prism, 2, 1, limit=5.0)
     mid_y = front_top_z * LID_SLOPE * 0.5
     front_win = rrect2(-0.34, mid_y - 0.2, 0.34, mid_y + 0.2, 0.07)
-    part.decal(proj, "kontur", grow(front_win, 0.018), LIFT_DARK)
-    part.decal(proj, "brzoskwinia", front_win, LIFT_FILL)
+    part.emboss(proj, "guma", front_win, seam)
+    part.decal(proj, "brzoskwinia", front_win, 0.005)
     return part
 
 
@@ -1025,7 +1249,13 @@ def build_lid():
         rotation=rotation_x(-OPEN_ANGLE),
     )
     length = (890 - 270) / math.cos(OPEN_ANGLE) * KPX
-    lid.solid("krem", rbox(-0.78, 0.78, 0.02, LID_TOP, 0.0, length, r=0.06, rows=1), outline=0.024)
+    lid.solid("krem", rbox(-0.78, 0.78, 0.02, LID_TOP, 0.0, length, r=0.06, rows=1), outline=0.016)
+    for x in (-0.56, -0.42, 0.42, 0.56):
+        lid.solid(
+            "krem",
+            rbox(x - 0.03, x + 0.03, LID_TOP - 0.01, LID_TOP + 0.016, 0.16, length - 0.14, r=0.014, corner=1, rows=1),
+            outline=0.006,
+        )
 
     board = Part("deska", parent="namiot_pokrywa")
     z0, z1, base = -0.10, 2.05, LID_TOP + 0.005
@@ -1039,16 +1269,17 @@ def build_lid():
             ring.append((hw * math.cos(a), base + 0.05 + 0.05 * math.sin(a), z0 + (z1 - z0) * t))
         rings.append(ring)
     board_solid = loft(rings)
-    board.solid("koral", board_solid, outline=0.018, crease=70)
+    board.solid("koral", board_solid, outline=0.012, crease=70)
+    board.solid("krem", rbox(-0.008, 0.008, base + 0.095, base + 0.104, 0.1, 1.86, r=0.003, corner=1, rows=1))
     fin = extrude_x([(-0.02, base + 0.085), (0.24, base + 0.085), (0.02, base + 0.265), (-0.09, base + 0.265)], -0.014, 0.014)
-    board.solid("koral", fin, outline=0.014)
+    board.solid("koral", fin, outline=0.01)
 
     bag = Part("torba", parent="namiot_pokrywa")
     # The bag and its straps reach down to the lid.
-    bag.solid("zielen_bagaz", rbox(-0.25, 0.25, base + 0.085, base + 0.325, 0.39, 1.26, r=0.04, rows=1), outline=0.02)
+    bag.solid("zielen_bagaz", rbox(-0.25, 0.25, base + 0.085, base + 0.325, 0.39, 1.26, r=0.04, rows=1), outline=0.012)
     for z in (0.58, 1.03):
         bag.solid(
-            "kontur",
+            "guma",
             rbox(-0.262, 0.262, base - 0.015, base + 0.338, z, z + 0.035, r=0.012, corner=1, rows=1),
         )
     return [lid, board, bag]
@@ -1058,7 +1289,20 @@ def build_rack():
     part = Part("bagaznik")
     shift = 0.15
     z0, z1 = 0.74, 1.70
-    part.solid("zderzak", rbox(-0.62, 0.62, 2.40, 2.47, z0, z1, r=0.03, corner=1, rows=1), outline=0.018)
+    for s in (1, -1):
+        part.solid(
+            "zderzak",
+            rbox(s * 0.6 - 0.025, s * 0.6 + 0.025, 2.40, 2.44, z0, z1, r=0.012, corner=1, rows=1),
+            outline=0.008,
+        )
+    slats = 7
+    for i in range(slats):
+        zs = z0 + 0.02 + (z1 - z0 - 0.11) * i / (slats - 1)
+        part.solid(
+            "zderzak",
+            rbox(-0.63, 0.63, 2.435, 2.47, zs, zs + 0.07, r=0.012, corner=1, rows=1),
+            outline=0.007,
+        )
     for z in (0.86, 1.56):
         for s in (1, -1):
             part.solid(
@@ -1077,25 +1321,39 @@ def build_rack():
     part.solid(
         "zielen_bagaz",
         rbox(-0.44, 0.40, 2.475, crop(0, 232)[1], z_green[0], z_green[1], r=0.022, rows=1),
-        outline=0.018,
+        outline=0.012,
     )
     part.solid(
         "walizka_jasna",
         rbox(-0.36, 0.30, crop(0, 232)[1] + 0.012, crop(0, 185)[1], z_green[0] + 0.14, z_green[1] - 0.01, r=0.022, rows=1),
-        outline=0.018,
+        outline=0.012,
     )
     z_brown = (crop(1062, 0)[0] + shift, crop(1138, 0)[0] + shift)
     part.solid(
         "walizka_braz",
         rbox(-0.30, 0.36, 2.475, crop(0, 192)[1], z_brown[0], z_brown[1], r=0.022, rows=1),
-        outline=0.018,
+        outline=0.012,
     )
-    # Straps wrapped around the brown case.
+    # Straps wrapped around the brown case, with buckles.
+    top_brown = crop(0, 192)[1]
     for x in (-0.08, 0.14):
         part.solid(
-            "kontur",
-            rbox(x, x + 0.03, 2.47, crop(0, 192)[1] + 0.006, z_brown[0] - 0.006, z_brown[1] + 0.006, r=0.01, corner=1, rows=1),
+            "guma",
+            rbox(x, x + 0.03, 2.47, top_brown + 0.006, z_brown[0] - 0.006, z_brown[1] + 0.006, r=0.01, corner=1, rows=1),
         )
+        part.solid("chrom", rbox(x - 0.008, x + 0.038, 2.74, 2.79, z_brown[1], z_brown[1] + 0.016, r=0.005, corner=1, rows=1))
+    # Handle on the light case, latches on the green one.
+    top_light = crop(0, 185)[1]
+    zl = (z_green[0] + 0.14 + z_green[1] - 0.01) / 2
+    for x in (-0.15, 0.09):
+        part.solid("guma", tube((x, top_light - 0.005, zl), (x, top_light + 0.035, zl), 0.01, sides=4))
+    part.solid("guma", tube((-0.15, top_light + 0.035, zl), (0.09, top_light + 0.035, zl), 0.012, sides=5))
+    for z in (z_green[0] + 0.1, z_green[1] - 0.1):
+        for side_x in (-0.44, 0.40):
+            part.solid(
+                "chrom",
+                rbox(side_x - 0.006, side_x + 0.006, 2.70, 2.75, z - 0.025, z + 0.025, r=0.003, corner=1, rows=1),
+            )
     return part
 
 
@@ -1170,7 +1428,7 @@ class Writer:
         return len(self.accessors) - 1
 
 
-def primitive(writer, material, tris):
+def primitive(writer, material, tris, shading=None):
     index = {}
     positions, normals, indices = [], [], []
     for t in tris:
@@ -1186,11 +1444,15 @@ def primitive(writer, material, tris):
             tri.append(index[k])
         if len(set(tri)) == 3:
             indices += tri
+    attributes = {
+        "POSITION": writer.accessor(positions, "VEC3", target=34962, bounds=True),
+        "NORMAL": writer.accessor(normals, "VEC3", target=34962),
+    }
+    if shading:
+        colours = [(shading(p),) * 3 for p in positions]
+        attributes["COLOR_0"] = writer.accessor(colours, "VEC3", target=34962)
     return {
-        "attributes": {
-            "POSITION": writer.accessor(positions, "VEC3", target=34962, bounds=True),
-            "NORMAL": writer.accessor(normals, "VEC3", target=34962),
-        },
+        "attributes": attributes,
         "indices": writer.accessor(indices, "SCALAR", component=5123, target=34963),
         "material": material,
     }, len(indices) // 3
@@ -1201,12 +1463,12 @@ def write_glb(path, parts, wheel_names):
     mat_names = list(MATERIALS)
     materials = []
     for name in mat_names:
-        colour, roughness = MATERIALS[name]
+        colour, roughness, metallic = MATERIALS[name]
         mat = {
             "name": name,
             "pbrMetallicRoughness": {
                 "baseColorFactor": srgb(colour),
-                "metallicFactor": 0.0,
+                "metallicFactor": metallic,
                 "roughnessFactor": roughness,
             },
         }
@@ -1222,7 +1484,8 @@ def write_glb(path, parts, wheel_names):
         prims = []
         for name in mat_names:
             if part.prims.get(name):
-                prim, count = primitive(writer, mat_names.index(name), part.prims[name])
+                shading = None if name in UNLIT else part.shading
+                prim, count = primitive(writer, mat_names.index(name), part.prims[name], shading)
                 prims.append(prim)
                 triangles += count
         meshes.append({"name": part.name, "primitives": prims})
