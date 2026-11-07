@@ -90,6 +90,13 @@ flutter:
     - assets/map/
     - assets/splash/
     - assets/splash/scene_01/
+    - assets/splash/scene_02/
+    - assets/splash/scene_03/
+    - assets/splash/scene_04/
+    - assets/splash/scene_05/
+    - assets/splash/scene_06/
+    - assets/splash/scene_07/
+    - assets/splash/scene_08/
     - assets/fonts/OFL-Epilogue.txt
     - assets/fonts/OFL-SpaceGrotesk.txt
 

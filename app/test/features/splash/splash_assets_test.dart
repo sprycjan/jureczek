@@ -39,7 +39,8 @@ void main() {
   test(
     'każda warstwa sceny istnieje, a ostatnia to pierwszy plan i droga przed nią',
     () {
-      expect(manifest.scenes, isNotEmpty);
+      expect(manifest.scenes, hasLength(8));
+      expect(manifest.scenes.map((s) => s.key).toSet(), hasLength(8));
       for (final scene in manifest.scenes) {
         expect(scene.layers.length, greaterThanOrEqualTo(3));
         expect(

@@ -24,7 +24,7 @@ Aplikacja startowała od ciemnego tła. Użytkownik chce animowanej ilustracji: 
 ## Konsekwencje
 - Grafikę poprawia się w generatorze, a SVG jest wynikiem.
 - Parametry animacji są w `SplashConfig`, a prędkości warstw w generatorze.
-- Zapas rastra na P30 jest mały, więc sceny nie mogą być cięższe od „Alp”. Gdyby były albo pojawiły się przycięcia, kolejny krok to raster wolnych warstw (niebo, chmury, dalekie góry) do obrazu wielkości widoku.
+- Zapas rastra na P30 jest mały, więc sceny nie mogą być cięższe od „Alp”. Wszystkie 8 scen mieści się w tym budżecie (ścieżki: 498–1664, odcinki: 21 699–44 933) i na P30 jedzie około 60 klatek/s; pierwsze 3 s po wczytaniu są najsłabsze, zob. [[v24 – ekran powitalny]]. Gdyby były albo pojawiły się przycięcia, kolejny krok to raster wolnych warstw (niebo, chmury, dalekie góry) do obrazu wielkości widoku.
 - Android 12+ pokazuje przed Flutterem własny ekran z ikoną; P30 tego nie sprawdzi ([[Backlog]]).
 - Grafika jest ozdobą: błąd wczytania daje sam gradient i normalny start.
 

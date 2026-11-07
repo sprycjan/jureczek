@@ -75,6 +75,335 @@
      "start": 0
     }
    ]
+  },
+  {
+   "key": "lake",
+   "layers": [
+    {
+     "file": "scene_02/clouds.svg",
+     "period": 2300,
+     "speed": 5,
+     "start": 1150
+    },
+    {
+     "file": "scene_02/far.svg",
+     "period": 2300,
+     "speed": 11,
+     "start": 1150
+    },
+    {
+     "file": "scene_02/near.svg",
+     "period": 1800,
+     "speed": 24,
+     "start": 900
+    },
+    {
+     "file": "scene_02/hills.svg",
+     "period": 2400,
+     "speed": 54,
+     "start": 1200
+    },
+    {
+     "file": "scene_02/trees.svg",
+     "period": 1600,
+     "speed": 92,
+     "start": 760
+    },
+    {
+     "file": "scene_02/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 200
+    },
+    {
+     "file": "scene_02/front.svg",
+     "period": 1500,
+     "speed": 215,
+     "start": 400
+    }
+   ]
+  },
+  {
+   "key": "meadows",
+   "layers": [
+    {
+     "file": "scene_03/clouds.svg",
+     "period": 2500,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_03/far.svg",
+     "period": 2200,
+     "speed": 10,
+     "start": 1100
+    },
+    {
+     "file": "scene_03/near.svg",
+     "period": 2000,
+     "speed": 24,
+     "start": 1000
+    },
+    {
+     "file": "scene_03/hills.svg",
+     "period": 2600,
+     "speed": 52,
+     "start": 1350
+    },
+    {
+     "file": "scene_03/trees.svg",
+     "period": 1700,
+     "speed": 92,
+     "start": 500
+    },
+    {
+     "file": "scene_03/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 500
+    },
+    {
+     "file": "scene_03/front.svg",
+     "period": 1600,
+     "speed": 215,
+     "start": 200
+    }
+   ]
+  },
+  {
+   "key": "gorge",
+   "layers": [
+    {
+     "file": "scene_04/clouds.svg",
+     "period": 2200,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_04/far.svg",
+     "period": 2100,
+     "speed": 12,
+     "start": 1050
+    },
+    {
+     "file": "scene_04/near.svg",
+     "period": 1900,
+     "speed": 28,
+     "start": 950
+    },
+    {
+     "file": "scene_04/hills.svg",
+     "period": 2300,
+     "speed": 58,
+     "start": 1150
+    },
+    {
+     "file": "scene_04/trees.svg",
+     "period": 1500,
+     "speed": 92,
+     "start": 620
+    },
+    {
+     "file": "scene_04/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 800
+    },
+    {
+     "file": "scene_04/front.svg",
+     "period": 1400,
+     "speed": 215,
+     "start": 900
+    }
+   ]
+  },
+  {
+   "key": "larch",
+   "layers": [
+    {
+     "file": "scene_05/clouds.svg",
+     "period": 2400,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_05/far.svg",
+     "period": 2300,
+     "speed": 12,
+     "start": 1150
+    },
+    {
+     "file": "scene_05/near.svg",
+     "period": 1900,
+     "speed": 26,
+     "start": 950
+    },
+    {
+     "file": "scene_05/hills.svg",
+     "period": 2500,
+     "speed": 54,
+     "start": 1000
+    },
+    {
+     "file": "scene_05/trees.svg",
+     "period": 1600,
+     "speed": 92,
+     "start": 280
+    },
+    {
+     "file": "scene_05/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 100
+    },
+    {
+     "file": "scene_05/front.svg",
+     "period": 1500,
+     "speed": 215,
+     "start": 600
+    }
+   ]
+  },
+  {
+   "key": "mesas",
+   "layers": [
+    {
+     "file": "scene_06/clouds.svg",
+     "period": 2400,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_06/far.svg",
+     "period": 2400,
+     "speed": 11,
+     "start": 1200
+    },
+    {
+     "file": "scene_06/near.svg",
+     "period": 1900,
+     "speed": 26,
+     "start": 950
+    },
+    {
+     "file": "scene_06/hills.svg",
+     "period": 2600,
+     "speed": 54,
+     "start": 1000
+    },
+    {
+     "file": "scene_06/trees.svg",
+     "period": 1600,
+     "speed": 92,
+     "start": 620
+    },
+    {
+     "file": "scene_06/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 340
+    },
+    {
+     "file": "scene_06/front.svg",
+     "period": 1500,
+     "speed": 215,
+     "start": 1100
+    }
+   ]
+  },
+  {
+   "key": "fjord",
+   "layers": [
+    {
+     "file": "scene_07/clouds.svg",
+     "period": 2300,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_07/far.svg",
+     "period": 2200,
+     "speed": 11,
+     "start": 1100
+    },
+    {
+     "file": "scene_07/near.svg",
+     "period": 1900,
+     "speed": 26,
+     "start": 950
+    },
+    {
+     "file": "scene_07/hills.svg",
+     "period": 2300,
+     "speed": 54,
+     "start": 1180
+    },
+    {
+     "file": "scene_07/trees.svg",
+     "period": 1500,
+     "speed": 92,
+     "start": 620
+    },
+    {
+     "file": "scene_07/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 640
+    },
+    {
+     "file": "scene_07/front.svg",
+     "period": 1400,
+     "speed": 215,
+     "start": 200
+    }
+   ]
+  },
+  {
+   "key": "pass",
+   "layers": [
+    {
+     "file": "scene_08/clouds.svg",
+     "period": 2300,
+     "speed": 5,
+     "start": 1200
+    },
+    {
+     "file": "scene_08/far.svg",
+     "period": 2200,
+     "speed": 12,
+     "start": 1100
+    },
+    {
+     "file": "scene_08/near.svg",
+     "period": 1900,
+     "speed": 28,
+     "start": 950
+    },
+    {
+     "file": "scene_08/hills.svg",
+     "period": 2300,
+     "speed": 58,
+     "start": 1150
+    },
+    {
+     "file": "scene_08/trees.svg",
+     "period": 1500,
+     "speed": 92,
+     "start": 620
+    },
+    {
+     "file": "scene_08/road.svg",
+     "period": 1240,
+     "speed": 170,
+     "start": 900
+    },
+    {
+     "file": "scene_08/front.svg",
+     "period": 1400,
+     "speed": 215,
+     "start": 700
+    }
+   ]
   }
  ]
 }

@@ -249,9 +249,10 @@ VALLEY = fixed('#8FA6B5', '#A9D2D8', '#6F8F96', '#25305E')
 
 
 class Massif:
-    def __init__(self, layer, x, top, half, base, shape, rock, rng, depth):
+    def __init__(self, layer, x, top, half, base, shape, rock, rng, depth, valley=None):
         self.layer, self.x, self.top, self.half, self.base = layer, x, top, half, base
         self.rock, self.rng, self.depth = rock, rng, depth
+        self.valley = valley or VALLEY
         self.h = base - top
         knots = [
             (x + half * (u + (rng.uniform(-.03, .03) if abs(u) < 1 else 0)),
@@ -448,7 +449,7 @@ class Massif:
 
         if snow > 0:
             self._snow(snow, sun)
-        L.add(outline, L.vgrad(self.top + h * .42, self.base, [(0, VALLEY, 0), (1, VALLEY, .78 if self.depth > .15 else .42)]))
+        L.add(outline, L.vgrad(self.top + h * .42, self.base, [(0, self.valley, 0), (1, self.valley, .78 if self.depth > .15 else .42)]))
 
     def _snow(self, snow, sun):
         """Śnieg wysoko i nierówno: płaty przy grani, półki śnieżne, bez czapy z zębami."""
@@ -686,9 +687,9 @@ def conifer_outline(x, base, h, rng, tiers=None, width=0.42):
     return top, left, right
 
 
-def conifer(layer, x, base, h, rng, dark, lit, rim=None):
+def conifer(layer, x, base, h, rng, dark, lit, rim=None, width=0.42):
     """Świerk: sylwetka z piętrami, jasna strona, opcjonalny sierp światła."""
-    top, left, right = conifer_outline(x, base, h, rng)
+    top, left, right = conifer_outline(x, base, h, rng, width=width)
     layer.add([top] + right + [(x, base)] + left[::-1], dark)
     layer.add([top] + right + [(x + h * 0.03, base - h * 0.02)], lit)
     if rim:
@@ -1051,31 +1052,33 @@ def road_layer(period_w, rng):
     return L
 
 
-def front_layer(period_w, rng, extra=None):
+def front_layer(period_w, rng, extra=None, fg=None, fg_mid=None, rocks=None):
+    FG_, FG_MID_ = fg or FG, fg_mid or FG_MID
+    rocks = rocks or ROCK_TONES
     L = Layer(period_w)
     f = wave(period_w, 926, [(4, 3, 0.4), (2.5, 7, 1.7), (1.5, 13, 3.1)])
-    band(L, f, SCENE_H, L.vgrad(915, 1000, [(0, FG_MID), (0.3, FG), (1, FG)]), step=16)
+    band(L, f, SCENE_H, L.vgrad(915, 1000, [(0, FG_MID_), (0.3, FG_), (1, FG_)]), step=16)
     x = 0
     while x < period_w:
-        grass(L, x, f(x) + 3, rng.uniform(16, 38), rng.randint(6, 10), 22, FG, rng)
+        grass(L, x, f(x) + 3, rng.uniform(16, 38), rng.randint(6, 10), 22, FG_, rng)
         x += rng.uniform(24, 52)
     for _ in range(46):
         x = rng.uniform(0, period_w)
-        grass(L, x, f(x) + 18 + rng.uniform(0, 40), rng.uniform(10, 26), 5, 16, FG_MID, rng)
+        grass(L, x, f(x) + 18 + rng.uniform(0, 40), rng.uniform(10, 26), 5, 16, FG_MID_, rng)
     # Głazy i kępy przy drodze.
     for x in (210, 640, 1140):
-        rock(L, x, f(x) + 14, rng.uniform(84, 124), rng.uniform(44, 66), rng, ROCK_TONES)
-        grass(L, x, f(x) + 16, 26, 12, 46, FG, rng)
+        rock(L, x, f(x) + 14, rng.uniform(84, 124), rng.uniform(44, 66), rng, rocks)
+        grass(L, x, f(x) + 16, 26, 12, 46, FG_, rng)
     for x in (420, 900, 1330):
-        bush(L, x, f(x) + 8, rng.uniform(80, 110), rng.uniform(36, 52), rng, (FG, FG_MID))
+        bush(L, x, f(x) + 8, rng.uniform(80, 110), rng.uniform(36, 52), rng, (FG_, FG_MID_))
     # Łodygi z kwiatkami.
     for _ in range(26):
         x = rng.uniform(0, period_w)
         h = rng.uniform(22, 46)
         base = f(x) + 2
         lean = rng.uniform(-6, 6)
-        L.add([(x - 0.9, base), (x + lean, base - h), (x + 0.9, base)], FG)
-        L.add(egg(x + lean, base - h, 2.6, 2.6, steps=8), FG, smooth=True)
+        L.add([(x - 0.9, base), (x + lean, base - h), (x + 0.9, base)], FG_)
+        L.add(egg(x + lean, base - h, 2.6, 2.6, steps=8), FG_, smooth=True)
     if extra:
         extra(L, f)
     return L
@@ -1185,7 +1188,575 @@ def scene_alps():
     return layers
 
 
-SCENES = {'alps': scene_alps}
+# ---------------------------------------------------------------- klocki pozostałych scen
+
+
+def clouds_layer(seed, width, items, streaks=()):
+    rng = random.Random(seed)
+    L = Layer(width)
+    for cx, base, wc, hc, kind in items:
+        cloud(L, cx, base, wc, hc, rng, kind)
+    for cx, cy, wc, hc in streaks:
+        streak(L, cx, cy, wc, hc, rng)
+    return L
+
+
+def water(L, y0, y1, shallow, deep, rng, glints=16, depth=.2, glint='#EAF6F2'):
+    """Tafla wody: jaśniejsza pod dalekim brzegiem, z poziomymi błyskami."""
+    L.add([(-24, y0), (L.w + 24, y0), (L.w + 24, y1 + 90), (-24, y1 + 90)],
+          L.vgrad(y0, y1, [(0, mat(shallow, .9, depth)), (.55, mat(shallow, .62, depth * .5)), (1, mat(deep, .6, depth * .2))]))
+    fill = mat(glint, 1.0, depth)
+    for _ in range(glints):
+        y = rng.uniform(y0 + 4, y1 - 2)
+        u = (y - y0) / (y1 - y0)
+        half = rng.uniform(14, 34) * (.5 + u)
+        t = .7 + 1.5 * u
+        x = rng.uniform(0, L.w)
+        L.add([(x - half, y), (x, y - t), (x + half, y), (x, y + t)], fill, opacity=.5)
+
+
+def reflect(L, massif_, y0, y1, squash=.42, strength=.55):
+    """Odbicie sylwetki masywu w wodzie, gasnące ku brzegowi widza."""
+    tone = massif_.tone(.24)
+    pts = [(massif_.lo, y0)]
+    for x, y in massif_.sky[1:-1]:
+        pts.append((x, min(y1, y0 + (massif_.base - y) * squash)))
+    pts.append((massif_.hi, y0))
+    L.add(pts, L.vgrad(y0, min(y1, y0 + massif_.h * squash), [(0, tone, strength), (1, tone, 0)]))
+
+
+def peak(L, x, top, half, base, shape, rock_hex, rng, depth=.24, snow=0.0, detail=1.0, valley=None, sun=1):
+    """Rysuje masyw i zwraca go, żeby dało się dorysować odbicie albo warstwy skały."""
+    m = Massif(L, x, top, half, base, shape, rock_hex, rng, depth, valley)
+    m.draw(snow, detail, sun)
+    return m
+
+
+def strata(m, levels, tones, rng):
+    """Poziome warstwy skały na stoliwach: nierówne pasma przez całą szerokość masywu."""
+    for i in range(levels):
+        y = m.top + m.h * (.08 + .86 * (i + rng.uniform(.1, .7)) / levels)
+        th = m.h * rng.uniform(.006, .02)
+        xs = [x for x in range(int(m.lo), int(m.hi), 26) if m.sky_y(x) < y]
+        if len(xs) < 3:
+            continue
+        top = [(x, y - th * rng.uniform(.4, 1)) for x in xs]
+        bottom = [(x, y + th * rng.uniform(.4, 1)) for x in xs]
+        top[0], top[-1], bottom[0], bottom[-1] = (xs[0], y), (xs[-1], y), (xs[0], y), (xs[-1], y)
+        m.layer.add(m.inside(top + bottom[::-1]), rng.choice(tones), opacity=.8)
+
+
+def waterfall(L, x, y0, y1, width, rng, lean=0.0, depth=.08):
+    """Wstęga wody spadająca po skale, z ciemniejszymi nurtami i pianą u dołu."""
+    white, shade = mat('#EEF7F8', 1.0, depth), mat('#A9C9D6', .75, depth)
+    steps = 12
+    left, right = [], []
+    for i in range(steps + 1):
+        u = i / steps
+        cx = x + lean * u + math.sin(u * 6.1) * width * .22
+        half = width * (.42 + .58 * u ** 1.4)
+        left.append((cx - half, y0 + (y1 - y0) * u))
+        right.append((cx + half * rng.uniform(.92, 1.08), y0 + (y1 - y0) * u))
+    L.add(left + right[::-1], white)
+    for _ in range(4):
+        u0 = rng.uniform(.05, .6)
+        cx = x + lean * u0 + rng.uniform(-.3, .3) * width
+        y = y0 + (y1 - y0) * u0
+        L.add([(cx - width * .07, y), (cx + width * .07, y), (cx + lean * .2 + width * .03, y + (y1 - y0) * rng.uniform(.2, .36))], shade)
+    for i in range(5):
+        L.add(egg(x + lean + (i - 2) * width * .72, y1 + rng.uniform(-2, 2), width * rng.uniform(.5, .85), width * .3, steps=9), white, smooth=True)
+
+
+def viaduct(L, x0, x1, deck, bottom, arches, rock_hex, depth=.12):
+    """Kamienny wiadukt z boku: pomost, przęsła z łukami i filary."""
+    light, mid, dark = mat(rock_hex, .85, depth), mat(rock_hex, .5, depth), mat(rock_hex, .14, depth)
+    span = (x1 - x0) / arches
+    pier = span * .12
+    thick = (bottom - deck) * .1
+    spring = deck + thick + (bottom - deck) * .42
+    for i in range(arches + 1):
+        x = x0 + i * span
+        L.add([(x - pier * 1.25, bottom), (x - pier, spring), (x + pier, spring), (x + pier * 1.25, bottom)], mid)
+        L.add([(x + pier * .25, bottom), (x + pier * .25, spring), (x + pier, spring), (x + pier * 1.25, bottom)], dark)
+    for i in range(arches):
+        a, b = x0 + i * span + pier, x0 + (i + 1) * span - pier
+        cx, rx = (a + b) / 2, (b - a) / 2
+        ry = spring - (deck + thick)
+        arc = [(cx + rx * math.cos(t * math.pi / 14), spring - ry * math.sin(t * math.pi / 14)) for t in range(15)]
+        L.add([(a - pier, deck + thick), (b + pier, deck + thick), (b + pier, spring)] + arc + [(a - pier, spring)], mid)
+        inner = [(x, y + ry * .1) for x, y in arc]
+        L.add(arc + inner[::-1], dark)
+    L.add([(x0 - pier * 2, deck), (x1 + pier * 2, deck), (x1 + pier * 2, deck + thick), (x0 - pier * 2, deck + thick)], light)
+    L.add([(x0 - pier * 2, deck + thick * .72), (x1 + pier * 2, deck + thick * .72), (x1 + pier * 2, deck + thick), (x0 - pier * 2, deck + thick)], dark)
+
+
+def cabin(L, x, base, w, h, wall_hex, roof_hex='#3A3036', depth=.08):
+    """Chatka nad wodą: ściana, dach i świecące w nocy okno."""
+    wall, side, roof = mat(wall_hex, .85, depth), mat(wall_hex, .3, depth), mat(roof_hex, .5, depth)
+    window = fixed('#F2DDB0', '#CFE3EA', '#FFD79A', '#FFD27A')
+    L.add([(x, base), (x, base - h), (x + w * .5, base - h), (x + w * .5, base)], wall)
+    L.add([(x + w * .5, base), (x + w * .5, base - h), (x + w, base - h), (x + w, base)], side)
+    L.add([(x - w * .08, base - h), (x + w * .25, base - h * 1.62), (x + w * .75, base - h * 1.62), (x + w * 1.08, base - h)], roof)
+    L.add([(x + w * .13, base - h * .68), (x + w * .34, base - h * .68), (x + w * .34, base - h * .34), (x + w * .13, base - h * .34)], window)
+
+
+def meadow_layer(w, seed, base, terms, color, light, tones, stands, tree=(26, 56), density=14, bottom=882, swathes=(22, 12)):
+    """Hala z dalszymi drzewami, jak w Alpach, z własnym kolorem i układem."""
+    rng = random.Random(seed)
+    L = Layer(w)
+    f = wave(w, base, terms)
+    band(L, f, bottom, L.vgrad(base - 28, bottom - 10, [(0, mat(color, .95, .1)), (1, mat(color, .62, .02))]))
+    for _ in range(swathes[0]):
+        swathe(L, f, rng.uniform(0, w), rng.uniform(120, 300), rng.uniform(10, 42), rng.uniform(5, 14), mat(light, 1.0, .08), rng)
+    for _ in range(swathes[1]):
+        swathe(L, f, rng.uniform(0, w), rng.uniform(140, 320), rng.uniform(24, 56), rng.uniform(6, 13), mat(color, .2, .06), rng)
+    for x0, x1 in stands:
+        forest_band(L, f, x0, x1, density, tree[0], tree[1], rng, *tones)
+    return L, f, rng
+
+
+def close_layer(w, seed, base, terms, color0, color1, light, tones, groups, bushes, bush_tones, tree=(76, 142), grass_hex='#3E8A42', slim=.42):
+    """Bliska łąka przy poboczu: pojedyncze drzewa, krzaki i trawa."""
+    rng = random.Random(seed)
+    L = Layer(w)
+    f = wave(w, base, terms)
+    band(L, f, 872, L.vgrad(base - 22, 862, [(0, mat(color0, 1.0, 0.0)), (1, mat(color1, .6, 0.0))]))
+    for _ in range(16):
+        swathe(L, f, rng.uniform(0, w), rng.uniform(90, 200), rng.uniform(6, 18), rng.uniform(3, 7), mat(light, 1.0, 0.0), rng)
+    for gx, count in groups:
+        for i in range(count):
+            x = gx + i * rng.uniform(24, 42) + rng.uniform(-8, 8)
+            conifer(L, x, f(x % w) + 3, rng.uniform(*tree), rng, *tones, width=slim)
+    for x in bushes:
+        bush(L, x, f(x % w) + 4, rng.uniform(60, 96), rng.uniform(24, 38), rng, bush_tones)
+    tone = mat(grass_hex, .6)
+    for x in range(0, w, 40):
+        grass(L, x, f(x) + 1, rng.uniform(8, 16), 4, 16, tone, rng)
+    return L
+
+
+GREEN_TREES = (mat('#1E5237', .28), mat('#2F7B46', .9), mat('#7CB95A', 1.0))
+GREEN_BUSH = (mat('#245A3A', .3), mat('#3B8A4A', .8), mat('#74B24A', 1.0))
+FAR_TREES = (mat('#245A40', .28, .1), mat('#3E8A52', .9, .08))
+NEAR_TREES = (mat('#1F5540', .3, .16), mat('#2F8052', .85, .14))
+
+
+# ---------------------------------------------------------------- scena 2: dolina z jeziorem
+
+
+def scene_lake():
+    clouds = clouds_layer('lake-clouds', 2300, (
+        (1040, 300, 190, 86, 'tower'), (1380, 408, 150, 40, 'bank'), (1700, 280, 280, 124, 'massive'),
+        (560, 330, 300, 120, 'massive'), (2080, 410, 190, 50, 'bank'), (250, 180, 150, 70, 'tower'),
+    ), ((1270, 88, 240, 7), (1020, 450, 170, 6), (1940, 90, 210, 7), (420, 90, 210, 7)))
+    rng = random.Random('lake-far')
+    far = Layer(2300)
+    H = 1150
+    mass = []
+    for x, top, half, shape, snow in (
+        (H + 880, 500, 300, 'hump', .0),
+        (H - 880, 480, 300, 'shoulder', .2),
+        (H - 480, 448, 280, 'horn', .3),
+        (H + 450, 462, 300, 'twin', .24),
+        (H - 104, 400, 330, 'cliff', .24),
+    ):
+        mass.append(peak(far, x, top, half, 652, shape, '#7E8FBC', rng, snow=snow, detail=.8))
+    water(far, 650, 806, '#2FC2BE', '#147F8E', rng)
+    for m in mass:
+        reflect(far, m, 651, 806)
+    f = wave(2300, 652, [(2, 3, .4), (1.5, 7, 1.2)])
+    band(far, f, 658, mat('#2F6B4E', .6, .16), step=20)
+    for x0, x1 in ((40, 170), (330, 420), (640, 820), (990, 1090), (1290, 1480), (1650, 1730), (1900, 2100), (2190, 2270)):
+        forest_band(far, f, x0, x1, 8, 9, 18, rng, *NEAR_TREES)
+
+    rng = random.Random('lake-near')
+    near = Layer(1800)
+    H = 900
+    for x, top, half, shape in ((H - 300, 640, 200, 'hump'), (H + 640, 620, 210, 'shoulder'), (H - 720, 650, 170, 'crag')):
+        peak(near, x, top, half, 790, shape, '#5E7A6E', rng, depth=.08, detail=.45)
+        g = wave(1800, 776, [(5, 3, 1.1), (3, 7, .2)])
+        forest_band(near, g, x - half * .9, x + half * .9, 15, 22, 40, rng, *NEAR_TREES)
+
+    hills, _, _ = meadow_layer(2400, 'lake-hills', 806, [(10, 2, 1.2), (6, 3, .4), (4, 7, 2.1)], '#6FB454', '#A8DC62', FAR_TREES,
+                               ((90, 330), (760, 960), (1480, 1700), (2100, 2280)), tree=(26, 52))
+    trees = close_layer(1600, 'lake-trees', 836, [(7, 2, .7), (4, 5, 1.3), (2, 11, .4)], '#82C646', '#519C3E', '#CDEB6E', GREEN_TREES,
+                        ((110, 2), (620, 3), (1040, 2), (1440, 3)), (360, 880, 1300), GREEN_BUSH)
+    rng = random.Random('lake-road')
+    road = road_layer(1240, rng)
+    front = front_layer(1500, random.Random('lake-front'))
+    return [('clouds', clouds, 5, 1150), ('far', far, 11, 1150), ('near', near, 24, 900), ('hills', hills, 54, 1200),
+            ('trees', trees, 92, 760), ('road', road, 170, 200), ('front', front, 215, 400)]
+
+
+# ---------------------------------------------------------------- scena 3: łąki z krętą drogą
+
+
+def winding_road(L, x, y_low, y_high, swing, fill, edge, rng):
+    """Droga wijąca się po zboczu: szeroka u dołu, zwężona w oddali, kilka zakrętów."""
+    steps = 34
+    left, right, left_e, right_e = [], [], [], []
+    phase = rng.uniform(0, 1)
+    for i in range(steps + 1):
+        u = i / steps
+        y = y_low + (y_high - y_low) * (1 - (1 - u) ** 1.7)
+        half = 15 * (1 - u) ** 1.5 + 1.1
+        cx = x + swing * (1 - u) ** .6 * math.sin(u * 8.6 + phase)
+        left.append((cx - half, y))
+        right.append((cx + half, y))
+        left_e.append((cx - half * 1.3 - .6, y))
+        right_e.append((cx + half * 1.3 + .6, y))
+    L.add(left_e + right_e[::-1], edge)
+    L.add(left + right[::-1], fill)
+
+
+def scene_meadows():
+    clouds = clouds_layer('meadow-clouds', 2500, (
+        (1120, 320, 300, 150, 'massive'), (1410, 118, 100, 34, 'lumps'), (1810, 280, 320, 150, 'massive'),
+        (2240, 400, 210, 60, 'bank'), (540, 280, 320, 150, 'massive'), (820, 440, 170, 42, 'bank'), (190, 140, 170, 70, 'tower'),
+    ), ((1320, 470, 170, 6), (760, 90, 210, 7), (2060, 90, 210, 7)))
+    rng = random.Random('meadow-far')
+    far = Layer(2200)
+    H = 1100
+    for x, top, half, shape, snow, detail in (
+        (H - 860, 590, 320, 'hump', .0, .5), (H + 800, 590, 330, 'ridge', .0, .5),
+        (H - 340, 560, 340, 'shoulder', .0, .6), (H + 330, 582, 320, 'hump', .0, .55),
+    ):
+        peak(far, x, top, half, 730, shape, '#8FA0BC', rng, depth=.4, snow=snow, detail=detail)
+
+    rng = random.Random('meadow-near')
+    near = Layer(2000)
+    H = 1000
+    f1 = wave(2000, 668, [(26, 2, .6), (14, 3, 2.1), (6, 7, .3)])
+    band(near, f1, 790, near.vgrad(640, 780, [(0, mat('#7DB757', .9, .22)), (1, mat('#5F9E4A', .7, .12))]), step=14)
+    for _ in range(14):
+        swathe(near, f1, rng.uniform(0, 2000), rng.uniform(140, 320), rng.uniform(14, 60), rng.uniform(6, 16), mat('#B5DC6C', 1, .18), rng)
+    for x0, x1 in ((80, 260), (620, 840), (1290, 1430), (1760, 1930)):
+        forest_band(near, f1, x0, x1, 15, 18, 34, rng, *NEAR_TREES)
+    # Dom z czerwonym dachem na horyzoncie.
+    for x in (1090, 1650, 340):
+        cabin(near, x, f1(x) + 4, 26, 12, '#EFE2CB', '#B4503E', depth=.16)
+
+    rng = random.Random('meadow-hills')
+    hills = Layer(2600)
+    f2 = wave(2600, 748, [(20, 2, 1.7), (11, 5, .4), (5, 9, 2.8)])
+    band(hills, f2, 882, hills.vgrad(724, 872, [(0, mat('#7EC04C', 1, .08)), (1, mat('#5FA543', .66, .02))]), step=14)
+    for _ in range(24):
+        swathe(hills, f2, rng.uniform(0, 2600), rng.uniform(130, 300), rng.uniform(16, 90), rng.uniform(5, 15), mat('#C2E466', 1, .05), rng)
+    surface, verge = mat('#E9DDBF', .95, .04), mat('#A8A06F', .6, .04)
+    # Dwa pojedyncze zakręty: jeden od razu w pierwszym kadrze, po prawej od kampera.
+    winding_road(hills, 1490, 874, 660, 58, surface, verge, rng)
+    winding_road(hills, 240, 874, 668, 62, surface, verge, rng)
+    for x0, x1 in ((640, 820), (1120, 1250), (1920, 2120), (2360, 2500)):
+        forest_band(hills, f2, x0, x1, 18, 26, 52, rng, *FAR_TREES)
+    trees = close_layer(1700, 'meadow-trees', 840, [(6, 2, .4), (4, 5, 2.2), (2, 11, 1.1)], '#8CCB48', '#57A23F', '#D8EE72', GREEN_TREES,
+                        ((80, 2), (720, 2), (1420, 2)), (260, 560, 1000, 1250), GREEN_BUSH, tree=(70, 118))
+    road = road_layer(1240, random.Random('meadow-road'))
+    front = front_layer(1600, random.Random('meadow-front'))
+    return [('clouds', clouds, 5, 1200), ('far', far, 10, 1100), ('near', near, 24, 1000), ('hills', hills, 52, 1350),
+            ('trees', trees, 92, 500), ('road', road, 170, 500), ('front', front, 215, 200)]
+
+
+# ---------------------------------------------------------------- scena 4: wąwóz z rzeką i mostem
+
+
+def scene_gorge():
+    clouds = clouds_layer('gorge-clouds', 2200, (
+        (1100, 260, 220, 96, 'tower'), (1360, 130, 120, 36, 'lumps'), (1660, 270, 280, 130, 'massive'),
+        (520, 300, 280, 120, 'massive'), (1950, 410, 160, 44, 'bank'), (200, 150, 150, 70, 'tower'),
+    ), ((960, 90, 200, 6), (1300, 400, 150, 5), (1860, 86, 200, 7)))
+    rng = random.Random('gorge-far')
+    far = Layer(2100)
+    H = 1050
+    for x, top, half, shape, snow in ((H - 40, 300, 250, 'horn', .3), (H - 620, 470, 280, 'hump', .0), (H + 560, 440, 280, 'twin', .22)):
+        peak(far, x, top, half, 800, shape, '#8D8FB4', rng, depth=.36, snow=snow, detail=.6)
+
+    rng = random.Random('gorge-near')
+    near = Layer(1900)
+    H = 950
+    rock_hex = '#A07E5C'
+    warm_valley = fixed('#A58E8E', '#B4B49E', '#8F6A6A', '#26264E')
+    floor = wave(1900, 592, [(4, 3, .4), (2, 7, 1.1)])
+    band(near, floor, 880, near.vgrad(580, 850, [(0, mat('#7DA654', .9, .16)), (1, mat('#557F41', .6, .05))]), step=14)
+    # Rzeka wychodzi spod środkowego przęsła i skręca w prawo, obok przodu kampera.
+    steps = 18
+
+    def river_x(u):
+        return H + 70 + 130 * u ** .8 + 9 * math.sin(u * 7.4)
+
+    def river_half(u):
+        return 8 + 48 * u ** 1.3
+
+    left = [(river_x(i / steps) - river_half(i / steps), 594 + 276 * i / steps) for i in range(steps + 1)]
+    right = [(river_x(i / steps) + river_half(i / steps), 594 + 276 * i / steps) for i in range(steps + 1)]
+    near.add(left + right[::-1], near.vgrad(594, 860, [(0, mat('#8FD6D6', 1, .12)), (1, mat('#2B8EA0', .75, .04))]))
+    for _ in range(9):
+        u = rng.uniform(.12, .95)
+        half = river_half(u) * rng.uniform(.3, .6)
+        x, y = river_x(u) + rng.uniform(-.4, .4) * river_half(u), 594 + 276 * u
+        near.add([(x - half, y), (x, y - 1.3), (x + half, y), (x, y + 1.3)], mat('#EAF6F2', 1, .06), opacity=.6)
+    viaduct(near, H - 280, H + 280, 400, 612, 4, '#C4AE92')
+    for x, top, half, shape in (
+        (H + 800, 430, 190, 'crag'), (H - 790, 440, 200, 'ridge'),
+        (H - 310, 262, 300, 'cliff'), (H + 300, 286, 200, 'shoulder'),
+    ):
+        peak(near, x, top, half, 880, shape, rock_hex, rng, depth=.08, detail=.42, valley=warm_valley, sun=1)
+    forest_band(near, floor, H - 140, H - 60, 9, 15, 26, rng, *NEAR_TREES)
+    forest_band(near, floor, H + 130, H + 190, 9, 15, 26, rng, *NEAR_TREES)
+
+    rng = random.Random('gorge-hills')
+    hills = Layer(2300)
+    f = wave(2300, 826, [(8, 3, 1.3), (5, 5, 2.4), (3, 9, .8)])
+    band(hills, f, 884, hills.vgrad(806, 872, [(0, mat('#6F9C4E', .9, .06)), (1, mat('#4F7E40', .6, .02))]), step=14)
+    for x in (340, 820, 1330, 1880, 2170):
+        rock(hills, x, f(x) + 12, rng.uniform(64, 100), rng.uniform(32, 54), rng, (mat('#8E7664', .1, .05), mat('#8E7664', .4, .05), mat('#8E7664', .9, .05)))
+    for x0, x1 in ((90, 280), (560, 720), (1500, 1660), (2020, 2120)):
+        forest_band(hills, f, x0, x1, 18, 30, 56, rng, *FAR_TREES)
+    trees = close_layer(1500, 'gorge-trees', 844, [(5, 2, .9), (3, 5, 2.4), (2, 11, 1.4)], '#6FAE45', '#4D8F3C', '#B4DB5E', GREEN_TREES,
+                        ((120, 2), (760, 2), (1260, 2)), (480, 1060), GREEN_BUSH, tree=(66, 112))
+    road = road_layer(1240, random.Random('gorge-road'))
+    front = front_layer(1400, random.Random('gorge-front'))
+    return [('clouds', clouds, 5, 1200), ('far', far, 12, 1050), ('near', near, 28, 950), ('hills', hills, 58, 1150),
+            ('trees', trees, 92, 620), ('road', road, 170, 800), ('front', front, 215, 900)]
+
+
+# ---------------------------------------------------------------- scena 5: złoty las modrzewiowy
+
+
+LARCH = (mat('#A9651B', .3), mat('#EFAB2C', .95), mat('#FFDF80', 1.0))
+LARCH_FAR = (mat('#A9651B', .3, .14), mat('#E9A52E', .9, .12))
+LARCH_BUSH = (mat('#8A5420', .3), mat('#D08B28', .8), mat('#F2BF4E', 1.0))
+
+
+def scene_larch():
+    clouds = clouds_layer('larch-clouds', 2400, (
+        (1050, 340, 250, 112, 'massive'), (1390, 420, 140, 34, 'bank'), (1040, 110, 130, 40, 'lumps'),
+        (1780, 300, 300, 140, 'massive'), (2190, 420, 200, 50, 'bank'), (500, 300, 300, 130, 'massive'), (210, 150, 150, 70, 'tower'),
+    ), ((1330, 80, 220, 7), (1950, 90, 220, 7), (760, 90, 220, 7)))
+    rng = random.Random('larch-far')
+    far = Layer(2300)
+    H = 1150
+    for x, top, half, shape, snow in (
+        (H + 860, 500, 300, 'ridge', .28), (H - 860, 480, 300, 'horn', .36),
+        (H - 430, 470, 270, 'hump', .2), (H + 500, 470, 290, 'cliff', .3),
+        (H - 70, 412, 340, 'twin', .34),
+    ):
+        peak(far, x, top, half, 760, shape, '#7B8DBE', rng, snow=snow, detail=.85)
+
+    rng = random.Random('larch-near')
+    near = Layer(1900)
+    H = 950
+    f = wave(1900, 716, [(22, 2, .9), (10, 5, 2.1), (5, 9, .3)])
+    band(near, f, 832, near.vgrad(696, 822, [(0, mat('#B97A24', .55, .18)), (1, mat('#8E5E22', .5, .08))]), step=14)
+    forest_band(near, f, 0, 1900, 10, 26, 46, rng, *LARCH_FAR)
+    g = wave(1900, 774, [(9, 3, 1.1), (5, 7, 2.4)])
+    forest_band(near, g, 0, 1900, 15, 28, 50, rng, *NEAR_TREES)
+
+    hills, f3, rng = meadow_layer(2500, 'larch-hills', 806, [(10, 2, .5), (7, 3, 2.1), (4, 7, 1.2)], '#B8A23A', '#EFCF58', LARCH_FAR,
+                                  ((60, 300), (600, 850), (1250, 1420), (1760, 1990), (2270, 2440)), tree=(30, 60), density=13)
+    trees = close_layer(1600, 'larch-trees', 838, [(7, 2, 1.7), (3, 5, .4), (2, 11, 2.2)], '#C9A83A', '#8F8233', '#F4D968', LARCH,
+                        ((60, 3), (500, 2), (820, 4), (1300, 3)), (340, 720, 1180), LARCH_BUSH, tree=(84, 150), grass_hex='#8F7A2E', slim=.36)
+    road = road_layer(1240, random.Random('larch-road'))
+    front = front_layer(1500, random.Random('larch-front'), fg=fixed('#33253F', '#3A2C20', '#2F1B2C', '#0A0818'), fg_mid=fixed('#4A3550', '#5B4426', '#47283A', '#14102A'))
+    return [('clouds', clouds, 5, 1200), ('far', far, 12, 1150), ('near', near, 26, 950), ('hills', hills, 54, 1000),
+            ('trees', trees, 92, 280), ('road', road, 170, 100), ('front', front, 215, 600)]
+
+
+# ---------------------------------------------------------------- scena 6: czerwone skały i stoliwa
+
+
+DESERT_VALLEY = fixed('#D9A78F', '#EDCDA6', '#C9805F', '#3E2C5C')
+DESERT_FG = fixed('#3E2436', '#6B3320', '#3A1A28', '#0D0A1C')
+DESERT_FG_MID = fixed('#573246', '#8A4A2A', '#552838', '#1A1230')
+DESERT_ROCKS = (
+    fixed('#5A2E3C', '#6E3524', '#4E2432', '#16122E'),
+    fixed('#84455A', '#9C5233', '#743648', '#231B44'),
+    fixed('#B9796E', '#D89263', '#AD6256', '#3E3268'),
+)
+
+
+def scene_mesas():
+    clouds = clouds_layer('mesa-clouds', 2400, (
+        (1040, 230, 170, 56, 'bank'), (1340, 400, 130, 30, 'lumps'), (1760, 240, 240, 80, 'bank'),
+        (520, 220, 220, 70, 'bank'), (2150, 380, 170, 40, 'lumps'),
+    ), ((1250, 90, 260, 7), (1000, 420, 200, 6), (1600, 110, 240, 7), (720, 90, 240, 7), (240, 300, 240, 7), (2100, 90, 240, 7)))
+    rng = random.Random('mesa-far')
+    far = Layer(2400)
+    H = 1200
+    rock_red = '#C26B4A'
+    bands = [mat(rock_red, .2, .3), mat(rock_red, .75, .3), mat('#E6B48A', .85, .3)]
+    for x, top, half, shape in (
+        (H + 860, 560, 300, 'hump'), (H - 860, 530, 320, 'table'),
+        (H - 400, 560, 250, 'cliff'), (H + 470, 500, 300, 'table'),
+        (H - 76, 480, 300, 'table'),
+    ):
+        m = peak(far, x, top, half, 812, shape, rock_red, rng, depth=.3, detail=.55, valley=DESERT_VALLEY)
+        strata(m, 6, bands, rng)
+
+    rng = random.Random('mesa-near')
+    near = Layer(1900)
+    H = 950
+    rock_near = '#A84F35'
+    bands = [mat(rock_near, .15, .1), mat(rock_near, .7, .1), mat('#DD9C70', .85, .1)]
+    for x, top, half, shape in ((H + 300, 620, 180, 'cliff'), (H - 310, 590, 150, 'horn'), (H + 720, 630, 180, 'table'), (H - 760, 610, 170, 'crag')):
+        m = peak(near, x, top, half, 816, shape, rock_near, rng, depth=.1, detail=.5, valley=DESERT_VALLEY)
+        strata(m, 5, bands, rng)
+    g = wave(1900, 790, [(6, 3, .7), (3, 7, 1.9)])
+    band(near, g, 840, near.vgrad(770, 830, [(0, mat('#C77C4F', .9, .12)), (1, mat('#A8603F', .6, .06))]), step=14)
+
+    rng = random.Random('mesa-hills')
+    hills = Layer(2600)
+    f = wave(2600, 818, [(9, 2, 1.1), (5, 5, .3), (3, 9, 2.4)])
+    band(hills, f, 882, hills.vgrad(800, 872, [(0, mat('#D8945A', 1, .06)), (1, mat('#B26B41', .66, .02))]), step=14)
+    for _ in range(18):
+        swathe(hills, f, rng.uniform(0, 2600), rng.uniform(120, 300), rng.uniform(8, 42), rng.uniform(4, 11), mat('#EFC385', 1, .04), rng)
+    for _ in range(10):
+        swathe(hills, f, rng.uniform(0, 2600), rng.uniform(120, 300), rng.uniform(16, 50), rng.uniform(4, 11), mat('#9A5536', .3, .04), rng)
+    sage = (mat('#5B6A44', .3, .06), mat('#889A5A', .85, .06))
+    for x in range(40, 2600, 170):
+        px = x + rng.uniform(-50, 50)
+        bush(hills, px, f(px % 2600) + 6, rng.uniform(26, 44), rng.uniform(10, 18), rng, sage)
+    for x in (560, 1420, 2180):
+        rock(hills, x, f(x) + 10, rng.uniform(70, 110), rng.uniform(34, 60), rng, (mat('#A84F35', .12, .04), mat('#A84F35', .45, .04), mat('#DD9C70', .95, .04)))
+
+    rng = random.Random('mesa-trees')
+    trees = Layer(1600)
+    f4 = wave(1600, 842, [(5, 2, 2.1), (3, 5, .7), (2, 11, 1.5)])
+    band(trees, f4, 872, trees.vgrad(824, 862, [(0, mat('#E0A566', 1, 0)), (1, mat('#B66F44', .6, 0))]))
+    for _ in range(14):
+        swathe(trees, f4, rng.uniform(0, 1600), rng.uniform(80, 190), rng.uniform(4, 16), rng.uniform(2, 6), mat('#F4D39A', 1, 0), rng)
+    near_sage = (mat('#4D5C3A', .3), mat('#7E9150', .85), mat('#AEBB6A', 1))
+    for x in (120, 470, 780, 1090, 1380):
+        bush(trees, x, f4(x) + 4, rng.uniform(46, 72), rng.uniform(18, 30), rng, near_sage)
+    for x in (300, 960, 1240):
+        rock(trees, x, f4(x) + 6, rng.uniform(58, 92), rng.uniform(26, 44), rng, DESERT_ROCKS)
+    road = road_layer(1240, random.Random('mesa-road'))
+    front = front_layer(1500, random.Random('mesa-front'), fg=DESERT_FG, fg_mid=DESERT_FG_MID, rocks=DESERT_ROCKS)
+    return [('clouds', clouds, 5, 1200), ('far', far, 11, 1200), ('near', near, 26, 950), ('hills', hills, 54, 1000),
+            ('trees', trees, 92, 620), ('road', road, 170, 340), ('front', front, 215, 1100)]
+
+
+# ---------------------------------------------------------------- scena 7: fiord
+
+
+def scene_fjord():
+    clouds = clouds_layer('fjord-clouds', 2300, (
+        (1050, 250, 230, 90, 'bank'), (1340, 120, 110, 30, 'lumps'), (1720, 240, 280, 110, 'massive'),
+        (520, 250, 270, 110, 'massive'), (2080, 330, 180, 46, 'bank'), (210, 150, 150, 60, 'tower'),
+    ), ((930, 90, 200, 6), (1300, 330, 180, 6), (1880, 86, 220, 7), (760, 110, 220, 7)))
+    rng = random.Random('fjord-far')
+    far = Layer(2200)
+    H = 1100
+    rock_cold = '#5F6F86'
+    mass = [peak(far, H + 40, 500, 170, 642, 'hump', '#8C9CB8', rng, depth=.5, snow=.2, detail=.4)]
+    for x, top, half, shape, snow in (
+        (H + 840, 400, 240, 'cliff', .18), (H - 810, 380, 240, 'horn', .22),
+        (H + 280, 330, 215, 'shoulder', .16), (H - 250, 270, 215, 'cliff', .18),
+    ):
+        mass.append(peak(far, x, top, half, 642, shape, rock_cold, rng, depth=.2, snow=snow, detail=.7))
+    water(far, 640, 806, '#2A7FA8', '#123F66', rng, glints=20)
+    for m in mass:
+        reflect(far, m, 641, 806, squash=.36, strength=.7)
+    wall = mass[-1]
+    fall_x = H - 142
+    waterfall(far, fall_x, wall.sky_y(fall_x) + 12, 642, 3.4, rng, lean=-5, depth=.2)
+    # Biały prom na wodzie.
+    hull, deck = mat('#F2EEE6', .95, .12), mat('#B5473E', .8, .12)
+    for bx in (1240, 180):
+        far.add([(bx - 30, 722), (bx + 34, 722), (bx + 26, 732), (bx - 24, 732)], hull)
+        far.add([(bx - 16, 722), (bx - 16, 712), (bx + 14, 712), (bx + 14, 722)], hull)
+        far.add([(bx - 4, 712), (bx - 4, 702), (bx + 5, 702), (bx + 5, 712)], deck)
+
+    rng = random.Random('fjord-near')
+    near = Layer(1900)
+    H = 950
+    for x, top, half, shape in ((H - 300, 520, 230, 'cliff'), (H + 680, 560, 200, 'shoulder'), (H + 340, 660, 160, 'hump')):
+        peak(near, x, top, half, 800, shape, '#46566A', rng, depth=.1, detail=.42)
+    g = wave(1900, 778, [(5, 3, .9), (3, 7, 2.2)])
+    for x0, x1 in ((H - 520, H - 100), (H + 200, H + 480), (H + 560, H + 860)):
+        forest_band(near, g, x0, x1, 15, 22, 42, rng, *NEAR_TREES)
+
+    hills, f, rng = meadow_layer(2300, 'fjord-hills', 812, [(8, 2, .4), (5, 5, 1.9), (3, 9, .6)], '#5F9758', '#94C56A', FAR_TREES,
+                                 ((60, 240), (1130, 1290), (1820, 1990)), tree=(28, 54), swathes=(14, 10))
+    # Czerwone chatki na brzegu, w pierwszym kadrze po prawej.
+    for x, color in ((1320, '#B23E30'), (1372, '#D9A23C'), (1420, '#B23E30'), (420, '#E8E2D4'), (2150, '#B23E30')):
+        cabin(hills, x, f(x) + 3, 34, 16, color, '#2C3038')
+    trees = close_layer(1500, 'fjord-trees', 844, [(5, 2, .4), (3, 5, 2.1), (2, 11, .9)], '#74AF56', '#4E8C46', '#ACD46A', GREEN_TREES,
+                        ((90, 2), (820, 2), (1290, 2)), (500, 1060), GREEN_BUSH, tree=(68, 118))
+    road = road_layer(1240, random.Random('fjord-road'))
+    front = front_layer(1400, random.Random('fjord-front'))
+    return [('clouds', clouds, 5, 1200), ('far', far, 11, 1100), ('near', near, 26, 950), ('hills', hills, 54, 1180),
+            ('trees', trees, 92, 620), ('road', road, 170, 640), ('front', front, 215, 200)]
+
+
+# ---------------------------------------------------------------- scena 8: wysoka przełęcz
+
+
+PASS_FG = fixed('#2B2A40', '#26363A', '#2A1F38', '#080818')
+PASS_FG_MID = fixed('#3D3B55', '#37494E', '#3D2E4C', '#101028')
+
+
+def scene_pass():
+    clouds = clouds_layer('pass-clouds', 2300, (
+        (1060, 200, 220, 86, 'massive'), (1370, 300, 130, 34, 'bank'), (1720, 220, 280, 110, 'massive'),
+        (520, 220, 280, 110, 'massive'), (2060, 330, 170, 44, 'bank'),
+    ), ((1320, 80, 220, 7), (1860, 86, 220, 7), (780, 96, 220, 7)))
+    rng = random.Random('pass-far')
+    far = Layer(2200)
+    H = 1100
+    for x, top, half, shape, snow in (
+        (H + 830, 430, 280, 'crag', .4), (H - 840, 420, 290, 'ridge', .4),
+        (H - 470, 400, 260, 'twin', .44), (H + 450, 400, 270, 'horn', .46),
+        (H - 40, 340, 300, 'broad', .42),
+    ):
+        peak(far, x, top, half, 824, shape, '#7D84A6', rng, depth=.22, snow=snow, detail=.6)
+
+    rng = random.Random('pass-near')
+    near = Layer(1900)
+    H = 950
+    rock_grey = '#6E6A72'
+    for x, top, half, shape in ((H + 660, 560, 230, 'crag'), (H - 720, 560, 240, 'ridge'), (H - 320, 520, 230, 'crag')):
+        peak(near, x, top, half, 830, shape, rock_grey, rng, depth=.08, detail=.5)
+    wall = peak(near, H + 205, 450, 190, 830, 'cliff', rock_grey, rng, depth=.08, detail=.5)
+    # Wodospad po prawej od kampera: zaczyna się na skale.
+    fall_x = H + 150
+    waterfall(near, fall_x, wall.sky_y(fall_x) + 26, 760, 8, rng, lean=-12)
+    near.add(egg(fall_x - 14, 770, 48, 8, steps=14), mat('#7CC7D6', .9, .06), smooth=True)
+
+    rng = random.Random('pass-hills')
+    hills = Layer(2300)
+    f = wave(2300, 806, [(12, 2, .4), (7, 5, 1.7), (3, 9, 2.6)])
+    band(hills, f, 882, hills.vgrad(786, 872, [(0, mat('#8E9A6A', .85, .08)), (1, mat('#6F7B52', .55, .02))]), step=14)
+    for _ in range(14):
+        swathe(hills, f, rng.uniform(0, 2300), rng.uniform(100, 260), rng.uniform(8, 50), rng.uniform(4, 11), mat('#B6BC7C', 1, .05), rng)
+    stone = (mat('#6E6A72', .12, .05), mat('#6E6A72', .45, .05), mat('#B5B2B6', .95, .05))
+    for x in range(60, 2300, 190):
+        px = x + rng.uniform(-60, 60)
+        rock(hills, px, f(px % 2300) + rng.uniform(6, 16), rng.uniform(44, 96), rng.uniform(22, 50), rng, stone)
+    tuft = mat('#5E6E48', .6, .04)
+    for x in range(0, 2300, 60):
+        grass(hills, x, f(x) + rng.uniform(2, 14), rng.uniform(8, 14), 3, 14, tuft, rng)
+
+    rng = random.Random('pass-trees')
+    trees = Layer(1500)
+    f4 = wave(1500, 842, [(5, 2, 1.1), (3, 5, 2.1), (2, 11, .4)])
+    band(trees, f4, 872, trees.vgrad(824, 862, [(0, mat('#A4AE6C', 1, 0)), (1, mat('#6F7E4C', .6, 0))]))
+    close_stone = (mat('#5E5A62', .12), mat('#6E6A72', .5), mat('#C2BEC2', 1))
+    for x in (90, 390, 690, 980, 1300):
+        rock(trees, x, f4(x) + 6, rng.uniform(70, 120), rng.uniform(36, 66), rng, close_stone)
+    tone = mat('#6A7A4A', .7)
+    for x in range(0, 1500, 34):
+        grass(trees, x, f4(x) + 1, rng.uniform(8, 15), 4, 15, tone, rng)
+    road = road_layer(1240, random.Random('pass-road'))
+    front = front_layer(1400, random.Random('pass-front'), fg=PASS_FG, fg_mid=PASS_FG_MID)
+    return [('clouds', clouds, 5, 1200), ('far', far, 12, 1100), ('near', near, 28, 950), ('hills', hills, 58, 1150),
+            ('trees', trees, 92, 620), ('road', road, 170, 900), ('front', front, 215, 700)]
+
+
+SCENES = {
+    'alps': scene_alps, 'lake': scene_lake, 'meadows': scene_meadows, 'gorge': scene_gorge,
+    'larch': scene_larch, 'mesas': scene_mesas, 'fjord': scene_fjord, 'pass': scene_pass,
+}
+
 
 # ---------------------------------------------------------------- zapis i podgląd
 
@@ -1205,6 +1776,8 @@ def write(out):
             files[f'{folder}/{name}.svg'] = layer.render()
             layers.append(dict(file=f'{folder}/{name}.svg', period=layer.w, speed=speed, start=start))
         scenes.append(dict(key=key, layers=layers))
+        weight = sum(files[l['file']].count('<path') for l in layers), sum(sum(files[l['file']].count(c) for c in 'LCM') for l in layers)
+        print(f'  {key}: {weight[0]} ścieżek, {weight[1]} odcinków')
 
     for rel, text in files.items():
         path = out / rel
@@ -1327,6 +1900,25 @@ def preview(files, palette, folder):
     render_png([recolor(svg, palette, 'day')], 1024, 1024, 512, 512, folder / 'camper.png')
 
 
+def sheet(files, palette, folder, names=None, periods=PERIODS):
+    """Arkusz pierwszych kadrów: wiersz to scena, kolumna to pora dnia."""
+    folder.mkdir(parents=True, exist_ok=True)
+    cells = []
+    for i, key in enumerate(SCENES, 1):
+        if names and key not in names:
+            continue
+        for period in periods:
+            png = folder / f'{i:02d}_{key}_{period}.png'
+            render_png(frame(files, palette, period, i, 461), 461, 1000, 423, 917, png)
+            cells.append(f'<div>{i} {key} · {period}<img src="{png.as_uri()}" style="width:300px;display:block"></div>')
+    html = folder / 'arkusz.html'
+    html.write_text(f'<!doctype html><html><body style="margin:0;background:#15131c;color:#ddd;font:13px sans-serif;display:grid;'
+                    f'grid-template-columns:repeat({len(periods)},300px);gap:8px;padding:8px">{"".join(cells)}</body></html>')
+    rows = len(cells) // len(periods)
+    subprocess.run([CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', f'--window-size={len(periods) * 308 + 8},{rows * 680 + 8}',
+                    f'--screenshot={folder / "arkusz.png"}', html.as_uri()], check=True, capture_output=True)
+
+
 OUT = None
 
 if __name__ == '__main__':
@@ -1334,3 +1926,8 @@ if __name__ == '__main__':
     files_, palette_ = write(OUT)
     if '--preview' in sys.argv:
         preview(files_, palette_, pathlib.Path(sys.argv[sys.argv.index('--preview') + 1]))
+    if '--sheet' in sys.argv:
+        at = sys.argv.index('--sheet')
+        names = sys.argv[at + 2].split(',') if len(sys.argv) > at + 2 and sys.argv[at + 2] != 'all' else None
+        periods = tuple(sys.argv[at + 3].split(',')) if len(sys.argv) > at + 3 else PERIODS
+        sheet(files_, palette_, pathlib.Path(sys.argv[at + 1]), names, periods)

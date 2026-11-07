@@ -1,14 +1,14 @@
 ---
 tags: [jureczek, wersja, ekran-powitalny, animacja, svg]
 wersja: v24
-status: etap 2 z 4 – animacja działa na jednej scenie, czeka na test użytkownika
+status: etap 3 z 4 – 8 scen na telefonie, arkusz czeka na ocenę użytkownika
 data: 2026-11-07
 ---
 # v24 – ekran powitalny
 
 Prośba użytkownika z 2026-11-07: zamiast ciemnego tła przy starcie animowany ekran powitalny. Wektorowy kamper z boku jedzie z lewej do prawej przez góry z paralaksą, jak początek ilustrowanej gry przygodowej. Decyzja: [[ADR-016 Ekran powitalny z warstw SVG]].
 
-Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (etap 2), pozostałe 7 scen (etap 3), dokończenie (etap 4). Ta notatka opisuje stan po etapie 2.
+Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (etap 2), pozostałe 7 scen (etap 3), dokończenie (etap 4). Ta notatka opisuje stan po etapie 3.
 
 ## Zakres
 - **Fazy:** A wjazd kampera, B jazda z paralaksą, C przyspieszenie i odjazd, a na końcu przenikanie do ekranu startowego.
@@ -16,7 +16,7 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 - **Gotowość:** pierwszy wynik `foldersProvider` (dane albo błąd) i obraz nagłówka. Limit 10 s.
 - **Pory dnia:** 4 palety wg `Landscape.at()`. W nocy świecą okna, przednia szyba, namiot i reflektor, a tylna lampa ma czerwoną poświatę.
 - **Natywne tło:** neutralny gradient zmierzchu, ten sam w pierwszej klatce Fluttera, potem 0,4 s przejścia w niebo pory dnia.
-- **Rysunki:** `tool/splash_art.py` generuje kampera, kamyk, 4 nieba i 7 warstw sceny „Alpy”.
+- **Rysunki:** `tool/splash_art.py` generuje kampera, kamyk, 4 nieba i 8 scen po 7 warstw: Alpy, dolina z turkusowym jeziorem, łąki z krętą drogą, wąwóz z rzeką i wiaduktem, złoty las modrzewiowy, czerwone skały i stoliwa, fiord, wysoka przełęcz z głazami i wodospadem.
 - **Zawieszenie:** dwa końce nadwozia na sprężynach, oparte o koła na własnych, sztywniejszych sprężynach. Nadwozie i nadkola się przechylają, a koła i cień zostają na drodze.
 
 ## Decyzje
@@ -37,10 +37,12 @@ Praca jest podzielona na przystanki: styl (etap 1), animacja na jednej scenie (e
 | 13 | Rysowanie | same `Picture`, bez rasteryzacji warstw, zob. pomiar niżej |
 | 14 | Życie kampera | fizyka zamiast ręcznych klatek: hamowanie na wjeździe siada na przód, przyspieszanie na odjeździe na tył, po zatrzymaniu nadwozie odbija; kamyk unosi kolejno przednie i tylne koło |
 | 15 | Kamyki | pierwszy najazd 1,7–2,2 s, kolejne co 3–5 s, różna wielkość; podczas odjazdu bez najazdów, bo kamper zmienia prędkość |
+| 16 | Sceny 2–8 | te same klocki co w Alpach, własne okresy warstw i pierwszy kadr ułożony pod pion; kolory pierwszego planu różne tylko tam, gdzie zielony by nie pasował (modrzewie, stoliwa, przełęcz) |
+| 17 | Wąwóz | most kończy się za ścianami skalnymi, żeby przy przewijaniu nie było widać urwanego końca |
 
 ## Pliki
 - `tool/splash_art.py`: generator SVG, palet i manifestu. SVG się nie edytuje.
-- `assets/splash/`: wyjście generatora (18 SVG, około 780 KB, 128 tokenów kolorów).
+- `assets/splash/`: wyjście generatora (67 SVG, około 3,5 MB, 406 tokenów kolorów).
 - `lib/features/splash/domain/splash_config.dart`: wszystkie parametry w jednym miejscu.
 - `lib/features/splash/domain/splash_gate.dart`: czysta bramka gotowości, jedno wyzwolenie.
 - `lib/features/splash/domain/splash_manifest.dart`: opis grafik.
@@ -63,6 +65,13 @@ Tryb `--profile`, rysowanie przez Impeller na OpenGLES, 7 warstw na scenie:
 
 Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynności w samej aplikacji nie zmierzyłem osobno, ten sam malarz działał w podglądzie. Pomiar jest sprzed zawieszenia, kurzu spod przedniej osi i kamyków.
 
+Pomiar po etapie 3, ze wszystkimi 8 scenami, zawieszeniem, kurzem i kamykami (podgląd, `--profile`, pora zachodu, okna po około 3 s):
+- około 60 klatek/s w każdej scenie, raster p50 13,8–16,0 ms, wczytanie sceny 69–145 ms;
+- **pierwsze okno po wczytaniu sceny jest najgorsze:** 8–42 ze 180 klatek ponad 16,7 ms rastra, p99 do około 36 ms; to właśnie okno widać przy starcie, a kolejne mają 1–26 takich klatek;
+- budżet: najcięższe są modrzewie (1664 ścieżki, 39 244 odcinki) i Alpy (1657, 44 933); ścieżek modrzewie mają o 7 więcej, odcinków mniej.
+
+Pomiar dotyczy podglądu, gdzie scena zmieniana jest po długim przytrzymaniu, a nie zimnego startu aplikacji.
+
 ## Pułapki
 - `SvgAssetLoader` z `assetBundle: rootBundle` nie przejdzie do izolatu („object is unsendable”). Bundle podajemy tylko w testach.
 - Nocna nakładka leży nad całym nadwoziem, więc przykrywa wszystko, co w dzień jest nad szybą. Podziałka i lusterko są wspólnymi elementami i są rysowane w obu wersjach.
@@ -75,10 +84,14 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 - `flutter run --no-resident ... | tail` potrafi wisieć ponad godzinę i nie zbudować nowej wersji. Pewniej: `flutter build apk --profile`, potem `adb install -r`. Warto sprawdzić, co jest w APK, przez `unzip -p`.
 - `pumpAndSettle` wisi przy zapętlonej animacji, dlatego przy pustym tokenie i z `showSplash: false` nakładki nie ma.
 - W teście animacja kończy się dopiero po przekroczeniu swojej długości: `pump(500 ms)` przy 500 ms nie wystarczy.
+- Tokeny kolorów numeruje kolejność pierwszego użycia, więc nowe kolory na poziomie modułu generatora zmieniają pliki wszystkich scen. Rysunek zostaje ten sam; sprawdzone porównaniem SVG po podstawieniu palety.
+- Warstwa daleka musi schodzić poniżej najwyższego punktu wzgórz, inaczej u stóp gór prześwituje niebo. Stąd woda rysowana 90 jednostek poniżej końca gradientu i niższa podstawa gór w stoliwach i na przełęczy.
+- Wolna warstwa przesuwa się w lewo, więc to, co leży na lewo od pierwszego kadru, nigdy się nie pokaże. Elementy dla oka trzeba kłaść w kadrze albo na prawo od niego.
+- Wodospad zaczyna się na `Massif.sky_y(x)`, a nie na stałej wysokości, bo inaczej spada z nieba.
 
 ## Checklista weryfikacji
 - [x] `flutter analyze`: 0 issues
-- [x] `flutter test`: 349/349
+- [x] `flutter test`: 349/349 (test grafik wymaga teraz dokładnie 8 scen)
 - [x] P30 przez adb: natywny gradient, przejście w niebo, wjazd, jazda z paralaksą, odjazd, ekran startowy
 - [x] P30 przez adb: stuknięcie po gotowości daje odjazd i przenikanie
 - [x] P30 przez adb: zimny start z udostępnienia, mapa z wynikiem po około 1,5 s (bez wcześniejszego zrzutu samej nakładki)
@@ -88,6 +101,10 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 - [x] P30 przez adb: przechył przy hamowaniu na wjeździe, kamyk na linii kół, kurz przy obu osiach (zrzuty; samego podskoku koła zrzuty nie złapały, sprawdzają go testy)
 - [ ] Użytkownik: czy kurz pasuje
 - [ ] Użytkownik: siła przechyłu i podskoku na kamyku
+- [x] Chrome: pierwszy kadr 8 scen w 4 porach (32 kombinacje), kadry po 4,6 s i 10 s jazdy, układ poziomy o zachodzie
+- [x] P30 przez adb: każda z 8 scen wczytuje się i jedzie (zrzuty o zachodzie), czasy klatek jak wyżej
+- [x] P30 przez adb: zwykła aplikacja po etapie 3, losowa scena, potem ekran startowy
+- [ ] Użytkownik: ocena arkusza 32 kombinacji
 - [ ] Etap 4: obrót ekranu w trakcie animacji, szew pętli przy dłuższej jeździe
 
 ## Poprawki po teście
@@ -96,9 +113,12 @@ Zapas jest mały: **sceny 2–8 nie mogą być cięższe od „Alp”**. Płynno
 - Tylne światło na czerwono w nocy (prośba użytkownika).
 - Noc: świeci przednia szyba, lusterko nie jest zasłonięte, podziałka szyby kabiny wróciła (uwaga użytkownika).
 - Kurz także za przednimi kołami, zawieszenie reagujące na przyspieszanie i hamowanie, kamyki na drodze (prośba użytkownika).
+- Etap 3, własny przegląd arkusza przed pokazaniem: filary mostu i rzeka wisiały w powietrzu, fiord nie miał stromych ścian, pod wodą i u stóp gór prześwitywało niebo, wodospad na przełęczy zaczynał się w powietrzu, chmura zasłaniała słońce na łąkach.
 
 ## Otwarte
-- Etap 3: 7 pozostałych scen i arkusz 32 kombinacji do oceny.
+- Etap 3: werdykt użytkownika do arkusza 32 kombinacji.
+- Na ścianach wąwozu jasna płyta skalna wygląda jak przyklejony wielokąt; czeka na ocenę arkusza.
+- Etap 4: obrót, szew pętli, udostępnienie z 8 scenami, `CLAUDE.md`.
 - Skała jest bardziej kanciasta niż na referencji; użytkownik zaakceptował styl z 2026-11-07.
 - `resorces/bgs.png` nie jest w repo: to cudza ilustracja, służy tylko jako referencja.
 
