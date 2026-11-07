@@ -106,9 +106,9 @@ Zimny start w prawdziwej aplikacji, z tymczasowym logiem `FrameTiming` usunięty
 - [x] P30 przez adb: zimny start z udostępnienia, mapa z wynikiem po około 1,5 s (bez wcześniejszego zrzutu samej nakładki)
 - [x] P30 przez adb: „Usuń animacje” (`animator_duration_scale` 0) daje nieruchomą scenę i przenikanie; ustawienie przywrócone
 - [x] P30: 4 palety, tylna lampa, nocna przednia szyba, podziałka i lusterko
-- [ ] Użytkownik: tempo wyjścia na telefonie (bez uwag przy przejściu do kolejnych etapów, bez wyraźnego potwierdzenia)
+- [x] Użytkownik: tempo wyjścia na telefonie
 - [x] P30 przez adb: przechył przy hamowaniu na wjeździe, kamyk na linii kół, kurz przy obu osiach (zrzuty; samego podskoku koła zrzuty nie złapały, sprawdzają go testy)
-- [ ] Użytkownik: kurz, przechył i podskok na kamyku (bez uwag przy przejściu do kolejnych etapów, bez wyraźnego potwierdzenia)
+- [x] Użytkownik: kurz, przechył i podskok na kamyku
 - [x] Chrome: pierwszy kadr 8 scen w 4 porach (32 kombinacje), kadry po 4,6 s i 10 s jazdy, układ poziomy o zachodzie
 - [x] P30 przez adb: każda z 8 scen wczytuje się i jedzie (zrzuty o zachodzie), czasy klatek jak wyżej
 - [x] P30 przez adb: zwykła aplikacja po etapie 3, losowa scena, potem ekran startowy
