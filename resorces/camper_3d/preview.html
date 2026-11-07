@@ -122,9 +122,10 @@ viewer.addEventListener("load", () => {
 });
 
 viewer.addEventListener("error", () => {
-  // Some hosts forbid fetching data: URLs; the same file is published beside the page.
+  // Some hosts forbid fetching data: URLs, so retry the same bytes as a blob: URL.
   if (viewer.src.startsWith("data:")) {
-    viewer.src = "camper.glb";
+    const bytes = Uint8Array.from(atob(viewer.src.split(",")[1]), (c) => c.charCodeAt(0));
+    viewer.src = URL.createObjectURL(new Blob([bytes], { type: "model/gltf-binary" }));
     return;
   }
   document.getElementById("note").textContent =
