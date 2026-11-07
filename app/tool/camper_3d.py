@@ -62,7 +62,8 @@ MATERIALS = {  # colour, roughness, metallic
     "metal": ("#C9D2D6", 0.6, 0.0),  # painted look: no mirror reflections, to match the drawing
     "lustro": ("#8FA6B2", 0.3, 0.0),
     "zderzak": ("#F1DFBE", 0.45, 0.0),
-    "reflektor": ("#E5BD82", 0.15, 0.0),
+    "reflektor": ("#E5BD82", 0.15, 0.0),  # amber: indicators and the side marker
+    "reflektor_bialy": ("#FBFAF5", 0.15, 0.0),  # headlight lens
     "swiatlo_tyl": ("#C28273", 0.25, 0.0),
     "zielen_bagaz": ("#61816C", 0.9, 0.0),
     "walizka_jasna": ("#D5BFA8", 0.8, 0.0),
@@ -1188,7 +1189,7 @@ def build_body():
         for t in shaded:
             pts = [q[0] for q in t]
             r = max(math.hypot(p[0] - c[0], p[1] - c[1]) for p in pts)
-            part.prims["reflektor" if r <= 0.104 else "kolpak"].append(t)
+            part.prims["reflektor_bialy" if r <= 0.104 else "kolpak"].append(t)
         part.prims["kontur"] += shade(inflate(lamp, 0.012), 180)
 
         rear = rear_proj.hit(s * 0.5, 0.78, (0.0, 0.78), 0.0)
