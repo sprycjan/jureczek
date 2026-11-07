@@ -58,8 +58,8 @@ MATERIALS = {  # colour, roughness, metallic
     "guma": ("#232B27", 0.7, 0.0),
     "opona": ("#3E5247", 0.95, 0.0),
     "felga": ("#EBD5BE", 0.4, 0.0),
-    "kolpak": ("#BCC9CF", 0.25, 0.85),
-    "chrom": ("#D5DCE0", 0.22, 1.0),
+    "kolpak": ("#BCC9CF", 0.6, 0.0),
+    "metal": ("#C9D2D6", 0.6, 0.0),  # painted look: no mirror reflections, to match the drawing
     "zderzak": ("#F1DFBE", 0.45, 0.0),
     "reflektor": ("#E5BD82", 0.15, 0.0),
     "swiatlo_tyl": ("#C28273", 0.25, 0.0),
@@ -869,15 +869,15 @@ def glazed(part, proj, poly, curtains=()):
 
 
 def bar_handle(part, proj, u0, u1, v):
-    """Chrome grab handle on two posts, standing off the surface."""
+    """Grab handle on two posts, standing off the surface."""
     center = ((u0 + u1) / 2, v)
     part.emboss(proj, "guma", rrect2(u0 - 0.02, v - 0.03, u1 + 0.02, v + 0.03, 0.025),
                 ((0.004, 0.002), (0.0, 0.009)), cap="guma")
     a = proj.hit(u0, v, center, 0.042)
     b = proj.hit(u1, v, center, 0.042)
-    part.solid("chrom", tube(a, b, 0.012), outline=0.006)
+    part.solid("metal", tube(a, b, 0.012), outline=0.006)
     for u in (u0 + 0.012, u1 - 0.012):
-        part.solid("chrom", tube(proj.hit(u, v, center, 0.0), proj.hit(u, v, center, 0.042), 0.009, sides=5))
+        part.solid("metal", tube(proj.hit(u, v, center, 0.0), proj.hit(u, v, center, 0.042), 0.009, sides=5))
 
 
 def louvres(part, proj, u0, u1, vs, height, mat):
@@ -1060,7 +1060,7 @@ def build_body():
             )
 
     # Exhaust, below the rear bumper.
-    part.solid("chrom", tube((-0.42, 0.275, -2.0), (-0.42, 0.265, -2.43), 0.032, sides=8), outline=0.01)
+    part.solid("metal", tube((-0.42, 0.275, -2.0), (-0.42, 0.265, -2.43), 0.032, sides=8), outline=0.01)
 
     # Headlights, tail lights, mirrors.
     for s in (1, -1):
@@ -1090,9 +1090,9 @@ def build_body():
         arm0 = (s * W * 0.82, *crop(1195, 595)[::-1])
         elbow = (x_out, *crop(1190, 560)[::-1])
         glass = (x_out + s * 0.02, *crop(1155, 530)[::-1])
-        part.solid("chrom", tube(arm0, elbow, 0.014), outline=0.007)
-        part.solid("chrom", tube(elbow, glass, 0.014), outline=0.007)
-        part.solid("chrom", ellipsoid(glass, 0.03, 0.095, 0.058), outline=0.01)
+        part.solid("metal", tube(arm0, elbow, 0.014), outline=0.007)
+        part.solid("metal", tube(elbow, glass, 0.014), outline=0.007)
+        part.solid("metal", ellipsoid(glass, 0.03, 0.095, 0.058), outline=0.01)
     return part
 
 
@@ -1341,7 +1341,7 @@ def build_rack():
             "guma",
             rbox(x, x + 0.03, 2.47, top_brown + 0.006, z_brown[0] - 0.006, z_brown[1] + 0.006, r=0.01, corner=1, rows=1),
         )
-        part.solid("chrom", rbox(x - 0.008, x + 0.038, 2.74, 2.79, z_brown[1], z_brown[1] + 0.016, r=0.005, corner=1, rows=1))
+        part.solid("metal", rbox(x - 0.008, x + 0.038, 2.74, 2.79, z_brown[1], z_brown[1] + 0.016, r=0.005, corner=1, rows=1))
     # Handle on the light case, latches on the green one.
     top_light = crop(0, 185)[1]
     zl = (z_green[0] + 0.14 + z_green[1] - 0.01) / 2
@@ -1351,7 +1351,7 @@ def build_rack():
     for z in (z_green[0] + 0.1, z_green[1] - 0.1):
         for side_x in (-0.44, 0.40):
             part.solid(
-                "chrom",
+                "metal",
                 rbox(side_x - 0.006, side_x + 0.006, 2.70, 2.75, z - 0.025, z + 0.025, r=0.003, corner=1, rows=1),
             )
     return part
