@@ -1260,7 +1260,7 @@ PREVIEW = """<title>Kamper 3D</title>
   --line: #33423a;
   color-scheme: dark;
 }
-html, body { height: 100%; }
+html, body { height: 100%; margin: 0; }
 body {
   background: var(--ground);
   color: var(--ink);
